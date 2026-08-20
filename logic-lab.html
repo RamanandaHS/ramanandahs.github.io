@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Propositional Logic Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Source+Serif+4:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14213D;
+    --ink-soft:#2A3A5C;
+    --paper:#FAF7F0;
+    --paper-raised:#FFFFFF;
+    --rule:#E1DACB;
+    --gold:#C89B3C;
+    --gold-deep:#A67F27;
+    --true:#3B7A57;
+    --true-bg:#E4F0E7;
+    --false:#A83C3C;
+    --false-bg:#F5E5E2;
+    --muted:#746B58;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Source Serif 4', Georgia, serif;
+    line-height:1.5;
+    padding:0 0 60px;
+  }
+  ::selection{background:var(--gold); color:var(--ink);}
+
+  /* ---------- Header ---------- */
+  header{
+    padding:44px 24px 30px;
+    max-width:1180px;
+    margin:0 auto;
+    border-bottom:2px solid var(--ink);
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-optical-sizing:auto;
+    font-weight:700;
+    font-size:clamp(30px,4.2vw,52px);
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  header p.sub{
+    max-width:640px;
+    color:var(--ink-soft);
+    font-size:17px;
+    margin:0;
+  }
+  .stamp{
+    position:absolute;
+    top:40px; right:24px;
+    width:96px; height:96px;
+    border:3px solid var(--gold-deep);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    transform:rotate(-9deg);
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    color:var(--gold-deep);
+    font-size:13px;
+    text-align:center;
+    line-height:1.25;
+    opacity:.85;
+  }
+
+  /* ---------- Layout ---------- */
+  main{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 24px;
+    display:grid;
+    grid-template-columns:1fr 300px;
+    gap:36px;
+  }
+  @media (max-width:920px){
+    main{grid-template-columns:1fr;}
+  }
+  .primary{min-width:0;}
+
+  section.card{
+    background:var(--paper-raised);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:28px 28px 30px;
+    margin-top:34px;
+    box-shadow:0 1px 0 var(--rule);
+  }
+  section.card:first-of-type{margin-top:34px;}
+
+  .card h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:24px;
+    margin:0 0 4px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .card h2 .idx{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    color:var(--gold-deep);
+    font-weight:700;
+  }
+  .card .desc{
+    color:var(--muted);
+    font-size:14.5px;
+    margin:0 0 20px;
+    max-width:640px;
+  }
+
+  /* ---------- Input row ---------- */
+  .input-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  input[type=text]{
+    flex:1 1 260px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:16px;
+    padding:12px 14px;
+    border:1.5px solid var(--ink);
+    border-radius:6px;
+    background:#fff;
+    color:var(--ink);
+  }
+  input[type=text]:focus{
+    outline:none;
+    border-color:var(--gold-deep);
+    box-shadow:0 0 0 3px rgba(200,155,60,.22);
+  }
+  .symbols{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .symbols button{
+    font-family:'JetBrains Mono',monospace;
+    font-size:15px;
+    font-weight:700;
+    background:var(--paper);
+    border:1px solid var(--rule);
+    color:var(--ink-soft);
+    border-radius:5px;
+    width:34px; height:32px;
+    cursor:pointer;
+    transition:.12s;
+  }
+  .symbols button:hover{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+  button.run{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:6px;
+    padding:0 20px;
+    cursor:pointer;
+    transition:.12s;
+  }
+  button.run:hover{background:var(--gold-deep);}
+
+  .error-box{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13.5px;
+    color:var(--false);
+    background:var(--false-bg);
+    border:1px solid var(--false);
+    border-radius:6px;
+    padding:10px 14px;
+    margin-top:6px;
+    display:none;
+  }
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px;}
+  .chip{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    background:var(--paper);
+    border:1px dashed var(--rule);
+    border-radius:20px;
+    padding:5px 12px;
+    cursor:pointer;
+  }
+  .chip:hover{border-color:var(--gold-deep); color:var(--gold-deep);}
+
+  /* ---------- Result area ---------- */
+  .result{margin-top:22px;}
+  .verdict{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    padding:7px 14px;
+    border-radius:20px;
+    margin-bottom:16px;
+  }
+  .verdict.taut{background:var(--true-bg); color:var(--true);}
+  .verdict.contra{background:var(--false-bg); color:var(--false);}
+  .verdict.contingent{background:#F1E9D6; color:var(--gold-deep);}
+  .verdict.equiv{background:var(--true-bg); color:var(--true);}
+  .verdict.notequiv{background:var(--false-bg); color:var(--false);}
+
+  table.truth{
+    width:100%;
+    border-collapse:collapse;
+    font-family:'JetBrains Mono',monospace;
+    font-size:14.5px;
+  }
+  table.truth th, table.truth td{
+    border:1px solid var(--rule);
+    padding:9px 6px;
+    text-align:center;
+  }
+  table.truth thead th{
+    background:var(--ink);
+    color:var(--paper);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.02em;
+  }
+  table.truth thead th.result-col{background:var(--gold-deep);}
+  table.truth tbody tr:nth-child(even){background:#FBFAF6;}
+  .stampcell{
+    display:inline-block;
+    min-width:30px;
+    padding:2px 8px;
+    border-radius:4px;
+    font-weight:700;
+    transform:rotate(-2deg);
+  }
+  .stampcell.T{background:var(--true-bg); color:var(--true); border:1px solid var(--true);}
+  .stampcell.F{background:var(--false-bg); color:var(--false); border:1px solid var(--false); transform:rotate(2deg);}
+  td.result-col{background:#FBF6E9;}
+
+  /* ---------- Sidebar ---------- */
+  aside{padding-top:34px;}
+  .ref-card{
+    background:var(--paper-raised);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:22px;
+    margin-bottom:22px;
+    position:sticky;
+    top:20px;
+  }
+  .ref-card h3{
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    font-weight:600;
+    margin:0 0 14px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--rule);
+  }
+  .conn-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 0;
+    border-bottom:1px dotted var(--rule);
+    font-size:13.5px;
+  }
+  .conn-row:last-child{border-bottom:none;}
+  .conn-sym{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:18px;
+    width:26px;
+    text-align:center;
+    color:var(--gold-deep);
+  }
+  .conn-name{color:var(--ink-soft); font-weight:600;}
+  .conn-note{color:var(--muted); font-size:12px; display:block;}
+
+  .law{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:var(--paper);
+    border:1px solid var(--rule);
+    border-radius:7px;
+    padding:9px 11px;
+    margin-bottom:8px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .law:hover{border-color:var(--gold-deep); background:#FBF6E9;}
+  .law .law-name{
+    font-weight:600;
+    font-size:13px;
+    color:var(--ink);
+    display:block;
+    margin-bottom:3px;
+  }
+  .law .law-formula{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--gold-deep);
+  }
+
+  footer{
+    max-width:1180px;
+    margin:40px auto 0;
+    padding:20px 24px 0;
+    color:var(--muted);
+    font-size:12.5px;
+    font-family:'JetBrains Mono',monospace;
+    border-top:1px solid var(--rule);
+    text-align:center;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="stamp">CHECKED<br>BY&nbsp;LOGIC</div>
+  <div class="eyebrow">Basic Connectives &middot; Truth Tables &middot; Logical Equivalence</div>
+  <h1>Propositional Logic Lab</h1>
+  <p class="sub">Type a statement, get its truth table instantly. Type two, and find out whether they mean the same thing. Built for working through connectives (¬ ∧ ∨ → ↔) by watching every row, not memorising the rules.</p>
+</header>
+
+<main>
+  <div class="primary">
+
+    <section class="card" id="single-card">
+      <h2><span class="idx">01</span> Truth Table Generator</h2>
+      <p class="desc">Enter one statement. Variables are auto-detected; the table shows every combination of truth values and classifies the result.</p>
+
+      <div class="input-row">
+        <input type="text" id="single-input" placeholder="e.g.  p -> (q or not r)   or   ¬p ∧ q" value="p → (q ∨ ¬r)">
+        <button class="run" id="single-run">Generate</button>
+      </div>
+      <div class="symbols" data-target="single-input">
+        <button data-ins="¬">¬</button>
+        <button data-ins="∧">∧</button>
+        <button data-ins="∨">∨</button>
+        <button data-ins="→">→</button>
+        <button data-ins="↔">↔</button>
+        <button data-ins="(">(</button>
+        <button data-ins=")">)</button>
+      </div>
+      <div class="chips" id="single-chips"></div>
+      <div class="error-box" id="single-error"></div>
+      <div class="result" id="single-result"></div>
+    </section>
+
+    <section class="card" id="equiv-card">
+      <h2><span class="idx">02</span> Logical Equivalence Checker</h2>
+      <p class="desc">Enter two statements. They're evaluated on one combined table over every variable involved — if the A ↔ B column comes out all True, they're logically equivalent.</p>
+
+      <div class="input-row">
+        <input type="text" id="equiv-a" placeholder="Statement A, e.g. ¬(p ∧ q)" value="¬(p ∧ q)">
+      </div>
+      <div class="input-row">
+        <input type="text" id="equiv-b" placeholder="Statement B, e.g. ¬p ∨ ¬q" value="¬p ∨ ¬q">
+        <button class="run" id="equiv-run">Check</button>
+      </div>
+      <div class="symbols" data-target="equiv-a">
+        <button data-ins="¬">¬</button>
+        <button data-ins="∧">∧</button>
+        <button data-ins="∨">∨</button>
+        <button data-ins="→">→</button>
+        <button data-ins="↔">↔</button>
+        <button data-ins="(">(</button>
+        <button data-ins=")">)</button>
+      </div>
+      <div class="error-box" id="equiv-error"></div>
+      <div class="result" id="equiv-result"></div>
+    </section>
+
+  </div>
+
+  <aside>
+    <div class="ref-card">
+      <h3>Connectives</h3>
+      <div class="conn-row"><span class="conn-sym">¬</span><div><span class="conn-name">Negation (NOT)</span><span class="conn-note">true when the statement is false</span></div></div>
+      <div class="conn-row"><span class="conn-sym">∧</span><div><span class="conn-name">Conjunction (AND)</span><span class="conn-note">true only if both are true</span></div></div>
+      <div class="conn-row"><span class="conn-sym">∨</span><div><span class="conn-name">Disjunction (OR)</span><span class="conn-note">true if at least one is true</span></div></div>
+      <div class="conn-row"><span class="conn-sym">→</span><div><span class="conn-name">Implication</span><span class="conn-note">false only when p is true, q false</span></div></div>
+      <div class="conn-row"><span class="conn-sym">↔</span><div><span class="conn-name">Biconditional</span><span class="conn-note">true when both sides match</span></div></div>
+      <p style="font-size:12px;color:var(--muted);margin:12px 0 0;">Typing shortcuts: <code>~ ! & | -&gt; &lt;-&gt;</code> or plain words <code>not/and/or/implies/iff</code> also work. Constants <code>T</code> / <code>F</code> are supported.</p>
+    </div>
+
+    <div class="ref-card">
+      <h3>Equivalence laws — click to load</h3>
+      <div id="laws-list"></div>
+    </div>
+  </aside>
+</main>
+
+<footer>PROPOSITIONAL LOGIC LAB — for exploring connectives, truth tables &amp; equivalence</footer>
+
+<script>
+/* ============ Parsing engine ============ */
+
+function preprocess(str){
+  return str
+    .replace(/<->/g,'↔')
+    .replace(/<=>/g,'↔')
+    .replace(/->/g,'→')
+    .replace(/=>/g,'→')
+    .replace(/&&/g,'∧')
+    .replace(/&/g,'∧')
+    .replace(/\|\|/g,'∨')
+    .replace(/\|/g,'∨')
+    .replace(/~/g,'¬')
+    .replace(/!/g,'¬')
+    .replace(/\bnot\b/gi,'¬')
+    .replace(/\biff\b/gi,'↔')
+    .replace(/\bimplies\b/gi,'→')
+    .replace(/\band\b/gi,'∧')
+    .replace(/\bor\b/gi,'∨');
+}
+
+function tokenize(str){
+  const tokens=[];
+  let i=0;
+  while(i<str.length){
+    const c=str[i];
+    if(/\s/.test(c)){i++;continue;}
+    if('¬∧∨↔→()'.includes(c)){tokens.push(c);i++;continue;}
+    if(/[a-zA-Z]/.test(c)){
+      let j=i+1;
+      while(j<str.length && /[a-zA-Z0-9_]/.test(str[j])) j++;
+      tokens.push(str.slice(i,j));
+      i=j;
+      continue;
+    }
+    throw new Error('Unrecognised character "'+c+'" — use letters as variables and ¬ ∧ ∨ → ↔ ( ) as connectives.');
+  }
+  return tokens;
+}
+
+function parse(tokens, original){
+  let pos=0;
+  const peek=()=>tokens[pos];
+
+  function parseIff(){
+    let left=parseImplies();
+    while(peek()==='↔'){ pos++; left={type:'iff', left, right:parseImplies()}; }
+    return left;
+  }
+  function parseImplies(){
+    let left=parseOr();
+    if(peek()==='→'){ pos++; return {type:'implies', left, right:parseImplies()}; }
+    return left;
+  }
+  function parseOr(){
+    let left=parseAnd();
+    while(peek()==='∨'){ pos++; left={type:'or', left, right:parseAnd()}; }
+    return left;
+  }
+  function parseAnd(){
+    let left=parseNot();
+    while(peek()==='∧'){ pos++; left={type:'and', left, right:parseNot()}; }
+    return left;
+  }
+  function parseNot(){
+    if(peek()==='¬'){ pos++; return {type:'not', operand:parseNot()}; }
+    return parseAtom();
+  }
+  function parseAtom(){
+    const t=peek();
+    if(t===undefined) throw new Error('Unexpected end of statement — check for a missing variable or closing parenthesis.');
+    if(t==='('){
+      pos++;
+      const e=parseIff();
+      if(peek()!==')') throw new Error('Missing closing parenthesis ")".');
+      pos++;
+      return e;
+    }
+    if('¬∧∨↔→)'.includes(t)) throw new Error('Unexpected symbol "'+t+'" — check your statement near there.');
+    pos++;
+    const up=t.toUpperCase();
+    if(up==='T'||up==='TRUE') return {type:'const', value:true};
+    if(up==='F'||up==='FALSE') return {type:'const', value:false};
+    return {type:'var', name:t};
+  }
+
+  if(tokens.length===0) throw new Error('Enter a statement first.');
+  const ast=parseIff();
+  if(pos<tokens.length) throw new Error('Unexpected symbol "'+tokens[pos]+'" — check your parentheses and connectives.');
+  return ast;
+}
+
+function parseStatement(raw){
+  const pre=preprocess(raw);
+  const tokens=tokenize(pre);
+  return parse(tokens, raw);
+}
+
+function collectVars(node, set){
+  if(node.type==='var'){ set.add(node.name); return; }
+  if(node.type==='const') return;
+  if(node.type==='not'){ collectVars(node.operand,set); return; }
+  collectVars(node.left,set);
+  collectVars(node.right,set);
+}
+
+function evalNode(node, env){
+  switch(node.type){
+    case 'const': return node.value;
+    case 'var': return !!env[node.name];
+    case 'not': return !evalNode(node.operand, env);
+    case 'and': return evalNode(node.left,env) && evalNode(node.right,env);
+    case 'or': return evalNode(node.left,env) || evalNode(node.right,env);
+    case 'implies': return (!evalNode(node.left,env)) || evalNode(node.right,env);
+    case 'iff': return evalNode(node.left,env) === evalNode(node.right,env);
+  }
+}
+
+function allAssignments(vars){
+  const n=vars.length;
+  const N=1<<n;
+  const rows=[];
+  for(let r=0;r<N;r++){
+    const env={};
+    for(let k=0;k<n;k++){
+      const bit=(r>>(n-1-k))&1; // bit 0 => true, bit 1 => false  => starts all-True
+      env[vars[k]] = bit===0;
+    }
+    rows.push(env);
+  }
+  return rows;
+}
+
+function tf(b){ return '<span class="stampcell '+(b?'T':'F')+'">'+(b?'T':'F')+'</span>'; }
+
+/* ============ UI: symbol insertion ============ */
+document.querySelectorAll('.symbols').forEach(group=>{
+  const targetId=group.getAttribute('data-target');
+  group.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const input=document.getElementById(targetId);
+      const s=input.selectionStart ?? input.value.length;
+      const e=input.selectionEnd ?? input.value.length;
+      const ins=btn.getAttribute('data-ins');
+      input.value = input.value.slice(0,s)+ins+input.value.slice(e);
+      input.focus();
+      input.selectionStart=input.selectionEnd=s+ins.length;
+    });
+  });
+});
+
+/* ============ Single truth table ============ */
+const singleInput=document.getElementById('single-input');
+const singleError=document.getElementById('single-error');
+const singleResult=document.getElementById('single-result');
+
+const sampleStatements=['p ∧ q','p ∨ ¬q','p → q','p ↔ (q ∧ r)','¬(p ∧ q) → r'];
+const chipsBox=document.getElementById('single-chips');
+sampleStatements.forEach(s=>{
+  const c=document.createElement('span');
+  c.className='chip'; c.textContent=s;
+  c.addEventListener('click',()=>{singleInput.value=s; runSingle();});
+  chipsBox.appendChild(c);
+});
+
+function runSingle(){
+  singleError.style.display='none';
+  singleResult.innerHTML='';
+  const raw=singleInput.value.trim();
+  if(!raw) return;
+  let ast, vars;
+  try{
+    ast=parseStatement(raw);
+    const vs=new Set(); collectVars(ast,vs);
+    vars=Array.from(vs).sort();
+  }catch(err){
+    singleError.textContent=err.message;
+    singleError.style.display='block';
+    return;
+  }
+  const rows=allAssignments(vars);
+  const results=rows.map(env=>evalNode(ast,env));
+  const allT=results.every(Boolean);
+  const allF=results.every(v=>!v);
+  let verdictClass, verdictText;
+  if(allT){verdictClass='taut';verdictText='Tautology — always true';}
+  else if(allF){verdictClass='contra';verdictText='Contradiction — always false';}
+  else {verdictClass='contingent';verdictText='Contingency — depends on the values';}
+
+  let html='<div class="verdict '+verdictClass+'">'+verdictText+'</div>';
+  html+='<table class="truth"><thead><tr>';
+  vars.forEach(v=>html+='<th>'+v+'</th>');
+  html+='<th class="result-col">'+escapeHtml(raw)+'</th></tr></thead><tbody>';
+  rows.forEach((env,i)=>{
+    html+='<tr>';
+    vars.forEach(v=>html+='<td>'+tf(env[v])+'</td>');
+    html+='<td class="result-col">'+tf(results[i])+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  singleResult.innerHTML=html;
+}
+document.getElementById('single-run').addEventListener('click',runSingle);
+singleInput.addEventListener('keydown',e=>{if(e.key==='Enter') runSingle();});
+
+/* ============ Equivalence checker ============ */
+const eqA=document.getElementById('equiv-a');
+const eqB=document.getElementById('equiv-b');
+const eqError=document.getElementById('equiv-error');
+const eqResult=document.getElementById('equiv-result');
+
+function runEquiv(){
+  eqError.style.display='none';
+  eqResult.innerHTML='';
+  const rawA=eqA.value.trim(), rawB=eqB.value.trim();
+  if(!rawA || !rawB) return;
+  let astA, astB, vars;
+  try{
+    astA=parseStatement(rawA);
+    astB=parseStatement(rawB);
+    const vs=new Set();
+    collectVars(astA,vs); collectVars(astB,vs);
+    vars=Array.from(vs).sort();
+  }catch(err){
+    eqError.textContent=err.message;
+    eqError.style.display='block';
+    return;
+  }
+  const rows=allAssignments(vars);
+  const resA=rows.map(env=>evalNode(astA,env));
+  const resB=rows.map(env=>evalNode(astB,env));
+  const iff=resA.map((v,i)=>v===resB[i]);
+  const equivalent=iff.every(Boolean);
+
+  let html='<div class="verdict '+(equivalent?'equiv':'notequiv')+'">'+
+    (equivalent?'Equivalent — A ↔ B is a tautology':'Not equivalent — they differ on at least one row')+'</div>';
+  html+='<table class="truth"><thead><tr>';
+  vars.forEach(v=>html+='<th>'+v+'</th>');
+  html+='<th>A: '+escapeHtml(rawA)+'</th><th>B: '+escapeHtml(rawB)+'</th><th class="result-col">A ↔ B</th></tr></thead><tbody>';
+  rows.forEach((env,i)=>{
+    html+='<tr>';
+    vars.forEach(v=>html+='<td>'+tf(env[v])+'</td>');
+    html+='<td>'+tf(resA[i])+'</td><td>'+tf(resB[i])+'</td><td class="result-col">'+tf(iff[i])+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  eqResult.innerHTML=html;
+}
+document.getElementById('equiv-run').addEventListener('click',runEquiv);
+[eqA,eqB].forEach(inp=>inp.addEventListener('keydown',e=>{if(e.key==='Enter') runEquiv();}));
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ============ Laws library ============ */
+const laws=[
+  {name:'Double Negation', a:'¬¬p', b:'p'},
+  {name:"De Morgan's (1)", a:'¬(p ∧ q)', b:'¬p ∨ ¬q'},
+  {name:"De Morgan's (2)", a:'¬(p ∨ q)', b:'¬p ∧ ¬q'},
+  {name:'Implication Elimination', a:'p → q', b:'¬p ∨ q'},
+  {name:'Contrapositive', a:'p → q', b:'¬q → ¬p'},
+  {name:'Commutative (∧)', a:'p ∧ q', b:'q ∧ p'},
+  {name:'Associative (∨)', a:'(p ∨ q) ∨ r', b:'p ∨ (q ∨ r)'},
+  {name:'Distributive', a:'p ∧ (q ∨ r)', b:'(p ∧ q) ∨ (p ∧ r)'},
+  {name:'Idempotent (∨)', a:'p ∨ p', b:'p'},
+  {name:'Absorption', a:'p ∧ (p ∨ q)', b:'p'},
+  {name:'Identity (∧ T)', a:'p ∧ T', b:'p'},
+  {name:'Domination (∨ T)', a:'p ∨ T', b:'T'},
+  {name:'Exportation', a:'(p ∧ q) → r', b:'p → (q → r)'}
+];
+const lawsList=document.getElementById('laws-list');
+laws.forEach(l=>{
+  const btn=document.createElement('button');
+  btn.className='law';
+  btn.innerHTML='<span class="law-name">'+l.name+'</span><span class="law-formula">'+l.a+'  ≡  '+l.b+'</span>';
+  btn.addEventListener('click',()=>{
+    eqA.value=l.a; eqB.value=l.b;
+    runEquiv();
+    document.getElementById('equiv-card').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+  lawsList.appendChild(btn);
+});
+
+/* ============ Initial run ============ */
+runSingle();
+runEquiv();
+</script>
+
+</body>
+</html>
