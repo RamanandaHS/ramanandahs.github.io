@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Permutation &amp; Combination Explorer — Balls in a Basket</title>
+<style>
+  :root{
+    --paper:#FAF8F3;
+    --paper-deep:#F1ECDF;
+    --line:#E2DBC8;
+    --ink:#242220;
+    --ink-soft:#6B6455;
+    --teal:#1F6F6B;
+    --teal-dark:#123F3D;
+    --teal-tint:#E4F1EF;
+    --gold:#C08A1E;
+    --gold-tint:#FBEFD2;
+    --card:#FFFFFF;
+    --shadow-sm: 0 2px 8px rgba(35,30,20,0.07);
+    --shadow-md: 0 10px 30px rgba(35,30,20,0.12);
+    --radius: 18px;
+    --red:#E24C3D;   --red-d:#A9331F;
+    --blue:#2C7FB0;  --blue-d:#1B5478;
+    --green:#1F9E75; --green-d:#146B50;
+    --purple:#7C4FA6; --purple-d:#4F2F70;
+    --amber:#D99A1E; --amber-d:#96660E;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--paper),var(--paper)),
+      repeating-linear-gradient(0deg, rgba(180,170,140,0.06) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, rgba(180,170,140,0.06) 0 1px, transparent 1px 28px);
+    color:var(--ink);
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    line-height:1.5;
+  }
+  h1,h2,h3{
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    font-weight:700;
+    margin:0 0 .3em 0;
+    color:var(--teal-dark);
+  }
+  .mono{ font-family: "SF Mono","Cascadia Code", Consolas, "Courier New", monospace; }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px;}
+  section{padding:56px 0;border-bottom:1px dashed var(--line);}
+  section:last-of-type{border-bottom:none;}
+  .eyebrow{
+    display:inline-block;
+    font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--teal); background:var(--teal-tint);
+    padding:5px 12px; border-radius:999px; font-weight:700; margin-bottom:14px;
+  }
+  .lede{color:var(--ink-soft); font-size:1.02rem; max-width:640px;}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow-sm); padding:26px;
+  }
+  button{font-family:inherit; cursor:pointer;}
+  .btn{
+    border:none; border-radius:12px; padding:13px 22px; font-size:1rem; font-weight:600;
+    background:var(--teal); color:#fff; box-shadow:var(--shadow-sm);
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px); box-shadow:var(--shadow-md);}
+  .btn:active{transform:translateY(0);}
+  .btn.secondary{background:#fff;color:var(--teal);border:2px solid var(--teal); box-shadow:none;}
+  .btn.gold{background:var(--gold);}
+  .btn:disabled{opacity:.4; cursor:not-allowed; transform:none;}
+  .btn.small{padding:9px 16px;font-size:.86rem;border-radius:9px;}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter:blur(8px);
+    background:rgba(250,248,243,0.92);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:1080px;margin:0 auto;padding:12px 22px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .topbar h2{margin:0;font-size:1.05rem;}
+  .steps{display:flex;gap:6px;flex-wrap:wrap;}
+  .step-dot{
+    width:10px;height:10px;border-radius:50%;background:var(--line);
+    transition:background .3s, transform .3s;
+  }
+  .step-dot.active{background:var(--teal); transform:scale(1.3);}
+
+  /* ---------- Hero ---------- */
+  .hero{text-align:center; padding-top:64px;}
+  .hero h1{font-size:2.5rem;}
+  .hero p{font-size:1.1rem;color:var(--ink-soft);}
+
+  /* ---------- Basket & balls ---------- */
+  .basket-zone{
+    display:flex; flex-wrap:wrap; gap:26px; justify-content:center; align-items:flex-end;
+    margin:34px 0; padding:34px 20px 10px;
+    background:radial-gradient(ellipse at center bottom, rgba(31,111,107,0.08), transparent 70%);
+    border-radius:24px;
+  }
+  .ball{
+    width:76px;height:76px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:1.1rem;
+    cursor:pointer; position:relative;
+    transition:transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, opacity .3s;
+    box-shadow: inset -6px -8px 14px rgba(0,0,0,.28), inset 6px 8px 12px rgba(255,255,255,.35), 0 8px 14px rgba(0,0,0,.18);
+    user-select:none;
+  }
+  .ball:hover{transform:translateY(-6px) scale(1.05);}
+  .ball.selected{transform:translateY(-14px) scale(1.08); box-shadow: inset -6px -8px 14px rgba(0,0,0,.28), inset 6px 8px 12px rgba(255,255,255,.35), 0 4px 22px rgba(31,111,107,.5);}
+  .ball.selected::after{
+    content:"✓"; position:absolute; top:-9px; right:-9px; width:24px;height:24px;border-radius:50%;
+    background:var(--teal); color:#fff; font-size:.8rem; display:flex; align-items:center;justify-content:center;
+    box-shadow:var(--shadow-sm);
+  }
+  .ball.dim{opacity:.35;}
+  .ball.tiny{width:52px;height:52px;font-size:.85rem;}
+  .ball[data-c="red"]{background:radial-gradient(circle at 32% 28%, #ff9c86, var(--red) 60%, var(--red-d));}
+  .ball[data-c="blue"]{background:radial-gradient(circle at 32% 28%, #8fc7e8, var(--blue) 60%, var(--blue-d));}
+  .ball[data-c="green"]{background:radial-gradient(circle at 32% 28%, #7fe0bd, var(--green) 60%, var(--green-d));}
+  .ball[data-c="purple"]{background:radial-gradient(circle at 32% 28%, #c9a8e6, var(--purple) 60%, var(--purple-d));}
+  .ball[data-c="amber"]{background:radial-gradient(circle at 32% 28%, #f3cf85, var(--amber) 60%, var(--amber-d));}
+
+  .selected-row{
+    min-height:70px; display:flex; gap:16px; justify-content:center; align-items:center;
+    flex-wrap:wrap; padding:14px; border:2px dashed var(--line); border-radius:16px; margin-top:10px;
+  }
+  .selected-caption{text-align:center;font-size:.95rem;color:var(--ink-soft);margin-top:10px;}
+  .instruction{
+    text-align:center; font-size:1.05rem; font-weight:600; color:var(--teal-dark);
+    background:var(--teal-tint); display:inline-block; padding:10px 20px; border-radius:12px;
+  }
+  .center{text-align:center;}
+  .hidden{display:none !important;}
+  .fade-in{animation:fadeIn .5s ease both;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  /* decision buttons */
+  .decision-row{display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:22px;}
+  .decision-btn{
+    padding:22px 34px; border-radius:16px; font-size:1.1rem; font-weight:700;
+    border:2px solid var(--line); background:#fff; min-width:230px;
+    transition:all .2s;
+  }
+  .decision-btn:hover{border-color:var(--teal); transform:translateY(-3px); box-shadow:var(--shadow-md);}
+  .decision-btn small{display:block;font-weight:400;color:var(--ink-soft);margin-top:4px;font-size:.82rem;}
+
+  /* arrangement row */
+  .arrangement{
+    display:flex; gap:14px; justify-content:center; margin:18px 0; min-height:80px; align-items:center;
+  }
+  .arrangement .ball{cursor:default;}
+  .arrangement .ball:hover{transform:none;}
+  .all-arrangements{display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:18px;}
+  .arr-chip{
+    display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;
+    box-shadow:var(--shadow-sm); animation:fadeIn .4s ease both;
+  }
+  .formula-reveal{
+    text-align:center; margin-top:26px; padding:22px; border-radius:16px;
+    background:var(--gold-tint); border:1px solid var(--gold);
+  }
+  .formula-reveal .big{font-size:1.6rem;font-weight:700;color:var(--teal-dark);}
+  .tag-order{
+    display:inline-block; margin-top:10px; font-weight:700; letter-spacing:.05em; font-size:.85rem;
+    padding:6px 14px; border-radius:999px;
+  }
+  .tag-order.matters{background:var(--teal); color:#fff;}
+  .tag-order.nomatter{background:var(--gold); color:#fff;}
+
+  .merge-list{display:flex;flex-direction:column;gap:10px;align-items:center;margin:18px 0;}
+  .merge-item{display:flex;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 14px;
+    transition:all .8s cubic-bezier(.34,1.2,.64,1);}
+  .merge-item.merged{transform:translateY(-60px);opacity:0;}
+  .merge-result{display:flex;gap:12px;justify-content:center;margin-top:8px;}
+
+  /* comparison */
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:26px;}
+  @media (max-width:720px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{border-radius:18px;padding:24px;text-align:center;}
+  .compare-card.perm{background:var(--teal-tint); border:1px solid var(--teal);}
+  .compare-card.comb{background:var(--gold-tint); border:1px solid var(--gold);}
+  .emoji-row{font-size:1.6rem;letter-spacing:6px;margin:10px 0;}
+  .compare-card .count{font-size:1.3rem;font-weight:700;margin-top:10px;}
+
+  /* experiment */
+  .control-row{display:flex;gap:34px;flex-wrap:wrap;justify-content:center;margin:26px 0;}
+  .control{text-align:center;}
+  .control label{display:block;font-weight:700;margin-bottom:8px;color:var(--teal-dark);}
+  .stepper{display:flex;align-items:center;gap:12px;}
+  .stepper button{
+    width:40px;height:40px;border-radius:50%;border:2px solid var(--teal);background:#fff;color:var(--teal);
+    font-size:1.2rem;font-weight:700;
+  }
+  .stepper .val{font-size:1.5rem;font-weight:700;min-width:34px;display:inline-block;}
+  .exp-balls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px 0;}
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;}
+  @media (max-width:640px){.result-grid{grid-template-columns:1fr;}}
+  .result-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center;}
+  .result-card .label{color:var(--ink-soft);font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;}
+  .result-card .formula{font-size:1.05rem;margin:8px 0;color:var(--teal-dark);}
+  .result-card .value{font-size:2rem;font-weight:700;}
+  .examples-box{margin-top:16px;font-size:.9rem;color:var(--ink-soft);}
+  .examples-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px;}
+  .example-chip{background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-family:monospace;}
+
+  /* four cases */
+  .tabs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:26px;}
+  .tab-btn{
+    padding:12px 18px;border-radius:12px;border:2px solid var(--line);background:#fff;font-weight:700;font-size:.92rem;
+  }
+  .tab-btn.active{border-color:var(--teal);background:var(--teal);color:#fff;}
+  .case-panel{display:none;}
+  .case-panel.active{display:block;}
+  .repeat-picker{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .repeat-col{text-align:center;}
+  .repeat-col .count-badge{
+    display:inline-block;margin-top:8px;background:var(--teal);color:#fff;border-radius:999px;
+    padding:2px 10px;font-weight:700;font-size:.82rem;
+  }
+  .multiset-grid, .seq-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px;}
+  .multiset-chip, .seq-chip{
+    display:flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 8px;
+    animation:fadeIn .35s ease both;
+  }
+  .pos-picker{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .pos-col{text-align:center;}
+  .pos-col select{
+    margin-top:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);font-size:1rem;
+  }
+
+  /* tree */
+  .tree{font-family:monospace; font-size:.95rem; max-width:520px;margin:24px auto;}
+  .tree-node{padding:4px 0 4px 26px; border-left:2px solid var(--line); position:relative; animation:fadeIn .4s ease both;}
+  .tree-node:before{content:"";position:absolute;left:-2px;top:18px;width:20px;height:2px;background:var(--line);}
+  .tree-root{font-weight:700;color:var(--teal-dark);text-align:center;margin-bottom:6px;}
+  .tree-branch{display:flex;align-items:center;gap:8px;}
+
+  /* discovery */
+  .discover-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  @media (max-width:900px){.discover-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:560px){.discover-grid{grid-template-columns:1fr;}}
+  .discover-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center;}
+  .discover-card .icon{font-size:1.8rem;}
+  .discover-card h3{font-size:1rem;margin-top:8px;}
+  .discover-card p{margin:3px 0;font-size:.86rem;color:var(--ink-soft);}
+
+  /* challenge */
+  .quiz-card{max-width:640px;margin:0 auto;}
+  .quiz-q{font-size:1.15rem;font-weight:600;margin-bottom:20px;color:var(--ink);}
+  .quiz-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+  .quiz-feedback{margin-top:20px;padding:16px;border-radius:12px;display:none;}
+  .quiz-feedback.correct{background:var(--teal-tint);border:1px solid var(--teal);display:block;}
+  .quiz-feedback.wrong{background:#FDECEA;border:1px solid var(--red);display:block;}
+  .quiz-progress{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-top:14px;}
+
+  footer{text-align:center;padding:40px 0 60px;color:var(--ink-soft);font-style:italic;}
+  .reset-fab{
+    position:fixed; right:20px; bottom:20px; z-index:60;
+    border-radius:999px; padding:14px 20px; box-shadow:var(--shadow-md);
+  }
+  @media (max-width:640px){
+    .hero h1{font-size:1.7rem;}
+    .ball{width:60px;height:60px;font-size:.9rem;}
+    section{padding:40px 0;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <h2>🎯 Permutation &amp; Combination Explorer</h2>
+    <div class="steps" id="stepDots"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero" id="sec-hero">
+    <span class="eyebrow">Balls in a Basket</span>
+    <h1>Permutation &amp; Combination Explorer</h1>
+    <p>Learn by selecting, arranging and experimenting with balls</p>
+  </section>
+
+  <!-- STEP 1: SELECT -->
+  <section id="sec-select">
+    <span class="eyebrow">01 · Select</span>
+    <h2>Pick your balls</h2>
+    <p class="lede">There are 5 different balls in the basket below.</p>
+    <div class="center"><span class="instruction" id="selectInstruction">Select exactly 3 balls.</span></div>
+    <div class="basket-zone" id="basket"></div>
+    <div class="selected-row" id="selectedRow"></div>
+    <p class="selected-caption" id="selectedCaption">Selected: (none yet)</p>
+  </section>
+
+  <!-- STEP 2: DECISION -->
+  <section id="sec-decide" class="hidden">
+    <span class="eyebrow">02 · Decide</span>
+    <h2 id="decideHeadline">You selected 3 balls.</h2>
+    <p class="lede">Does the order of these balls matter?</p>
+    <div class="decision-row">
+      <button class="decision-btn" id="btnYesOrder">YES — Order Matters<small>Arranging in a line, ranking, assigning roles…</small></button>
+      <button class="decision-btn" id="btnNoOrder">NO — Order Does Not Matter<small>Just picking a group, a team, a set…</small></button>
+    </div>
+  </section>
+
+  <!-- CASE 1: PERMUTATION -->
+  <section id="sec-permutation" class="hidden">
+    <span class="eyebrow">03 · Discover</span>
+    <h2>Permutation</h2>
+    <p class="lede">The same 3 balls can be arranged in different orders.</p>
+    <div class="arrangement" id="permArrangement"></div>
+    <div class="center">
+      <button class="btn secondary" id="btnAnotherArrangement">Show another arrangement</button>
+      <button class="btn" id="btnAllArrangements">Show ALL arrangements</button>
+    </div>
+    <div class="all-arrangements hidden" id="allArrangements"></div>
+    <div class="formula-reveal hidden" id="permFormulaBox">
+      <div>3 balls can be arranged in <span class="mono">3!</span> ways.</div>
+      <div class="big mono" id="permFormulaValue">3P3 = 3! = 6</div>
+      <span class="tag-order matters">ORDER MATTERS</span>
+      <p style="margin-top:14px;font-size:.9rem;color:var(--ink-soft);">For example, <b>RED–BLUE–GREEN</b> is different from <b>GREEN–BLUE–RED</b>.</p>
+    </div>
+  </section>
+
+  <!-- CASE 2: COMBINATION -->
+  <section id="sec-combination" class="hidden">
+    <span class="eyebrow">03 · Discover</span>
+    <h2>Combination</h2>
+    <p class="lede">Watch what happens when we treat different orderings of the same balls as one selection.</p>
+    <div class="merge-list" id="mergeList"></div>
+    <div class="center"><button class="btn" id="btnMerge">Merge equal selections</button></div>
+    <div id="mergeResultWrap" class="hidden">
+      <p class="center" style="font-weight:600;color:var(--teal-dark);">All these arrangements represent the SAME selection.</p>
+      <div class="merge-result" id="mergeResult"></div>
+    </div>
+    <div class="formula-reveal hidden" id="combFormulaBox">
+      <div class="big mono" id="combFormulaValue">3C3 = 1</div>
+      <span class="tag-order nomatter">ORDER DOES NOT MATTER</span>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section id="sec-compare" class="hidden">
+    <span class="eyebrow">Compare</span>
+    <h2>Permutation vs. Combination</h2>
+    <div class="compare-grid">
+      <div class="compare-card perm">
+        <h3>PERMUTATION — Arrange the balls</h3>
+        <div class="emoji-row">🔴🔵🟢</div>
+        <div class="emoji-row">🟢🔴🔵</div>
+        <div class="emoji-row">🔵🟢🔴</div>
+        <div class="count">6 different arrangements</div>
+        <span class="tag-order matters">ORDER MATTERS</span>
+      </div>
+      <div class="compare-card comb">
+        <h3>COMBINATION — Select the balls</h3>
+        <div class="emoji-row">🔴🔵🟢</div>
+        <div class="count">Only ONE selection</div>
+        <span class="tag-order nomatter">ORDER DOES NOT MATTER</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIMENT -->
+  <section id="sec-experiment">
+    <span class="eyebrow">04 · Generalize</span>
+    <h2>Experiment</h2>
+    <p class="lede">Change the number of balls (n) and how many you select (r), and watch the counts respond.</p>
+    <div class="control-row">
+      <div class="control">
+        <label>Number of balls (n)</label>
+        <div class="stepper">
+          <button id="nMinus">−</button><span class="val" id="nVal">5</span><button id="nPlus">+</button>
+        </div>
+      </div>
+      <div class="control">
+        <label>Number selected (r)</label>
+        <div class="stepper">
+          <button id="rMinus">−</button><span class="val" id="rVal">3</span><button id="rPlus">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="exp-balls" id="expBalls"></div>
+    <div class="result-grid">
+      <div class="result-card">
+        <div class="label">Permutation</div>
+        <div class="formula mono">nPr = n! / (n−r)!</div>
+        <div class="value mono" id="expPermValue">—</div>
+      </div>
+      <div class="result-card">
+        <div class="label">Combination</div>
+        <div class="formula mono">nCr = n! / (r!(n−r)!)</div>
+        <div class="value mono" id="expCombValue">—</div>
+      </div>
+    </div>
+    <div class="examples-box center">
+      <div>A few example <b>arrangements</b> (order matters):</div>
+      <div class="examples-list" id="expPermExamples"></div>
+      <div style="margin-top:14px;">A few example <b>selections</b> (order doesn't matter):</div>
+      <div class="examples-list" id="expCombExamples"></div>
+    </div>
+  </section>
+
+  <!-- FOUR CASES -->
+  <section id="sec-fourcases">
+    <span class="eyebrow">05 · Four Cases</span>
+    <h2>The four cases, side by side</h2>
+    <div class="tabs">
+      <button class="tab-btn active" data-case="1">① Permutation<br><small>no repetition · order matters</small></button>
+      <button class="tab-btn" data-case="2">② Combination<br><small>no repetition · order doesn't matter</small></button>
+      <button class="tab-btn" data-case="3">③ Combination w/ repetition<br><small>order doesn't matter</small></button>
+      <button class="tab-btn" data-case="4">④ Permutation w/ repetition<br><small>order matters</small></button>
+    </div>
+
+    <div class="case-panel active card" data-panel="1">
+      <h3>Case 1 — Permutation (no repetition)</h3>
+      <p class="lede">Pick 3 different balls from 5, and line them up. Every new order counts as a new arrangement — this is exactly the "Order Matters" demo above.</p>
+      <p class="lede mono">5P3 = 5×4×3 = 60</p>
+      <p style="font-size:.9rem;color:var(--ink-soft);">Scroll back up to the Permutation demo to replay it, or use the Experiment sliders above.</p>
+    </div>
+
+    <div class="case-panel card" data-panel="2">
+      <h3>Case 2 — Combination (no repetition)</h3>
+      <p class="lede">Pick 3 different balls from 5 — but this time only the group matters, not the order. This is the "Order Does Not Matter" demo above.</p>
+      <p class="lede mono">5C3 = 10</p>
+      <p style="font-size:.9rem;color:var(--ink-soft);">Scroll back up to the Combination demo to replay it, or use the Experiment sliders above.</p>
+    </div>
+
+    <div class="case-panel card" data-panel="3">
+      <h3>Case 3 — Combination with repetition</h3>
+      <p class="lede">Select 3 balls. You may choose the same colour more than once — and order still doesn't matter.</p>
+      <div class="repeat-picker" id="repeatPicker"></div>
+      <p class="center" style="font-weight:600;">Your selection: <span id="repeatTotal" class="mono">0 / 3</span></p>
+      <div class="multiset-grid" id="repeatSelectionDisplay"></div>
+      <div class="center" style="margin-top:14px;">
+        <button class="btn secondary small" id="repeatResetBtn">Clear</button>
+        <button class="btn small" id="repeatShowAllBtn">Show all possible selections</button>
+      </div>
+      <div class="multiset-grid" id="repeatAllDisplay"></div>
+      <div class="formula-reveal" style="margin-top:22px;">
+        <div>3 types of balls, choose 3, repetition allowed:</div>
+        <div class="big mono">(n+r−1)Cr = 5C3 = 10</div>
+        <span class="tag-order nomatter">ORDER DOES NOT MATTER</span>
+      </div>
+    </div>
+
+    <div class="case-panel card" data-panel="4">
+      <h3>Case 4 — Permutation with repetition</h3>
+      <p class="lede">Choose a ball colour for each of 3 positions. Repetition is allowed, and order matters — position 1, 2 and 3 are all distinct slots.</p>
+      <div class="pos-picker" id="posPicker"></div>
+      <div class="center" style="margin-top:10px;">
+        <span style="font-weight:600;">Your sequence: </span><span id="posSequenceDisplay" class="mono">— — —</span>
+      </div>
+      <div class="center" style="margin-top:14px;">
+        <button class="btn small" id="posShowAllBtn">Show all 27 sequences</button>
+      </div>
+      <div class="seq-grid" id="posAllDisplay"></div>
+      <div class="formula-reveal" style="margin-top:22px;">
+        <div>3 types of balls, 3 positions, repetition allowed:</div>
+        <div class="big mono">3 × 3 × 3 = 27 = n<sup>r</sup></div>
+        <span class="tag-order matters">ORDER MATTERS</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TREE -->
+  <section id="sec-tree">
+    <span class="eyebrow">Why permutations grow fast</span>
+    <h2>Visual tree — 3 balls, choose 2</h2>
+    <p class="lede">Every branch is a decision. Choosing an order means every earlier choice removes an option from the next branch.</p>
+    <div class="center"><button class="btn secondary" id="growTreeBtn">Grow the tree</button></div>
+    <div class="tree" id="treeBox"></div>
+  </section>
+
+  <!-- DISCOVERY SUMMARY -->
+  <section id="sec-discover">
+    <span class="eyebrow">06 · Summary</span>
+    <h2>What did you discover?</h2>
+    <div class="discover-grid">
+      <div class="discover-card"><div class="icon">🔀</div><h3>Permutation</h3><p>Arrange</p><p>Order matters</p></div>
+      <div class="discover-card"><div class="icon">🧺</div><h3>Combination</h3><p>Select</p><p>Order does not matter</p></div>
+      <div class="discover-card"><div class="icon">🔁</div><h3>Combination w/ repetition</h3><p>Select</p><p>Repetition allowed</p><p>Order does not matter</p></div>
+      <div class="discover-card"><div class="icon">♻️</div><h3>Permutation w/ repetition</h3><p>Arrange</p><p>Repetition allowed</p><p>Order matters</p></div>
+    </div>
+  </section>
+
+  <!-- CHALLENGE -->
+  <section id="sec-challenge">
+    <span class="eyebrow">07 · Practice</span>
+    <h2>Test yourself</h2>
+    <div class="quiz-card card">
+      <div class="quiz-q" id="quizQuestion">Loading question…</div>
+      <div class="quiz-btns">
+        <button class="btn" id="quizPermBtn">Permutation</button>
+        <button class="btn secondary" id="quizCombBtn">Combination</button>
+      </div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="center" style="margin-top:16px;">
+        <button class="btn gold small hidden" id="quizNextBtn">Next question →</button>
+      </div>
+      <div class="quiz-progress" id="quizProgress"></div>
+    </div>
+  </section>
+
+  <footer>Designed as an interactive mathematics learning resource.</footer>
+</div>
+
+<button class="btn secondary reset-fab" id="resetFab">↺ Reset</button>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- helpers ---------------- */
+  function factorial(n){ let r=1; for(let i=2;i<=n;i++) r*=i; return r; }
+  function nPr(n,r){ if(r>n||r<0) return 0; return factorial(n)/factorial(n-r); }
+  function nCr(n,r){ if(r>n||r<0) return 0; return Math.round(factorial(n)/(factorial(r)*factorial(n-r))); }
+
+  function permute(arr){
+    if(arr.length<=1) return [arr.slice()];
+    const out=[];
+    for(let i=0;i<arr.length;i++){
+      const rest=arr.slice(0,i).concat(arr.slice(i+1));
+      for(const p of permute(rest)) out.push([arr[i]].concat(p));
+    }
+    return out;
+  }
+
+  function combinations(arr,r){
+    const out=[];
+    function helper(start,chosen){
+      if(chosen.length===r){ out.push(chosen.slice()); return; }
+      for(let i=start;i<arr.length;i++){
+        chosen.push(arr[i]);
+        helper(i+1,chosen);
+        chosen.pop();
+      }
+    }
+    helper(0,[]);
+    return out;
+  }
+
+  // multisets of size r drawn from `types` (with repetition), order-free (non-decreasing index)
+  function multisetsWithRepetition(types,r){
+    const out=[];
+    function helper(start,chosen){
+      if(chosen.length===r){ out.push(chosen.slice()); return; }
+      for(let i=start;i<types.length;i++){
+        chosen.push(types[i]);
+        helper(i,chosen);
+        chosen.pop();
+      }
+    }
+    helper(0,[]);
+    return out;
+  }
+
+  // all sequences of length r from `types` (with repetition), order matters
+  function sequencesWithRepetition(types,r){
+    let out=[[]];
+    for(let pos=0;pos<r;pos++){
+      const next=[];
+      for(const seq of out){ for(const t of types){ next.push(seq.concat([t])); } }
+      out=next;
+    }
+    return out;
+  }
+
+  /* ---------------- ball palette ---------------- */
+  const BALLS = [
+    {id:1, key:"red",    label:"Ball 1", emoji:"🔴", name:"Red"},
+    {id:2, key:"blue",   label:"Ball 2", emoji:"🔵", name:"Blue"},
+    {id:3, key:"green",  label:"Ball 3", emoji:"🟢", name:"Green"},
+    {id:4, key:"purple", label:"Ball 4", emoji:"🟣", name:"Purple"},
+    {id:5, key:"amber",  label:"Ball 5", emoji:"🟡", name:"Gold"}
+  ];
+  function ballById(id){ return BALLS.find(b=>b.id===id); }
+  function makeBallEl(ball, opts){
+    opts=opts||{};
+    const d=document.createElement("div");
+    d.className="ball"+(opts.tiny?" tiny":"");
+    d.dataset.c=ball.key;
+    d.title=ball.name;
+    d.textContent=opts.text!==undefined?opts.text:ball.id;
+    return d;
+  }
+
+  /* ---------------- STEP 1: select balls ---------------- */
+  const basket=document.getElementById("basket");
+  const selectedRow=document.getElementById("selectedRow");
+  const selectedCaption=document.getElementById("selectedCaption");
+  const selectInstruction=document.getElementById("selectInstruction");
+  let selected=[];
+
+  function renderBasket(){
+    basket.innerHTML="";
+    BALLS.forEach(ball=>{
+      const el=makeBallEl(ball);
+      if(selected.includes(ball.id)) el.classList.add("selected");
+      el.addEventListener("click",()=>toggleBall(ball.id));
+      basket.appendChild(el);
+    });
+  }
+  function toggleBall(id){
+    if(selected.includes(id)){
+      selected=selected.filter(x=>x!==id);
+    } else {
+      if(selected.length>=3) return;
+      selected.push(id);
+    }
+    renderBasket();
+    renderSelectedRow();
+    checkSelectionComplete();
+  }
+  function renderSelectedRow(){
+    selectedRow.innerHTML="";
+    if(selected.length===0){
+      selectedCaption.textContent="Selected: (none yet)";
+      return;
+    }
+    selected.forEach(id=>{
+      const b=ballById(id);
+      selectedRow.appendChild(makeBallEl(b));
+    });
+    selectedCaption.textContent="Selected: "+selected.join(", ");
+  }
+  function checkSelectionComplete(){
+    const decideSec=document.getElementById("sec-decide");
+    if(selected.length===3){
+      selectInstruction.textContent="Great — 3 balls selected!";
+      document.getElementById("decideHeadline").textContent="You selected 3 balls.";
+      decideSec.classList.remove("hidden");
+      decideSec.classList.add("fade-in");
+      setTimeout(()=>decideSec.scrollIntoView({behavior:"smooth",block:"start"}),200);
+    } else {
+      selectInstruction.textContent="Select exactly 3 balls.";
+      decideSec.classList.add("hidden");
+      hideAllDiscoverySections();
+    }
+  }
+
+  function hideAllDiscoverySections(){
+    ["sec-permutation","sec-combination","sec-compare"].forEach(id=>{
+      document.getElementById(id).classList.add("hidden");
+    });
+  }
+
+  /* ---------------- STEP 2 -> CASE 1: PERMUTATION ---------------- */
+  const permSec=document.getElementById("sec-permutation");
+  const permArrangement=document.getElementById("permArrangement");
+  const allArrangements=document.getElementById("allArrangements");
+  const permFormulaBox=document.getElementById("permFormulaBox");
+  let permList=[];
+  let permIndex=0;
+
+  document.getElementById("btnYesOrder").addEventListener("click",()=>{
+    hideAllDiscoverySections();
+    permSec.classList.remove("hidden");
+    permSec.classList.add("fade-in");
+    allArrangements.classList.add("hidden");
+    allArrangements.innerHTML="";
+    permFormulaBox.classList.add("hidden");
+    permList=permute(selected.slice());
+    permIndex=0;
+    renderArrangement(permList[0]);
+    document.getElementById("sec-compare").classList.remove("hidden");
+    setTimeout(()=>permSec.scrollIntoView({behavior:"smooth",block:"start"}),150);
+  });
+
+  function renderArrangement(arr){
+    permArrangement.innerHTML="";
+    arr.forEach(id=>permArrangement.appendChild(makeBallEl(ballById(id))));
+    permArrangement.classList.remove("fade-in");
+    void permArrangement.offsetWidth;
+    permArrangement.classList.add("fade-in");
+  }
+
+  document.getElementById("btnAnotherArrangement").addEventListener("click",()=>{
+    permIndex=(permIndex+1)%permList.length;
+    renderArrangement(permList[permIndex]);
+  });
+
+  document.getElementById("btnAllArrangements").addEventListener("click",()=>{
+    allArrangements.innerHTML="";
+    allArrangements.classList.remove("hidden");
+    permList.forEach((arr,i)=>{
+      const chip=document.createElement("div");
+      chip.className="arr-chip";
+      chip.style.animationDelay=(i*0.08)+"s";
+      arr.forEach(id=>chip.appendChild(makeBallEl(ballById(id),{tiny:true})));
+      allArrangements.appendChild(chip);
+    });
+    permFormulaBox.classList.remove("hidden");
+    const k=selected.length;
+    document.getElementById("permFormulaValue").textContent =
+      k+"P"+k+" = "+k+"! = "+factorial(k);
+  });
+
+  /* ---------------- STEP 2 -> CASE 2: COMBINATION ---------------- */
+  const combSec=document.getElementById("sec-combination");
+  const mergeList=document.getElementById("mergeList");
+  const mergeResultWrap=document.getElementById("mergeResultWrap");
+  const mergeResult=document.getElementById("mergeResult");
+  const combFormulaBox=document.getElementById("combFormulaBox");
+
+  document.getElementById("btnNoOrder").addEventListener("click",()=>{
+    hideAllDiscoverySections();
+    combSec.classList.remove("hidden");
+    combSec.classList.add("fade-in");
+    mergeResultWrap.classList.add("hidden");
+    combFormulaBox.classList.add("hidden");
+    buildMergeList();
+    document.getElementById("sec-compare").classList.remove("hidden");
+    setTimeout(()=>combSec.scrollIntoView({behavior:"smooth",block:"start"}),150);
+  });
+
+  function buildMergeList(){
+    mergeList.innerHTML="";
+    const three=permute(selected.slice()).slice(0,3); // show 3 sample orderings of the same group
+    three.forEach(arr=>{
+      const row=document.createElement("div");
+      row.className="merge-item";
+      arr.forEach(id=>row.appendChild(makeBallEl(ballById(id),{tiny:true})));
+      mergeList.appendChild(row);
+    });
+  }
+
+  document.getElementById("btnMerge").addEventListener("click",()=>{
+    const items=mergeList.querySelectorAll(".merge-item");
+    items.forEach(it=>it.classList.add("merged"));
+    setTimeout(()=>{
+      mergeResultWrap.classList.remove("hidden");
+      mergeResult.innerHTML="";
+      selected.forEach(id=>mergeResult.appendChild(makeBallEl(ballById(id))));
+      combFormulaBox.classList.remove("hidden");
+      const k=selected.length;
+      document.getElementById("combFormulaValue").textContent = k+"C"+k+" = 1";
+    },500);
+  });
+
+  /* ---------------- EXPERIMENT ---------------- */
+  let expN=5, expR=3;
+  const nVal=document.getElementById("nVal");
+  const rVal=document.getElementById("rVal");
+  const expBalls=document.getElementById("expBalls");
+
+  const EXP_TYPES=["red","blue","green","purple","amber","red","blue","green"]; // reused cyclically for n up to 8
+  function expBallObj(i){
+    return {id:i+1, key:EXP_TYPES[i%EXP_TYPES.length], name:"Ball "+(i+1)};
+  }
+
+  function renderExperiment(){
+    nVal.textContent=expN;
+    rVal.textContent=expR;
+    expBalls.innerHTML="";
+    for(let i=0;i<expN;i++){
+      const ball=expBallObj(i);
+      const el=makeBallEl(ball,{tiny:true});
+      if(i<expR) el.classList.add("selected"); else el.classList.add("dim");
+      expBalls.appendChild(el);
+    }
+    const p=nPr(expN,expR), c=nCr(expN,expR);
+    document.getElementById("expPermValue").textContent = expN+"P"+expR+" = "+p;
+    document.getElementById("expCombValue").textContent = expN+"C"+expR+" = "+c;
+
+    // sample examples (cap for readability)
+    const ids=[]; for(let i=0;i<expN;i++) ids.push(i+1);
+    const permExamplesBox=document.getElementById("expPermExamples");
+    const combExamplesBox=document.getElementById("expCombExamples");
+    permExamplesBox.innerHTML="";
+    combExamplesBox.innerHTML="";
+
+    let permSamples;
+    if(p<=200){ permSamples=permute(ids.slice(0,Math.min(expN,6))); } // guard against huge n
+    // Build a light sample generator instead of full enumeration for large n
+    permSamples = samplePermutations(ids, expR, 8);
+    permSamples.forEach(arr=>{
+      const chip=document.createElement("span");
+      chip.className="example-chip";
+      chip.textContent=arr.join("-");
+      permExamplesBox.appendChild(chip);
+    });
+
+    const combSamples = sampleCombinations(ids, expR, 8);
+    combSamples.forEach(arr=>{
+      const chip=document.createElement("span");
+      chip.className="example-chip";
+      chip.textContent="{"+arr.join(",")+"}";
+      combExamplesBox.appendChild(chip);
+    });
+  }
+
+  // Generate up to `limit` distinct random permutations of length r from ids
+  function samplePermutations(ids,r,limit){
+    const seen=new Set(); const out=[];
+    let attempts=0;
+    while(out.length<limit && attempts<limit*20){
+      attempts++;
+      const pool=ids.slice();
+      const pick=[];
+      for(let i=0;i<r && pool.length>0;i++){
+        const idx=Math.floor(Math.random()*pool.length);
+        pick.push(pool.splice(idx,1)[0]);
+      }
+      const key=pick.join("-");
+      if(!seen.has(key)){ seen.add(key); out.push(pick); }
+      if(nPr(ids.length,r)<=limit && out.length>=nPr(ids.length,r)) break;
+    }
+    return out;
+  }
+  function sampleCombinations(ids,r,limit){
+    const seen=new Set(); const out=[];
+    let attempts=0;
+    while(out.length<limit && attempts<limit*20){
+      attempts++;
+      const pool=ids.slice();
+      const pick=[];
+      for(let i=0;i<r && pool.length>0;i++){
+        const idx=Math.floor(Math.random()*pool.length);
+        pick.push(pool.splice(idx,1)[0]);
+      }
+      pick.sort((a,b)=>a-b);
+      const key=pick.join("-");
+      if(!seen.has(key)){ seen.add(key); out.push(pick); }
+      if(nCr(ids.length,r)<=limit && out.length>=nCr(ids.length,r)) break;
+    }
+    return out;
+  }
+
+  document.getElementById("nPlus").addEventListener("click",()=>{
+    if(expN<8){ expN++; if(expR>expN) expR=expN; renderExperiment(); }
+  });
+  document.getElementById("nMinus").addEventListener("click",()=>{
+    if(expN>3){ expN--; if(expR>expN) expR=expN; renderExperiment(); }
+  });
+  document.getElementById("rPlus").addEventListener("click",()=>{
+    if(expR<expN){ expR++; renderExperiment(); }
+  });
+  document.getElementById("rMinus").addEventListener("click",()=>{
+    if(expR>1){ expR--; renderExperiment(); }
+  });
+
+  /* ---------------- FOUR CASES TABS ---------------- */
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".case-panel").forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelector('.case-panel[data-panel="'+btn.dataset.case+'"]').classList.add("active");
+    });
+  });
+
+  /* Case 3: combination with repetition */
+  const REPEAT_TYPES=[
+    {key:"red",name:"Red"},
+    {key:"blue",name:"Blue"},
+    {key:"green",name:"Green"}
+  ];
+  let repeatCounts={red:0,blue:0,green:0};
+  const REPEAT_R=3;
+
+  function renderRepeatPicker(){
+    const box=document.getElementById("repeatPicker");
+    box.innerHTML="";
+    REPEAT_TYPES.forEach(t=>{
+      const col=document.createElement("div");
+      col.className="repeat-col";
+      const ball=document.createElement("div");
+      ball.className="ball";
+      ball.dataset.c=t.key;
+      ball.textContent="+";
+      ball.addEventListener("click",()=>{
+        const total=Object.values(repeatCounts).reduce((a,b)=>a+b,0);
+        if(total<REPEAT_R){ repeatCounts[t.key]++; renderRepeatPicker(); renderRepeatSelection(); }
+      });
+      const badge=document.createElement("div");
+      badge.className="count-badge";
+      badge.textContent=t.name+": "+repeatCounts[t.key];
+      col.appendChild(ball);
+      col.appendChild(badge);
+      box.appendChild(col);
+    });
+  }
+  function renderRepeatSelection(){
+    const total=Object.values(repeatCounts).reduce((a,b)=>a+b,0);
+    document.getElementById("repeatTotal").textContent=total+" / "+REPEAT_R;
+    const disp=document.getElementById("repeatSelectionDisplay");
+    disp.innerHTML="";
+    const chip=document.createElement("div");
+    chip.className="multiset-chip";
+    REPEAT_TYPES.forEach(t=>{
+      for(let i=0;i<repeatCounts[t.key];i++){
+        const b=document.createElement("div");
+        b.className="ball tiny";
+        b.dataset.c=t.key;
+        b.textContent="";
+        chip.appendChild(b);
+      }
+    });
+    if(total>0) disp.appendChild(chip);
+  }
+  document.getElementById("repeatResetBtn").addEventListener("click",()=>{
+    repeatCounts={red:0,blue:0,green:0};
+    renderRepeatPicker(); renderRepeatSelection();
+    document.getElementById("repeatAllDisplay").innerHTML="";
+  });
+  document.getElementById("repeatShowAllBtn").addEventListener("click",()=>{
+    const keys=REPEAT_TYPES.map(t=>t.key);
+    const all=multisetsWithRepetition(keys,REPEAT_R);
+    const box=document.getElementById("repeatAllDisplay");
+    box.innerHTML="";
+    all.forEach((combo,i)=>{
+      const chip=document.createElement("div");
+      chip.className="multiset-chip";
+      chip.style.animationDelay=(i*0.05)+"s";
+      combo.forEach(key=>{
+        const b=document.createElement("div");
+        b.className="ball tiny";
+        b.dataset.c=key;
+        box.appendChild(chip);
+        chip.appendChild(b);
+      });
+      box.appendChild(chip);
+    });
+  });
+
+  /* Case 4: permutation with repetition */
+  const POS_TYPES=[{key:"red",name:"Red"},{key:"blue",name:"Blue"},{key:"green",name:"Green"}];
+  let posChoice=["red","blue","green"];
+  function renderPosPicker(){
+    const box=document.getElementById("posPicker");
+    box.innerHTML="";
+    for(let i=0;i<3;i++){
+      const col=document.createElement("div");
+      col.className="pos-col";
+      const label=document.createElement("div");
+      label.style.fontWeight="700";
+      label.textContent="Position "+(i+1);
+      const select=document.createElement("select");
+      POS_TYPES.forEach(t=>{
+        const opt=document.createElement("option");
+        opt.value=t.key; opt.textContent=t.name;
+        if(posChoice[i]===t.key) opt.selected=true;
+        select.appendChild(opt);
+      });
+      select.addEventListener("change",()=>{
+        posChoice[i]=select.value;
+        renderPosSequence();
+      });
+      col.appendChild(label);
+      col.appendChild(select);
+      box.appendChild(col);
+    }
+  }
+  function renderPosSequence(){
+    const wrap=document.getElementById("posSequenceDisplay");
+    wrap.textContent="";
+    const names=posChoice.map(k=>POS_TYPES.find(t=>t.key===k).name);
+    wrap.textContent=names.join(" — ");
+  }
+  document.getElementById("posShowAllBtn").addEventListener("click",()=>{
+    const keys=POS_TYPES.map(t=>t.key);
+    const all=sequencesWithRepetition(keys,3);
+    const box=document.getElementById("posAllDisplay");
+    box.innerHTML="";
+    all.forEach((seq,i)=>{
+      const chip=document.createElement("div");
+      chip.className="seq-chip";
+      chip.style.animationDelay=(i*0.02)+"s";
+      seq.forEach(key=>{
+        const b=document.createElement("div");
+        b.className="ball tiny";
+        b.dataset.c=key;
+        chip.appendChild(b);
+      });
+      box.appendChild(chip);
+    });
+  });
+
+  /* ---------------- TREE ---------------- */
+  document.getElementById("growTreeBtn").addEventListener("click",()=>{
+    const treeTypes=["red","blue","green"];
+    const names={red:"RED",blue:"BLUE",green:"GREEN"};
+    const box=document.getElementById("treeBox");
+    box.innerHTML="";
+    const root=document.createElement("div");
+    root.className="tree-root";
+    root.textContent="START";
+    box.appendChild(root);
+    let delay=0;
+    treeTypes.forEach(first=>{
+      const level1=document.createElement("div");
+      level1.className="tree-node";
+      level1.style.animationDelay=delay+"s"; delay+=0.15;
+      const branch1=document.createElement("div");
+      branch1.className="tree-branch";
+      branch1.innerHTML="<span>"+names[first]+"</span>";
+      level1.appendChild(branch1);
+      treeTypes.filter(t=>t!==first).forEach(second=>{
+        const level2=document.createElement("div");
+        level2.className="tree-node";
+        level2.style.animationDelay=delay+"s"; delay+=0.15;
+        level2.innerHTML="<span>"+names[second]+"</span>";
+        level1.appendChild(level2);
+      });
+      box.appendChild(level1);
+    });
+  });
+
+  /* ---------------- QUIZ ---------------- */
+  const QUESTIONS=[
+    {q:"There are 5 students. Choose 3 for a committee (no distinct roles). Does order matter?",a:"combination",why:"A committee is just a group — swapping who you picked first doesn't create a new committee."},
+    {q:"There are 4 students. Choose a President, Secretary and Treasurer.",a:"permutation",why:"Each role is a distinct position, so who gets which role matters — different orders give different outcomes."},
+    {q:"From a deck, you draw 3 cards to form a hand of cards (no order to a 'hand').",a:"combination",why:"A hand is a set of cards — the order you drew them in doesn't change the hand."},
+    {q:"Arrange 4 different books on a shelf in a row.",a:"permutation",why:"A shelf has a left-to-right order, so each different order is a distinct arrangement."},
+    {q:"Choose 2 toppings (from 6 options) for a pizza.",a:"combination",why:"Toppings just get added to the pizza — the order you add them in doesn't create a different pizza."},
+    {q:"Award Gold, Silver and Bronze medals to 3 of 8 runners.",a:"permutation",why:"Gold, Silver and Bronze are distinct positions — the order of finishing matters."},
+    {q:"Select a team of 5 players from a squad of 12 (no captain assigned).",a:"combination",why:"A team is just a set of players — there's no ordering among the 5 chosen."},
+    {q:"Assign 3 different tasks to 3 of 7 employees (one task each).",a:"permutation",why:"Each employee gets a specific, distinct task — swapping who does which task changes the outcome."}
+  ];
+  let quizOrder=[], quizIndex=0, quizAnswered=false;
+  function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  function startQuiz(){
+    quizOrder=shuffle(QUESTIONS.map((_,i)=>i));
+    quizIndex=0;
+    showQuizQuestion();
+  }
+  function showQuizQuestion(){
+    quizAnswered=false;
+    const item=QUESTIONS[quizOrder[quizIndex]];
+    document.getElementById("quizQuestion").textContent=item.q;
+    document.getElementById("quizFeedback").className="quiz-feedback";
+    document.getElementById("quizFeedback").textContent="";
+    document.getElementById("quizNextBtn").classList.add("hidden");
+    document.getElementById("quizProgress").textContent="Question "+(quizIndex+1)+" of "+quizOrder.length;
+  }
+  function answerQuiz(choice){
+    if(quizAnswered) return;
+    quizAnswered=true;
+    const item=QUESTIONS[quizOrder[quizIndex]];
+    const fb=document.getElementById("quizFeedback");
+    if(choice===item.a){
+      fb.className="quiz-feedback correct";
+      fb.textContent="✅ Correct — it's a "+item.a+". "+item.why;
+    } else {
+      fb.className="quiz-feedback wrong";
+      fb.textContent="❌ Not quite — it's actually a "+item.a+". "+item.why;
+    }
+    document.getElementById("quizNextBtn").classList.remove("hidden");
+  }
+  document.getElementById("quizPermBtn").addEventListener("click",()=>answerQuiz("permutation"));
+  document.getElementById("quizCombBtn").addEventListener("click",()=>answerQuiz("combination"));
+  document.getElementById("quizNextBtn").addEventListener("click",()=>{
+    quizIndex=(quizIndex+1)%quizOrder.length;
+    if(quizIndex===0) quizOrder=shuffle(QUESTIONS.map((_,i)=>i));
+    showQuizQuestion();
+  });
+
+  /* ---------------- STEP DOTS + SCROLL SPY ---------------- */
+  const sectionIds=["sec-hero","sec-select","sec-decide","sec-experiment","sec-fourcases","sec-tree","sec-discover","sec-challenge"];
+  const dotsWrap=document.getElementById("stepDots");
+  sectionIds.forEach((id,i)=>{
+    const dot=document.createElement("div");
+    dot.className="step-dot"+(i===0?" active":"");
+    dot.dataset.target=id;
+    dotsWrap.appendChild(dot);
+  });
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const idx=sectionIds.indexOf(entry.target.id);
+        if(idx>=0){
+          document.querySelectorAll(".step-dot").forEach((d,i)=>d.classList.toggle("active",i===idx));
+        }
+      }
+    });
+  },{rootMargin:"-45% 0px -45% 0px"});
+  sectionIds.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) io.observe(el);
+  });
+
+  /* ---------------- RESET ---------------- */
+  function resetAll(){
+    selected=[];
+    renderBasket();
+    renderSelectedRow();
+    document.getElementById("sec-decide").classList.add("hidden");
+    hideAllDiscoverySections();
+    repeatCounts={red:0,blue:0,green:0};
+    renderRepeatPicker(); renderRepeatSelection();
+    document.getElementById("repeatAllDisplay").innerHTML="";
+    posChoice=["red","blue","green"];
+    renderPosPicker(); renderPosSequence();
+    document.getElementById("posAllDisplay").innerHTML="";
+    document.getElementById("treeBox").innerHTML="";
+    expN=5; expR=3; renderExperiment();
+    startQuiz();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  document.getElementById("resetFab").addEventListener("click",resetAll);
+
+  /* ---------------- INIT ---------------- */
+  renderBasket();
+  renderSelectedRow();
+  renderExperiment();
+  renderRepeatPicker();
+  renderRepeatSelection();
+  renderPosPicker();
+  renderPosSequence();
+  startQuiz();
+
+})();
+</script>
+</body>
+</html>

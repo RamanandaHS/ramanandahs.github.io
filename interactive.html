@@ -1,36 +1,820 @@
-<div class="lab">
-    <h3>Mathematical Logic</h3>
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Interactive Mathematics - Dr. Ramananda</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f7fa;
+            color: #333;
+        }
+
+        /* Header */
+
+        header {
+            background-color: #1f4e79;
+            color: white;
+            padding: 35px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 10px 0;
+            font-size: 32px;
+        }
+
+        header p {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        /* Navigation */
+
+        nav {
+            background-color: #163a5c;
+            text-align: center;
+            padding: 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 14px;
+            font-size: 15px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main content */
+
+        .container {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .intro {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .intro h2 {
+            color: #1f4e79;
+            margin-top: 0;
+        }
+
+        /* Semester */
+
+        .semester {
+            background-color: white;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .semester-header {
+            background-color: #1f4e79;
+            color: white;
+            padding: 20px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .semester-header:hover {
+            background-color: #285f91;
+        }
+
+        .semester-header h2 {
+            margin: 0;
+            font-size: 23px;
+        }
+
+        .arrow {
+            font-size: 22px;
+        }
+
+        .semester-content {
+            padding: 25px;
+        }
+
+        /* Topic cards */
+
+        .topics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .topic {
+            background-color: #f7f9fc;
+            border: 1px solid #dce4ec;
+            border-radius: 10px;
+            padding: 20px;
+            transition: 0.2s;
+        }
+
+        .topic:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.10);
+        }
+
+        .topic h3 {
+            color: #1f4e79;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .topic p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* Buttons */
+
+        .button {
+            display: inline-block;
+            padding: 9px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .open {
+            background-color: #1f4e79;
+            color: white;
+        }
+
+        .open:hover {
+            background-color: #163a5c;
+        }
+
+        .coming {
+            background-color: #e8edf2;
+            color: #666;
+            cursor: default;
+        }
+
+        /* Status */
+
+        .available {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .soon {
+            color: #d17a00;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        /* Footer */
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            margin-top: 40px;
+            background-color: #163a5c;
+            color: white;
+        }
+
+        /* Mobile */
+
+        @media (max-width: 600px) {
+
+            header h1 {
+                font-size: 26px;
+            }
+
+            nav a {
+                display: inline-block;
+                margin: 6px;
+            }
+
+            .semester-header h2 {
+                font-size: 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>Interactive Mathematics</h1>
 
     <p>
-        Explore logical statements, connectives and truth tables
-        interactively.
+        Explore • Visualize • Experiment • Understand
     </p>
+
+</header>
+
+
+<nav>
+
+    <a href="index.html">Home</a>
+
+    <a href="about.html">About Me</a>
+
+    <a href="teaching.html">Teaching</a>
+
+    <a href="interactive.html">Interactive Mathematics</a>
+
+    <a href="research.html">Research</a>
+
+    <a href="resources.html">Resources</a>
+
+</nav>
+
+
+<div class="container">
+
+
+    <div class="intro">
+
+        <h2>Interactive Mathematics Learning</h2>
+
+        <p>
+            Explore mathematical concepts through interactive
+            activities, visualizations, simulations and experiments.
+        </p>
+
+        <p>
+            Select your semester and choose a topic to begin.
+        </p>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- I SEMESTER -->
+    <!-- ===================================================== -->
+
+    <div class="semester">
+
+        <div class="semester-header"
+             onclick="toggleSemester('sem1')">
+
+            <h2>I Semester</h2>
+
+            <span class="arrow" id="arrow1">▼</span>
+
+        </div>
+
+
+        <div class="semester-content" id="sem1">
+
+            <div class="topics">
+
+
+               <div class="topic">
+
+    <h3>Polar Curves</h3>
 
     <p>
-        <a href="logic-lab.html">Open Mathematical Logic Lab</a>
+        Explore polar curves, their shapes,
+        equations and important properties
+        through visualization.
     </p>
-</div>
-<div class="lab">
-    <h3>Combinatorics</h3>
-    <p><strong>Coming Soon</strong></p>
+
+    <a href="I-Semester/Calculus/geo.html"
+       class="button open">
+
+        Open Polar Curves Lab
+
+    </a>
+
 </div>
 
-<div class="lab">
-    <h3>Relations and Functions</h3>
-    <p><strong>Coming Soon</strong></p>
+
+                <div class="topic">
+
+                    <h3>Taylor Series</h3>
+
+                    <p>
+                        Visualize Taylor polynomial approximations
+                        and understand how functions are represented
+                        using series.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Solution of Differential Equations</h3>
+
+                    <p>
+                        Explore methods for solving ordinary
+                        differential equations interactively.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Matrices</h3>
+
+                    <p>
+                        Explore matrix operations and visualize
+                        important concepts in linear algebra.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Rank &amp; Systems of Equations</h3>
+
+                    <p>
+                        Understand rank of a matrix and solve
+                        systems of linear equations interactively.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- II SEMESTER -->
+    <!-- ===================================================== -->
+
+    <div class="semester">
+
+        <div class="semester-header"
+             onclick="toggleSemester('sem2')">
+
+            <h2>II Semester</h2>
+
+            <span class="arrow" id="arrow2">▼</span>
+
+        </div>
+
+
+        <div class="semester-content" id="sem2">
+
+            <div class="topics">
+
+
+                <div class="topic">
+
+                    <h3>Solution of Transcendental Equations</h3>
+
+                    <p>
+                        Explore numerical methods for finding
+                        roots of transcendental equations.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Interpolation</h3>
+
+                    <p>
+                        Visualize interpolation methods and
+                        understand how values are estimated
+                        from given data.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Numerical Integration</h3>
+
+                    <p>
+                        Explore numerical integration using
+                        different approximation methods.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Numerical Solution of Differential Equations</h3>
+
+                    <p>
+                        Explore numerical methods for solving
+                        ordinary differential equations.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Partial Differential Equations</h3>
+
+                    <p>
+                        Explore basic concepts and visualizations
+                        related to partial differential equations.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Multiple Integrals</h3>
+
+                    <p>
+                        Visualize double and multiple integrals
+                        geometrically.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+<!-- III SEMESTER -->
+<!-- ===================================================== -->
+
+<div class="semester">
+
+    <div class="semester-header"
+         onclick="toggleSemester('sem3')">
+
+        <h2>III Semester</h2>
+
+        <span class="arrow" id="arrow3">▼</span>
+
+    </div>
+
+
+    <div class="semester-content" id="sem3">
+
+        <div class="topics">
+
+
+            <!-- Mathematical Logic -->
+
+            <div class="topic">
+
+                <h3>Mathematical Logic</h3>
+
+                <p>
+                    Explore statements, logical connectives,
+                    truth tables and logical reasoning interactively.
+                </p>
+
+                <a href="III-Semester/Discrete-Mathematics/logic-lab.html"
+                   class="button open">
+
+                    Open Logic Lab
+
+                </a>
+
+            </div>
+
+
+            <!-- Permutation and Combination -->
+
+            <div class="topic">
+
+                <h3>Permutation &amp; Combination</h3>
+
+                <p>
+                    Explore permutations and combinations through
+                    interactive visualizations and experiments.
+                </p>
+
+                <a href="III-Semester/Discrete-Mathematics/permCom.html"
+                   class="button open">
+
+                    Open Lab
+
+                </a>
+
+            </div>
+
+
+            <!-- Relations and Functions -->
+
+            <div class="topic">
+
+                <h3>Relations &amp; Functions</h3>
+
+                <p>
+                    Explore relations, functions, properties and
+                    their representations interactively.
+                </p>
+
+                <div class="soon">
+
+                    Coming Soon
+
+                </div>
+
+            </div>
+
+
+            <!-- Enumeration and Generating Functions -->
+
+            <div class="topic">
+
+                <h3>Enumeration &amp; Generating Functions</h3>
+
+                <p>
+                    Explore enumeration techniques and generating
+                    functions through interactive examples.
+                </p>
+
+                <div class="soon">
+
+                    Coming Soon
+
+                </div>
+
+            </div>
+
+
+            <!-- Graph Theory -->
+
+            <div class="topic">
+
+                <h3>Graph Theory</h3>
+
+                <p>
+                    Explore graphs, paths, circuits,
+                    connectivity, trees and other
+                    graph-theoretic concepts.
+                </p>
+
+                <div class="soon">
+
+                    Coming Soon
+
+                </div>
+
+            </div>
+
+
+            <!-- Transform Calculus -->
+
+            <div class="topic">
+
+                <h3>Transform Calculus</h3>
+
+                <p>
+                    Explore transforms and their applications
+                    in solving mathematical problems.
+                </p>
+
+                <div class="soon">
+
+                    Coming Soon
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
 </div>
 
-<div class="lab">
-    <h3>Enumeration and Generating Functions</h3>
-    <p><strong>Coming Soon</strong></p>
+
+    <!-- ===================================================== -->
+    <!-- IV SEMESTER -->
+    <!-- ===================================================== -->
+
+    <div class="semester">
+
+        <div class="semester-header"
+             onclick="toggleSemester('sem4')">
+
+            <h2>IV Semester</h2>
+
+            <span class="arrow" id="arrow4">▼</span>
+
+        </div>
+
+
+        <div class="semester-content" id="sem4">
+
+            <div class="topics">
+
+
+                <div class="topic">
+
+                    <h3>Complex Analysis</h3>
+
+                    <p>
+                        Explore complex numbers, functions
+                        and important concepts in complex analysis.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Statistics</h3>
+
+                    <p>
+                        Explore statistical concepts using
+                        data visualization and interactive examples.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Regression</h3>
+
+                    <p>
+                        Explore correlation and regression
+                        using interactive data and visualizations.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Probability</h3>
+
+                    <p>
+                        Explore probability through simulations,
+                        experiments and visual examples.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+                <div class="topic">
+
+                    <h3>Sampling Theory</h3>
+
+                    <p>
+                        Explore sampling methods and statistical
+                        sampling concepts interactively.
+                    </p>
+
+                    <div class="soon">
+                        Coming Soon
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
 </div>
 
-<div class="lab">
-    <h3>Graph Theory</h3>
-    <p><strong>Coming Soon</strong></p>
-</div>
 
-<div class="lab">
-    <h3>Calculus</h3>
-    <p><strong>Coming Soon</strong></p>
-</div>
+<footer>
+
+    © 2026 Dr. Ramananda H. S. | Mathematics
+
+</footer>
+
+
+
+<script>
+
+function toggleSemester(id) {
+
+    const section = document.getElementById(id);
+
+    const number = id.replace("sem", "");
+
+    const arrow =
+        document.getElementById("arrow" + number);
+
+
+    if (section.style.display === "none") {
+
+        section.style.display = "block";
+
+        arrow.textContent = "▼";
+
+    }
+
+    else {
+
+        section.style.display = "none";
+
+        arrow.textContent = "▶";
+
+    }
+
+}
+
+</script>
+
+
+</body>
+
+</html>
