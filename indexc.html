@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WX2V25WH47"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-WX2V25WH47');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Ramananda - Mathematics</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #123157;
+            --navy-deep: #0b2242;
+            --navy-soft: #274b78;
+            --gold: #c8952e;
+            --gold-light: #e8b95c;
+            --teal: #1c7a6e;
+            --teal-light: #e4f2ef;
+            --paper: #f6f4ee;
+            --card-bg: #ffffff;
+            --ink: #1c2531;
+            --ink-soft: #4a5568;
+            --border: #e4e0d6;
+
+            --font-display: 'Newsreader', Georgia, serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            margin: 0;
+            background-color: var(--paper);
+            color: var(--ink);
+            line-height: 1.65;
+            overflow-x: hidden;
+        }
+
+        /* ---------- HEADER ---------- */
+
+        header {
+            position: relative;
+            background: linear-gradient(155deg, var(--navy-deep) 0%, var(--navy) 55%, var(--navy-soft) 100%);
+            color: white;
+            padding: 64px 24px 56px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        header .math-bg {
+            position: absolute;
+            inset: 0;
+            opacity: 0.16;
+            pointer-events: none;
+        }
+
+        header .header-inner {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header .eyebrow {
+            font-family: var(--font-body);
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            font-size: 12.5px;
+            color: var(--gold-light);
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+
+        header h1 {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: clamp(2.1rem, 5vw, 3.2rem);
+            margin: 0 0 14px;
+            letter-spacing: 0.01em;
+        }
+
+        header p {
+            font-size: clamp(1rem, 2vw, 1.15rem);
+            color: #d7e0ee;
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+        }
+
+        header p::before {
+            content: "";
+        }
+
+        /* ---------- NAV ---------- */
+
+        nav {
+            background-color: var(--navy-deep);
+            text-align: center;
+            padding: 4px 12px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        nav a {
+            color: #cfd9e8;
+            text-decoration: none;
+            margin: 0 4px;
+            padding: 16px 14px;
+            font-size: 15px;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        nav a::after {
+            content: "";
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 10px;
+            height: 2px;
+            background: var(--gold-light);
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 0.25s ease;
+        }
+
+        nav a:hover {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        nav a:hover::after {
+            transform: scaleX(1);
+        }
+
+        nav a.active {
+            color: #ffffff;
+        }
+
+        nav a.active::after {
+            transform: scaleX(1);
+        }
+
+        nav a.feedback-link {
+            background: var(--gold);
+            color: var(--navy-deep);
+            border-radius: 999px;
+            padding: 9px 20px;
+            font-weight: 600;
+            margin-left: 10px;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        nav a.feedback-link::after {
+            display: none;
+        }
+
+        nav a.feedback-link:hover {
+            background: var(--gold-light);
+            color: var(--navy-deep);
+            transform: translateY(-1px);
+        }
+
+        /* ---------- CONTENT ---------- */
+
+        .content {
+            max-width: 1000px;
+            margin: 56px auto;
+            padding: 0 24px;
+            background-color: transparent;
+        }
+
+        .content h2 {
+            font-family: var(--font-display);
+            color: var(--navy);
+            font-size: clamp(1.5rem, 3vw, 1.9rem);
+            font-weight: 600;
+            margin: 0 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .content h2::before {
+            content: "";
+            width: 6px;
+            height: 26px;
+            background: linear-gradient(180deg, var(--gold), var(--teal));
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .welcome-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px clamp(24px, 5vw, 48px);
+            margin-bottom: 48px;
+            box-shadow: 0 1px 3px rgba(18, 49, 87, 0.05);
+            position: relative;
+        }
+
+        .welcome-panel p {
+            font-size: 1.05rem;
+            color: var(--ink-soft);
+            max-width: 68ch;
+        }
+
+        .welcome-panel p:last-of-type {
+            margin-bottom: 0;
+        }
+
+        /* ---------- FEATURE CARD GRID ---------- */
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 26px 22px;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+            border-top: 3px solid var(--navy-soft);
+        }
+
+        .feature-card:nth-child(5n+1) { border-top-color: var(--navy-soft); }
+        .feature-card:nth-child(5n+2) { border-top-color: var(--gold); }
+        .feature-card:nth-child(5n+3) { border-top-color: var(--teal); }
+        .feature-card:nth-child(5n+4) { border-top-color: var(--navy); }
+        .feature-card:nth-child(5n+5) { border-top-color: var(--gold-light); }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 14px 28px rgba(18, 49, 87, 0.12);
+            border-color: var(--navy-soft);
+        }
+
+        .feature-card .icon {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--navy);
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--teal-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .feature-card p {
+            margin: 0;
+            font-size: 0.98rem;
+            color: var(--ink);
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        /* ---------- FOOTER ---------- */
+
+        footer {
+            text-align: center;
+            padding: 28px 20px;
+            margin-top: 40px;
+            background: var(--navy-deep);
+            color: #b9c5d8;
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+
+        @media (max-width: 640px) {
+            header {
+                padding: 48px 18px 40px;
+            }
+
+            nav {
+                padding: 6px 6px;
+            }
+
+            nav a {
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+
+            nav a.feedback-link {
+                margin: 6px auto;
+            }
+
+            .content {
+                margin: 36px auto;
+            }
+
+            .welcome-panel {
+                padding: 28px 20px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+            .feature-card, nav a, nav a::after, nav a.feedback-link {
+                transition: none;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <header>
+        <svg class="math-bg" viewBox="0 0 1000 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0,220 C120,120 180,280 300,180 C420,80 480,240 600,150 C720,70 800,220 1000,140" stroke="#e8b95c" stroke-width="2" fill="none" opacity="0.55"/>
+            <path d="M0,80 C150,180 250,20 400,110 C550,200 650,40 800,120 C900,175 950,110 1000,140" stroke="#ffffff" stroke-width="1.4" fill="none" opacity="0.35"/>
+            <text x="60" y="60" font-family="Newsreader, serif" font-size="46" fill="#ffffff" opacity="0.5">&#8747;</text>
+            <text x="880" y="90" font-family="Newsreader, serif" font-size="40" fill="#e8b95c" opacity="0.55">&#960;</text>
+            <text x="150" y="270" font-family="Newsreader, serif" font-size="38" fill="#ffffff" opacity="0.4">&#8721;</text>
+            <text x="740" y="260" font-family="Newsreader, serif" font-size="44" fill="#ffffff" opacity="0.45">&#8734;</text>
+            <text x="440" y="55" font-family="Newsreader, serif" font-size="30" fill="#e8b95c" opacity="0.4">&#916;</text>
+            <text x="330" y="290" font-family="Newsreader, serif" font-size="30" fill="#ffffff" opacity="0.35">&#8730;</text>
+        </svg>
+        <div class="header-inner">
+            <div class="eyebrow">Mathematics &middot; Teaching &amp; Research Portal</div>
+            <h1>Dr. Ramananda H. S.</h1>
+            <p>Mathematics | Teaching | Visualization | Research</p>
+        </div>
+    </header>
+
+    <nav>
+        <a href="indexc.html" class="active">Home</a>
+        <a href="about.html">About Me</a>
+        <a href="teaching.html">Teaching</a>
+        <a href="interactive.html">Interactive Mathematics</a>
+        <a href="research.html">Research</a>
+        <a href="resources.html">Resources</a>
+	<a href="https://docs.google.com/forms/d/e/1FAIpQLScV75HC-IUsFiTU-A41eKMbF84-ARtIGBeWuAgScXpyLimXAQ/viewform?usp=publish-editor"
+   	target="_blank" class="feedback-link">
+   	 Feedback / Suggestions
+</a>
+    </nav>
+
+    <div class="content">
+
+        <div class="welcome-panel">
+            <h2>Welcome</h2>
+
+            <p>
+                Welcome to my mathematics teaching and research website.
+            </p>
+
+            <p>
+                My aim is to make mathematics easier to understand
+                through visualization, interaction, technology and
+                meaningful applications.
+            </p>
+        </div>
+
+        <h2>What You Will Find Here</h2>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">&#8734;</div>
+                <p>Innovative approaches to teaching Mathematics</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#8721;</div>
+                <p>Interactive Mathematics dashboards</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#960;</div>
+                <p>Python, MATLAB and computational resources</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#8747;</div>
+                <p>Teaching materials and activities</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#8710;</div>
+                <p>Research in Mathematics</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        &copy; 2026 Dr. Ramananda H. S. | Mathematics
+    </footer>
+
+</body>
+
+</html>
