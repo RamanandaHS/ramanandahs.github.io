@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Derivative Quest — Level 3 | Trigonometric Derivatives</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js" defer></script>
+
+<style>
+  :root{
+    --navy-950:#0B1220;
+    --navy-800:#16213A;
+    --navy-700:#202D4A;
+    --paper:#F1F4F8;
+    --card:#FFFFFF;
+    --ink:#1B2430;
+    --ink-soft:#5B6472;
+    --amber:#E8A33D;
+    --amber-dark:#C97F1E;
+    --teal:#2A9D8F;
+    --teal-dark:#20776C;
+    --coral:#E4572E;
+    --border:#DCE3EC;
+    --radius:14px;
+    --shadow:0 6px 20px rgba(16,25,48,0.08);
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .app{ max-width:1100px; margin:0 auto; padding:0 0 60px; }
+
+  /* ---------- HERO / HEADER ---------- */
+  .hero{
+    background:radial-gradient(1200px 320px at 15% -20%, #1C2A4A 0%, var(--navy-950) 55%);
+    color:#fff;
+    padding:28px 24px 22px;
+    border-radius:0 0 24px 24px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-top{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .hero h1{
+    font-family:var(--font-display);
+    font-size:clamp(1.5rem, 4vw, 2.1rem);
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .hero .level-tag{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:0.95rem;
+    color:var(--amber);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin:0 0 6px;
+  }
+  .hero .subtitle{
+    margin:10px 0 0;
+    font-size:0.95rem;
+    color:#B9C4DA;
+    max-width:520px;
+  }
+
+  /* staircase level rail — signature element */
+  .staircase-rail{ display:flex; align-items:flex-end; gap:0; margin-top:22px; }
+  .stair-step{ display:flex; flex-direction:column; align-items:center; width:64px; position:relative; }
+  .stair-step .platform{
+    width:100%; height:6px; background:var(--navy-700); border-radius:3px 3px 0 0;
+  }
+  .stair-step.active .platform{ background:linear-gradient(90deg, var(--amber-dark), var(--amber)); box-shadow:0 0 14px rgba(232,163,61,0.55); }
+  .stair-step.done .platform{ background:linear-gradient(90deg, var(--teal-dark), var(--teal)); }
+  .stair-step .dot{
+    width:30px; height:30px; border-radius:50%;
+    background:var(--navy-700); border:2px solid #2B3B60;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-size:0.75rem; font-weight:700; color:#7C8AA8;
+    margin-bottom:8px;
+  }
+  .stair-step.active .dot{
+    background:var(--amber); border-color:var(--amber); color:var(--navy-950);
+    box-shadow:0 0 0 5px rgba(232,163,61,0.18);
+  }
+  .stair-step.done .dot{ background:var(--teal); border-color:var(--teal); color:#fff; }
+  .stair-step .lvl-label{ font-size:0.65rem; color:#7C8AA8; margin-top:6px; letter-spacing:0.04em; }
+  .stair-step.active .lvl-label{ color:var(--amber); font-weight:600; }
+  .stair-step.done .lvl-label{ color:var(--teal); }
+  .stair-step:nth-child(1){ margin-bottom:26px; }
+  .stair-step:nth-child(2){ margin-bottom:19px; }
+  .stair-step:nth-child(3){ margin-bottom:12px; }
+  .stair-step:nth-child(4){ margin-bottom:6px; }
+  .stair-step:nth-child(5){ margin-bottom:0px; }
+
+  /* ---------- DASHBOARD LAYOUT ---------- */
+  .dashboard{
+    display:grid; grid-template-columns: 250px 1fr; gap:18px;
+    padding:20px 20px 0;
+  }
+  @media(max-width:820px){
+    .dashboard{ grid-template-columns: 1fr; }
+    .rail-order{ order:-1; }
+  }
+
+  .rail{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:18px; align-self:start; position:sticky; top:16px;
+  }
+  @media(max-width:820px){ .rail{ position:static; } }
+
+  .rail h3{
+    font-family:var(--font-display); font-size:0.78rem; text-transform:uppercase;
+    letter-spacing:0.08em; color:var(--ink-soft); margin:0 0 12px;
+  }
+
+  .checklist{ list-style:none; margin:0 0 18px; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .checklist li{ display:flex; align-items:center; gap:10px; font-size:0.88rem; color:var(--ink-soft); }
+  .checklist li .mark{
+    width:22px; height:22px; border-radius:50%; flex:0 0 22px;
+    border:2px solid var(--border); display:flex; align-items:center; justify-content:center;
+    font-size:0.7rem; font-weight:700; color:transparent;
+  }
+  .checklist li.done{ color:var(--ink); font-weight:500; }
+  .checklist li.done .mark{ background:var(--teal); border-color:var(--teal); color:#fff; }
+  .checklist li.current .mark{ border-color:var(--amber); background:var(--amber); color:#fff; }
+  .checklist li.current{ color:var(--ink); font-weight:600; }
+
+  .timer-box{
+    background:var(--navy-950); color:#fff; border-radius:12px; padding:14px; text-align:center; margin-bottom:14px;
+  }
+  .timer-box .lbl{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#8EA0C4; margin-bottom:4px; }
+  .timer-box .clock{ font-family:var(--font-mono); font-size:1.9rem; font-weight:600; letter-spacing:0.02em; }
+  .timer-box.warning .clock{ color:var(--amber); }
+  .timer-box.urgent .clock{ color:var(--coral); animation:pulse 1s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.45;} }
+
+  .score-box{
+    display:flex; align-items:center; justify-content:space-between;
+    background:#FBF3E4; border:1px solid #F0DEB4; border-radius:12px; padding:10px 14px;
+  }
+  .score-box .stair-mini{ display:flex; gap:2px; align-items:flex-end; }
+  .score-box .stair-mini span{ width:5px; background:var(--amber); border-radius:1px; }
+  .score-box .stair-mini span:nth-child(1){ height:6px; }
+  .score-box .stair-mini span:nth-child(2){ height:10px; }
+  .score-box .stair-mini span:nth-child(3){ height:14px; }
+  .score-box .label{ font-size:0.72rem; color:var(--amber-dark); text-transform:uppercase; letter-spacing:0.05em; font-weight:600; }
+  .score-box .value{ font-family:var(--font-display); font-size:1.3rem; font-weight:700; color:var(--ink); }
+
+  .restart-link{
+    display:block; text-align:center; margin-top:14px; font-size:0.78rem; color:var(--ink-soft);
+    text-decoration:underline; cursor:pointer; background:none; border:none; width:100%; font-family:var(--font-body);
+  }
+  .restart-link:hover{ color:var(--coral); }
+
+  /* ---------- STAGE PANEL ---------- */
+  .stage-panel{ min-height:420px; }
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:26px 26px 24px; margin-bottom:16px;
+  }
+  .card h2{ font-family:var(--font-display); font-size:1.35rem; margin:0 0 4px; }
+  .card .eyebrow{ font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--amber-dark); font-weight:700; margin-bottom:6px; }
+  .card p{ margin:10px 0; color:var(--ink); }
+  .muted{ color:var(--ink-soft); }
+
+  .rule-box{
+    background:var(--navy-950); color:#fff; border-radius:12px; padding:20px; text-align:center; margin:16px 0;
+    font-size:1.15rem;
+  }
+  .rule-box.small{ font-size:1rem; padding:14px; }
+
+  .transform-flow{
+    display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; margin:18px 0; padding:16px;
+    background:var(--paper); border-radius:12px;
+  }
+  .transform-flow .step{ font-size:1.2rem; opacity:0; transform:translateY(8px); animation:fadeUp 0.5s ease forwards; }
+  .transform-flow .arrow{ color:var(--amber-dark); font-size:1.3rem; opacity:0; animation:fadeUp 0.5s ease forwards; }
+  .transform-flow .caption{ font-size:0.78rem; color:var(--ink-soft); flex-basis:100%; text-align:center; opacity:0; animation:fadeUp 0.5s ease forwards; }
+  @keyframes fadeUp{ to{ opacity:1; transform:translateY(0);} }
+
+  .callout{ background:#EAF6F4; border-left:4px solid var(--teal); border-radius:8px; padding:12px 16px; margin:14px 0; font-size:0.92rem; }
+  .callout.amber{ background:#FDF3E2; border-left-color:var(--amber); }
+  .callout.coral{ background:#FDECE7; border-left-color:var(--coral); }
+
+  .btn{
+    font-family:var(--font-display); font-weight:600; font-size:0.95rem;
+    border:none; border-radius:10px; padding:13px 22px; cursor:pointer;
+    background:var(--navy-950); color:#fff; transition:transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn:hover{ transform:translateY(-1px); box-shadow:0 6px 16px rgba(16,25,48,0.22); }
+  .btn:active{ transform:translateY(0); }
+  .btn.amber{ background:linear-gradient(135deg, var(--amber-dark), var(--amber)); color:var(--navy-950); }
+  .btn.teal{ background:linear-gradient(135deg, var(--teal-dark), var(--teal)); }
+  .btn:disabled{ opacity:0.45; cursor:not-allowed; transform:none; box-shadow:none; }
+  .btn-row{ display:flex; justify-content:flex-end; gap:10px; margin-top:18px; flex-wrap:wrap; }
+
+  .step-reveal{ display:none; margin:14px 0; padding-left:14px; border-left:3px solid var(--border); opacity:0; animation:fadeUp 0.4s ease forwards; }
+  .step-reveal.shown{ display:block; }
+  .step-reveal .step-num{ font-family:var(--font-display); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--amber-dark); font-weight:700; }
+
+  .challenge-head{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+  .challenge-badge{
+    font-family:var(--font-display); background:var(--navy-950); color:var(--amber); font-weight:700;
+    border-radius:8px; padding:4px 10px; font-size:0.78rem; letter-spacing:0.04em;
+  }
+
+  .answer-row{ display:flex; gap:10px; margin:18px 0 6px; flex-wrap:wrap; }
+  .answer-row input[type="text"]{
+    flex:1; min-width:220px; font-family:var(--font-mono); font-size:1.05rem;
+    padding:13px 14px; border:2px solid var(--border); border-radius:10px; outline:none; color:var(--ink);
+  }
+  .answer-row input[type="text"]:focus{ border-color:var(--amber); }
+  label.visually-hidden{
+    position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;
+  }
+  .format-hint{ font-size:0.78rem; color:var(--ink-soft); margin-top:-2px; }
+
+  .feedback{ border-radius:10px; padding:14px 16px; margin:14px 0; font-weight:500; opacity:0; animation:fadeUp 0.35s ease forwards; }
+  .feedback.correct{ background:#E6F6EE; color:var(--teal-dark); border:1px solid #BFE7D4; }
+  .feedback.wrong{ background:#FDECE7; color:#A83A1E; border:1px solid #F5C5B4; }
+  .feedback .pts{ display:inline-block; margin-top:6px; font-family:var(--font-display); font-weight:700; color:var(--amber-dark); }
+
+  .hint-box{ background:#FFF8EA; border:1px dashed var(--amber); border-radius:10px; padding:12px 16px; margin:12px 0; font-size:0.92rem; opacity:0; animation:fadeUp 0.35s ease forwards;}
+  .hint-box strong{ color:var(--amber-dark); }
+
+  .solution-box{ background:var(--navy-950); color:#fff; border-radius:10px; padding:16px; margin:14px 0; }
+
+  .practice-block{ margin-top:18px; padding-top:16px; border-top:1px dashed var(--border); }
+
+  /* ---------- COMPLETE SCREEN ---------- */
+  .complete-hero{ text-align:center; padding:36px 20px; }
+  .complete-hero .trophy{ font-size:3rem; }
+  .complete-hero h2{ font-family:var(--font-display); font-size:1.9rem; margin:10px 0 2px; }
+  .stats-table{ width:100%; max-width:420px; margin:22px auto; border-collapse:collapse; text-align:left; }
+  .stats-table td{ padding:9px 6px; border-bottom:1px solid var(--border); font-size:0.95rem; }
+  .stats-table td:last-child{ text-align:right; font-family:var(--font-mono); font-weight:600; }
+  .stats-table td.check{ color:var(--teal); font-weight:700; text-align:right; font-family:var(--font-body); }
+
+  .rules-table{ width:100%; border-collapse:collapse; margin:14px 0 18px; }
+  .rules-table td{ padding:10px 8px; border-bottom:1px solid var(--border); font-size:1rem; }
+  .rules-table td:nth-child(2){ text-align:center; color:var(--ink-soft); width:24px; }
+  .rules-table tr:last-child td{ border-bottom:none; }
+
+  .unlock-card{
+    background:linear-gradient(135deg, var(--navy-800), var(--navy-950)); color:#fff;
+    border-radius:14px; padding:20px; max-width:420px; margin:0 auto 10px; text-align:center;
+  }
+  .unlock-card .lock-title{ font-family:var(--font-display); color:var(--amber); font-weight:700; margin-bottom:4px; }
+
+  .confetti{ position:fixed; top:-10px; width:8px; height:14px; z-index:999; border-radius:2px; animation:fall linear forwards; }
+  @keyframes fall{ to{ transform:translateY(100vh) rotate(400deg); opacity:0.3; } }
+
+  .timeup-overlay{
+    background:#FDECE7; border:1px solid #F5C5B4; border-radius:14px; padding:26px; text-align:center;
+  }
+  .timeup-overlay h2{ color:#A83A1E; font-family:var(--font-display); }
+
+  .locked-note{ text-align:center; font-size:0.75rem; color:var(--ink-soft); margin-top:6px; }
+
+  @media(max-width:520px){
+    .card{ padding:20px 16px; }
+    .stair-step{ width:52px; }
+    .btn{ width:100%; }
+    .btn-row{ flex-direction:column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="hero">
+    <div class="hero-top">
+      <div>
+        <p class="level-tag">🎯 Derivative Quest</p>
+        <h1>Level 3 — Trigonometric Derivatives</h1>
+        <p class="subtitle">Learn the rule → Practice → Pass the challenge → Unlock the next level</p>
+      </div>
+    </div>
+    <div class="staircase-rail" role="img" aria-label="Levels 1 and 2 complete, Level 3 of 5 unlocked and active">
+      <div class="stair-step done"><div class="dot">✓</div><div class="platform"></div><div class="lvl-label">LEVEL 1</div></div>
+      <div class="stair-step done"><div class="dot">✓</div><div class="platform"></div><div class="lvl-label">LEVEL 2</div></div>
+      <div class="stair-step active">
+        <div class="dot">3</div>
+        <div class="platform"></div>
+        <div class="lvl-label">LEVEL 3</div>
+      </div>
+      <div class="stair-step"><div class="dot">4</div><div class="platform"></div><div class="lvl-label">LEVEL 4</div></div>
+      <div class="stair-step"><div class="dot">5</div><div class="platform"></div><div class="lvl-label">LEVEL 5</div></div>
+    </div>
+  </header>
+
+  <div class="dashboard">
+    <aside class="rail rail-order">
+      <h3>Level 3 Progress</h3>
+      <ul class="checklist" id="checklist"></ul>
+
+      <div class="timer-box" id="timerBox">
+        <div class="lbl">Time Remaining</div>
+        <div class="clock" id="clockDisplay">08:00</div>
+      </div>
+
+      <div class="score-box">
+        <div>
+          <div class="label">Score</div>
+          <div class="value" id="scoreValue">0</div>
+        </div>
+        <div class="stair-mini" aria-hidden="true"><span></span><span></span><span></span></div>
+      </div>
+
+      <button class="restart-link" id="restartBtn" type="button">Restart Level 3</button>
+    </aside>
+
+    <main class="stage-panel" id="stagePanel">
+      <!-- dynamic stage content injected here -->
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     0. CONFIG & ANALYTICS
+  ========================================================= */
+  const STORAGE_KEY = "derivativeQuest_level3_progress_v2";
+  const LEVEL_SECONDS = 12 * 60; // bumped from 8 to 12 minutes: this level covers 4 examples + 4 challenges
+  const STAGES = ["learn","example1","example2","example3","example4","challenge1","challenge2","challenge3","challenge4","complete"];
+  const STAGE_LABELS = ["Learn","Example 1","Example 2","Example 3","Example 4","Challenge 1","Challenge 2","Challenge 3","Challenge 4","Mastery"];
+  const NEXT_AFTER_CHALLENGE = { 1: "challenge2", 2: "challenge3", 3: "challenge4", 4: "complete" };
+  const TOTAL_CHALLENGES = 4;
+
+  // ---- GA4 hook — do NOT hardcode a real Measurement ID here. ----
+  function trackEvent(eventName, eventParams = {}) {
+    if (typeof gtag === "function") {
+      gtag("event", eventName, Object.assign({ level: 3 }, eventParams));
+    }
+    // console.log("[analytics]", eventName, eventParams);
+  }
+
+  /* =========================================================
+     1. STATE
+  ========================================================= */
+  const defaultState = () => ({
+    stage: "learn",
+    startTime: null,
+    completionTime: null,
+    startedEventFired: false,
+    score: 0,
+    totalAttempts: 0,
+    hintsUsed: 0,
+    correctFirstTry: 0,
+    timeUp: false,
+    challenges: { 1: null, 2: null, 3: null, 4: null }
+  });
+
+  let state = loadState();
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      return Object.assign(defaultState(), parsed);
+    }catch(e){ return defaultState(); }
+  }
+
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch(e){ /* storage unavailable — game still works, just won't persist */ }
+  }
+
+  /* =========================================================
+     2. MATH ENGINE
+     Every derivative is represented as an object with:
+       - powerMap: { power -> coeff } for x^n terms (including -1, i.e. 1/x from ln x)
+       - expCoeff: coefficient on e^x
+       - sinCoeff, cosCoeff: coefficients on sin x, cos x
+       - sec2Coeff: coefficient on sec^2 x            (from tan x)
+       - csc2Coeff: coefficient on csc^2 x             (from cot x, sign folded in)
+       - secTanCoeff: coefficient on sec x tan x       (from sec x)
+       - cscCotCoeff: coefficient on csc x cot x       (from csc x, sign folded in)
+       - arcsinFormCoeff: coefficient on 1/sqrt(1-x^2) (from sin^-1 x and cos^-1 x, signs folded in)
+       - arctanFormCoeff: coefficient on 1/(1+x^2)     (from tan^-1 x and cot^-1 x, signs folded in)
+       - arcsecFormCoeff: coefficient on 1/(x*sqrt(x^2-1)) (from sec^-1 x and csc^-1 x, signs folded in)
+     No eval() is used anywhere on student input.
+  ========================================================= */
+
+  function blankResult(){
+    return { powerMap:{}, expCoeff:0, sinCoeff:0, cosCoeff:0, sec2Coeff:0, csc2Coeff:0,
+             secTanCoeff:0, cscCotCoeff:0, arcsinFormCoeff:0, arctanFormCoeff:0, arcsecFormCoeff:0 };
+  }
+
+  function mapsEqual(a, b){
+    const keys = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
+    for(const k of keys){
+      const av = (a && a[k]) || 0;
+      const bv = (b && b[k]) || 0;
+      if(Math.abs(av - bv) > 1e-9) return false;
+    }
+    return true;
+  }
+
+  function isZeroResult(r){
+    const scalarKeys = ["expCoeff","sinCoeff","cosCoeff","sec2Coeff","csc2Coeff","secTanCoeff","cscCotCoeff","arcsinFormCoeff","arctanFormCoeff","arcsecFormCoeff"];
+    if(Object.keys(r.powerMap).length > 0) return false;
+    return scalarKeys.every(k => Math.abs(r[k] || 0) < 1e-9);
+  }
+
+  // Parses student input like "4sec^2x-3secxtanx" or "5/sqrt(1-x^2)" or "4/(1+x^2)+6/(x*sqrt(x^2-1))"
+  function parseMixedExpression(raw){
+    if(typeof raw !== "string") return null;
+    let expr = raw.trim().toLowerCase();
+    if(expr === "") return null;
+    expr = expr.replace(/\s+/g, "");
+    expr = expr.replace(/\*\*/g, "^");
+    expr = expr.replace(/\*/g, "");
+
+    // Compound trig-derivative forms — must be substituted before the generic +/- split,
+    // since some of them (e.g. 1-x^2) contain an internal minus sign of their own.
+    expr = expr.replace(/sec\^2\(?x\)?/g, "SEC2").replace(/sec\(x\)\^2/g, "SEC2");
+    expr = expr.replace(/csc\^2\(?x\)?/g, "CSC2").replace(/csc\(x\)\^2/g, "CSC2");
+    expr = expr.replace(/sec\(?x\)?tan\(?x\)?/g, "SECTAN").replace(/tan\(?x\)?sec\(?x\)?/g, "SECTAN");
+    expr = expr.replace(/csc\(?x\)?cot\(?x\)?/g, "CSCCOT").replace(/cot\(?x\)?csc\(?x\)?/g, "CSCCOT");
+    expr = expr.replace(/(\d*\.?\d*)\/sqrt\(1-x\^2\)/g, (m, p1) => (p1 === "" ? "1" : p1) + "ARCSINFORM");
+    expr = expr.replace(/(\d*\.?\d*)\/\(1\+x\^2\)/g, (m, p1) => (p1 === "" ? "1" : p1) + "ARCTANFORM");
+    expr = expr.replace(/(\d*\.?\d*)\/\(?xsqrt\(x\^2-1\)\)?/g, (m, p1) => (p1 === "" ? "1" : p1) + "ARCSECFORM");
+
+    expr = expr.replace(/sin\(x\)/g, "SINX").replace(/sinx/g, "SINX");
+    expr = expr.replace(/cos\(x\)/g, "COSX").replace(/cosx/g, "COSX");
+    expr = expr.replace(/ln\(x\)/g, "LNX").replace(/lnx/g, "LNX");
+    expr = expr.replace(/\^-/g, "^\u00A7"); // mark negative-exponent minus so it isn't split as a term separator
+    if(expr[0] !== "+" && expr[0] !== "-") expr = "+" + expr;
+
+    const termPattern = /[+-][^+-]+/g;
+    const rawTerms = expr.match(termPattern);
+    if(!rawTerms) return null;
+
+    const result = blankResult();
+
+    for(const t of rawTerms){
+      const sign = t[0] === "-" ? -1 : 1;
+      const body = t.slice(1);
+      if(body === "") return null;
+
+      let m;
+      if(body.indexOf("SEC2") !== -1){
+        m = body.match(/^(\d*\.?\d*)SEC2$/); if(!m) return null;
+        result.sec2Coeff += sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("CSC2") !== -1){
+        m = body.match(/^(\d*\.?\d*)CSC2$/); if(!m) return null;
+        result.csc2Coeff += sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("SECTAN") !== -1){
+        m = body.match(/^(\d*\.?\d*)SECTAN$/); if(!m) return null;
+        result.secTanCoeff += sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("CSCCOT") !== -1){
+        m = body.match(/^(\d*\.?\d*)CSCCOT$/); if(!m) return null;
+        result.cscCotCoeff += sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("ARCSINFORM") !== -1){
+        m = body.match(/^(\d*\.?\d*)ARCSINFORM$/); if(!m) return null;
+        result.arcsinFormCoeff += sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("ARCTANFORM") !== -1){
+        m = body.match(/^(\d*\.?\d*)ARCTANFORM$/); if(!m) return null;
+        result.arctanFormCoeff += sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("ARCSECFORM") !== -1){
+        m = body.match(/^(\d*\.?\d*)ARCSECFORM$/); if(!m) return null;
+        result.arcsecFormCoeff += sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("e^x") !== -1){
+        m = body.match(/^(\d*\.?\d*)e\^x$/); if(!m) return null;
+        result.expCoeff += sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("SINX") !== -1){
+        m = body.match(/^(\d*\.?\d*)SINX$/); if(!m) return null;
+        result.sinCoeff += sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("COSX") !== -1){
+        m = body.match(/^(\d*\.?\d*)COSX$/); if(!m) return null;
+        result.cosCoeff += sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("LNX") !== -1){
+        m = body.match(/^(\d*\.?\d*)LNX$/); if(!m) return null;
+        result.powerMap[-1] = (result.powerMap[-1] || 0) + sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("/x") !== -1){
+        m = body.match(/^(\d*\.?\d*)\/x$/); if(!m) return null;
+        result.powerMap[-1] = (result.powerMap[-1] || 0) + sign * (m[1] === "" ? 1 : parseFloat(m[1])); continue;
+      }
+      if(body.indexOf("x") !== -1){
+        const parts = body.split("x");
+        if(parts.length !== 2) return null;
+        const coeffPart = parts[0];
+        const powerPart = parts[1];
+        let coeff = coeffPart === "" ? 1 : parseFloat(coeffPart);
+        let power;
+        if(powerPart === ""){
+          power = 1;
+        } else if(powerPart[0] === "^"){
+          const ps = powerPart.slice(1);
+          power = ps[0] === "\u00A7" ? -parseInt(ps.slice(1), 10) : parseInt(ps, 10);
+        } else {
+          return null;
+        }
+        if(isNaN(coeff) || isNaN(power)) return null;
+        coeff = sign * coeff;
+        result.powerMap[power] = (result.powerMap[power] || 0) + coeff;
+        continue;
+      }
+      const coeff = parseFloat(body);
+      if(isNaN(coeff)) return null;
+      result.powerMap[0] = (result.powerMap[0] || 0) + sign * coeff;
+    }
+
+    Object.keys(result.powerMap).forEach(k => { if(Math.abs(result.powerMap[k]) < 1e-9) delete result.powerMap[k]; });
+    return result;
+  }
+
+  function checkMixedAnswer(studentInput, correctResult){
+    const parsed = parseMixedExpression(studentInput);
+    if(parsed === null) return { valid: false, correct: false };
+    const scalarKeys = ["expCoeff","sinCoeff","cosCoeff","sec2Coeff","csc2Coeff","secTanCoeff","cscCotCoeff","arcsinFormCoeff","arctanFormCoeff","arcsecFormCoeff"];
+    let ok = mapsEqual(parsed.powerMap, correctResult.powerMap);
+    for(const k of scalarKeys){
+      if(Math.abs((parsed[k] || 0) - (correctResult[k] || 0)) > 1e-9) ok = false;
+    }
+    return { valid: true, correct: ok };
+  }
+
+  // Term descriptors (SOURCE functions, used only to build questions — never parsed from student text):
+  // {kind:'power'|'exp'|'log'|'sin'|'cos'|'tan'|'cot'|'sec'|'csc'|
+  //        'arcsin'|'arccos'|'arctan'|'arccot'|'arcsec'|'arccsc'|'const', coeff, power? }
+  const LATEX_BUILDERS = {
+    power: (abs, term) => term.power === 0 ? `${abs}` : (term.power === 1 ? `${abs}x` : `${abs}x^{${term.power}}`),
+    exp: (abs) => abs === 1 ? "e^x" : `${abs}e^x`,
+    log: (abs) => abs === 1 ? "\\ln x" : `${abs}\\ln x`,
+    sin: (abs) => abs === 1 ? "\\sin x" : `${abs}\\sin x`,
+    cos: (abs) => abs === 1 ? "\\cos x" : `${abs}\\cos x`,
+    tan: (abs) => abs === 1 ? "\\tan x" : `${abs}\\tan x`,
+    cot: (abs) => abs === 1 ? "\\cot x" : `${abs}\\cot x`,
+    sec: (abs) => abs === 1 ? "\\sec x" : `${abs}\\sec x`,
+    csc: (abs) => abs === 1 ? "\\csc x" : `${abs}\\csc x`,
+    arcsin: (abs) => abs === 1 ? "\\sin^{-1}x" : `${abs}\\sin^{-1}x`,
+    arccos: (abs) => abs === 1 ? "\\cos^{-1}x" : `${abs}\\cos^{-1}x`,
+    arctan: (abs) => abs === 1 ? "\\tan^{-1}x" : `${abs}\\tan^{-1}x`,
+    arccot: (abs) => abs === 1 ? "\\cot^{-1}x" : `${abs}\\cot^{-1}x`,
+    arcsec: (abs) => abs === 1 ? "\\sec^{-1}x" : `${abs}\\sec^{-1}x`,
+    arccsc: (abs) => abs === 1 ? "\\csc^{-1}x" : `${abs}\\csc^{-1}x`,
+    const: (abs) => `${abs}`
+  };
+
+  function formatTermLatex(term, isFirst){
+    const sign = term.coeff < 0 ? "-" : (isFirst ? "" : "+");
+    const abs = Math.abs(term.coeff);
+    return sign + LATEX_BUILDERS[term.kind](abs, term);
+  }
+
+  function termsToLatex(terms){
+    return terms.map((t, i) => formatTermLatex(t, i === 0)).join("");
+  }
+
+  function termsToDerivative(terms){
+    const r = blankResult();
+    terms.forEach(t => {
+      if(t.kind === "power"){
+        if(t.power === 0) return;
+        const np = t.power - 1;
+        const nc = t.coeff * t.power;
+        if(Math.abs(nc) > 1e-9) r.powerMap[np] = (r.powerMap[np] || 0) + nc;
+      } else if(t.kind === "exp") r.expCoeff += t.coeff;
+      else if(t.kind === "log") r.powerMap[-1] = (r.powerMap[-1] || 0) + t.coeff;
+      else if(t.kind === "sin") r.cosCoeff += t.coeff;               // d/dx(c sin x) = c cos x
+      else if(t.kind === "cos") r.sinCoeff += -t.coeff;              // d/dx(c cos x) = -c sin x
+      else if(t.kind === "tan") r.sec2Coeff += t.coeff;              // d/dx(c tan x) = c sec^2 x
+      else if(t.kind === "cot") r.csc2Coeff += -t.coeff;             // d/dx(c cot x) = -c csc^2 x
+      else if(t.kind === "sec") r.secTanCoeff += t.coeff;            // d/dx(c sec x) = c sec x tan x
+      else if(t.kind === "csc") r.cscCotCoeff += -t.coeff;           // d/dx(c csc x) = -c csc x cot x
+      else if(t.kind === "arcsin") r.arcsinFormCoeff += t.coeff;     // d/dx(c sin^-1 x) = c/sqrt(1-x^2)
+      else if(t.kind === "arccos") r.arcsinFormCoeff += -t.coeff;    // d/dx(c cos^-1 x) = -c/sqrt(1-x^2)
+      else if(t.kind === "arctan") r.arctanFormCoeff += t.coeff;     // d/dx(c tan^-1 x) = c/(1+x^2)
+      else if(t.kind === "arccot") r.arctanFormCoeff += -t.coeff;    // d/dx(c cot^-1 x) = -c/(1+x^2)
+      else if(t.kind === "arcsec") r.arcsecFormCoeff += t.coeff;     // d/dx(c sec^-1 x) = c/(x*sqrt(x^2-1))
+      else if(t.kind === "arccsc") r.arcsecFormCoeff += -t.coeff;    // d/dx(c csc^-1 x) = -c/(x*sqrt(x^2-1))
+    });
+    return r;
+  }
+
+  function derivativeToLatex(result){
+    const parts = [];
+    const powers = Object.keys(result.powerMap).map(Number).filter(p => p > 0).sort((a,b) => b - a);
+    powers.forEach(p => parts.push({ kind: "power", power: p, coeff: result.powerMap[p] }));
+    if(Object.prototype.hasOwnProperty.call(result.powerMap, 0)) parts.push({ kind: "const", coeff: result.powerMap[0] });
+    if(Math.abs(result.expCoeff) > 1e-9) parts.push({ kind: "exp", coeff: result.expCoeff });
+    if(Math.abs(result.sinCoeff) > 1e-9) parts.push({ kind: "sin", coeff: result.sinCoeff });
+    if(Math.abs(result.cosCoeff) > 1e-9) parts.push({ kind: "cos", coeff: result.cosCoeff });
+    if(Math.abs(result.sec2Coeff) > 1e-9) parts.push({ kind: "sec2", coeff: result.sec2Coeff });
+    if(Math.abs(result.csc2Coeff) > 1e-9) parts.push({ kind: "csc2", coeff: result.csc2Coeff });
+    if(Math.abs(result.secTanCoeff) > 1e-9) parts.push({ kind: "sectan", coeff: result.secTanCoeff });
+    if(Math.abs(result.cscCotCoeff) > 1e-9) parts.push({ kind: "csccot", coeff: result.cscCotCoeff });
+    if(Math.abs(result.arcsinFormCoeff) > 1e-9) parts.push({ kind: "arcsinform", coeff: result.arcsinFormCoeff });
+    if(Math.abs(result.arctanFormCoeff) > 1e-9) parts.push({ kind: "arctanform", coeff: result.arctanFormCoeff });
+    if(Math.abs(result.arcsecFormCoeff) > 1e-9) parts.push({ kind: "arcsecform", coeff: result.arcsecFormCoeff });
+    if(Object.prototype.hasOwnProperty.call(result.powerMap, -1)) parts.push({ kind: "invx", coeff: result.powerMap[-1] });
+    if(parts.length === 0) return "0";
+
+    const specialLatex = {
+      sec2: (abs) => abs === 1 ? "\\sec^2 x" : `${abs}\\sec^2 x`,
+      csc2: (abs) => abs === 1 ? "\\csc^2 x" : `${abs}\\csc^2 x`,
+      sectan: (abs) => abs === 1 ? "\\sec x\\tan x" : `${abs}\\sec x\\tan x`,
+      csccot: (abs) => abs === 1 ? "\\csc x\\cot x" : `${abs}\\csc x\\cot x`,
+      arcsinform: (abs) => `\\dfrac{${abs}}{\\sqrt{1-x^2}}`,
+      arctanform: (abs) => `\\dfrac{${abs}}{1+x^2}`,
+      arcsecform: (abs) => `\\dfrac{${abs}}{x\\sqrt{x^2-1}}`,
+      invx: (abs) => abs === 1 ? "\\dfrac{1}{x}" : `\\dfrac{${abs}}{x}`
+    };
+
+    return parts.map((t, i) => {
+      const isFirst = i === 0;
+      const sign = t.coeff < 0 ? "-" : (isFirst ? "" : "+");
+      const abs = Math.abs(t.coeff);
+      if(specialLatex[t.kind]) return sign + specialLatex[t.kind](abs);
+      return formatTermLatex(t, isFirst);
+    }).join("");
+  }
+
+  function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+  function pick(arr){ return arr[randInt(0, arr.length - 1)]; }
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i = a.length - 1; i > 0; i--){
+      const j = randInt(0, i);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  const DIRECT_KINDS = ["sin","cos","tan","cot","sec","csc"];
+  const INVERSE_KINDS = ["arcsin","arccos","arctan","arccot","arcsec","arccsc"];
+
+  function generateSingleFromPool(pool){
+    const kind = pick(pool);
+    const coeff = randInt(2, 9);
+    const term = { kind, coeff };
+    return {
+      terms: [term],
+      questionLatex: `f(x)=${termsToLatex([term])}`,
+      correctResult: termsToDerivative([term])
+    };
+  }
+
+  function buildMixedFromPool(pool){
+    const kinds = shuffle(pool).slice(0, pick([2,3]));
+    const terms = kinds.map((kind, idx) => {
+      let coeff = randInt(2, 9);
+      const negative = idx > 0 && Math.random() < 0.55;
+      if(negative) coeff = -coeff;
+      return { kind, coeff };
+    });
+    return {
+      terms,
+      questionLatex: `f(x)=${termsToLatex(terms)}`,
+      correctResult: termsToDerivative(terms)
+    };
+  }
+
+  // Guards against a degenerate all-zero derivative (e.g. equal arcsec + arccsc coefficients cancel out)
+  function generateMixedFromPool(pool){
+    let q, tries = 0;
+    do{ q = buildMixedFromPool(pool); tries++; }
+    while(isZeroResult(q.correctResult) && tries < 20);
+    return q;
+  }
+
+  /* =========================================================
+     3. TIMER
+  ========================================================= */
+  let timerInterval = null;
+
+  function elapsedSeconds(){
+    if(!state.startTime) return 0;
+    return Math.floor((Date.now() - state.startTime) / 1000);
+  }
+
+  function startTimer(){
+    stopTimer();
+    updateTimerDisplay();
+    timerInterval = setInterval(() => { updateTimerDisplay(); }, 1000);
+  }
+
+  function stopTimer(){
+    if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  function updateTimerDisplay(){
+    const clock = document.getElementById("clockDisplay");
+    const box = document.getElementById("timerBox");
+    if(!clock || !box) return;
+
+    if(state.stage === "complete"){
+      clock.textContent = "DONE";
+      box.classList.remove("warning","urgent");
+      stopTimer();
+      return;
+    }
+
+    const remaining = Math.max(LEVEL_SECONDS - elapsedSeconds(), 0);
+    const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
+    const ss = String(remaining % 60).padStart(2, "0");
+    clock.textContent = `${mm}:${ss}`;
+
+    box.classList.remove("warning","urgent");
+    if(remaining <= 90) box.classList.add("urgent");
+    else if(remaining <= 240) box.classList.add("warning");
+
+    if(remaining <= 0 && !state.timeUp && state.stage !== "complete"){
+      state.timeUp = true;
+      trackEvent("derivative_level3_timeout", { stage: state.stage, score: state.score });
+      saveState();
+      stopTimer();
+      render();
+    }
+  }
+
+  function formatDuration(totalSeconds){
+    const s = Math.max(totalSeconds, 0);
+    const mm = String(Math.floor(s / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    return `${mm}:${ss}`;
+  }
+
+  /* =========================================================
+     4. RENDER — SIDE RAIL
+  ========================================================= */
+  function renderRail(){
+    const list = document.getElementById("checklist");
+    const currentIndex = STAGES.indexOf(state.stage);
+    list.innerHTML = STAGE_LABELS.map((label, i) => {
+      const done = i < currentIndex || (state.stage === "complete");
+      const current = i === currentIndex && state.stage !== "complete";
+      const cls = done ? "done" : (current ? "current" : "");
+      const mark = done ? "✓" : (current ? "●" : "");
+      return `<li class="${cls}"><span class="mark">${mark}</span>${label}</li>`;
+    }).join("");
+    document.getElementById("scoreValue").textContent = state.score;
+  }
+
+  function typeset(){
+    if(window.MathJax && window.MathJax.typesetPromise){
+      const panel = document.getElementById("stagePanel");
+      window.MathJax.typesetPromise([panel]).catch(() => {});
+    }
+  }
+
+  /* =========================================================
+     5. STAGE: LEARN — full reference table of all 12 rules
+  ========================================================= */
+  function renderLearn(){
+    const panel = document.getElementById("stagePanel");
+    panel.innerHTML = `
+      <div class="card">
+        <p class="eyebrow">🎓 Mission</p>
+        <h2>Learn All Six Trigonometric Ratios — Direct &amp; Inverse</h2>
+        <p>This level covers every one of the six trigonometric ratios and their six inverse counterparts. By the end, you should be able to differentiate any constant multiple of these, alone or mixed together.</p>
+
+        <h2 style="margin-top:22px;">The Six Direct Ratios</h2>
+        <table class="rules-table">
+          <tr><td>\\( \\dfrac{d}{dx}(\\sin x) \\)</td><td>=</td><td>\\( \\cos x \\)</td></tr>
+          <tr><td>\\( \\dfrac{d}{dx}(\\cos x) \\)</td><td>=</td><td>\\( -\\sin x \\)</td></tr>
+          <tr><td>\\( \\dfrac{d}{dx}(\\tan x) \\)</td><td>=</td><td>\\( \\sec^2 x \\)</td></tr>
+          <tr><td>\\( \\dfrac{d}{dx}(\\cot x) \\)</td><td>=</td><td>\\( -\\csc^2 x \\)</td></tr>
+          <tr><td>\\( \\dfrac{d}{dx}(\\sec x) \\)</td><td>=</td><td>\\( \\sec x\\tan x \\)</td></tr>
+          <tr><td>\\( \\dfrac{d}{dx}(\\csc x) \\)</td><td>=</td><td>\\( -\\csc x\\cot x \\)</td></tr>
+        </table>
+        <div class="callout coral">⚠️ Watch the signs! Cofunctions (cos, cot, csc) always pick up a minus sign when differentiated — sin, tan, and sec never do.</div>
+
+        <h2 style="margin-top:26px;">The Six Inverse Ratios</h2>
+        <table class="rules-table">
+          <tr><td>\\( \\dfrac{d}{dx}(\\sin^{-1} x) \\)</td><td>=</td><td>\\( \\dfrac{1}{\\sqrt{1-x^2}} \\)</td></tr>
+          <tr><td>\\( \\dfrac{d}{dx}(\\cos^{-1} x) \\)</td><td>=</td><td>\\( -\\dfrac{1}{\\sqrt{1-x^2}} \\)</td></tr>
+          <tr><td>\\( \\dfrac{d}{dx}(\\tan^{-1} x) \\)</td><td>=</td><td>\\( \\dfrac{1}{1+x^2} \\)</td></tr>
+          <tr><td>\\( \\dfrac{d}{dx}(\\cot^{-1} x) \\)</td><td>=</td><td>\\( -\\dfrac{1}{1+x^2} \\)</td></tr>
+          <tr><td>\\( \\dfrac{d}{dx}(\\sec^{-1} x) \\)</td><td>=</td><td>\\( \\dfrac{1}{x\\sqrt{x^2-1}} \\)</td></tr>
+          <tr><td>\\( \\dfrac{d}{dx}(\\csc^{-1} x) \\)</td><td>=</td><td>\\( -\\dfrac{1}{x\\sqrt{x^2-1}} \\)</td></tr>
+        </table>
+        <p class="muted">Same pattern: \\(\\sin^{-1}\\), \\(\\tan^{-1}\\), and \\(\\sec^{-1}\\) are positive; their co-versions \\(\\cos^{-1}\\), \\(\\cot^{-1}\\), \\(\\csc^{-1}\\) are the same expression with a minus sign.</p>
+
+        <h2 style="margin-top:26px;">Constant Multiple &amp; Sum Rules — unchanged</h2>
+        <p>Every rule from Levels 1–3 still applies: pull constants out, and differentiate a sum term by term.</p>
+        <div class="callout amber">\\[ \\dfrac{d}{dx}\\left(4\\tan x-3\\sec x\\right)=4\\sec^2 x-3\\sec x\\tan x \\]</div>
+
+        <div class="btn-row">
+          <button class="btn amber" id="continueLearnBtn">CONTINUE →</button>
+        </div>
+      </div>
+    `;
+    typeset();
+    document.getElementById("continueLearnBtn").addEventListener("click", () => {
+      trackEvent("derivative_learning_completed", {});
+      goToStage("example1");
+    });
+  }
+
+  /* =========================================================
+     6-9. STAGES: EXAMPLE 1-4 (data-driven, one renderer)
+  ========================================================= */
+  const EXAMPLES = [
+    {
+      title: "\\( f(x)=4\\tan x-3\\sec x \\)",
+      note: "Covers tan x and sec x.",
+      steps: [
+        "\\[ \\dfrac{d}{dx}(4\\tan x)=4\\sec^2 x \\]",
+        "\\[ \\dfrac{d}{dx}(-3\\sec x)=-3\\sec x\\tan x \\]"
+      ],
+      result: "\\boxed{f'(x)=4\\sec^2 x-3\\sec x\\tan x}"
+    },
+    {
+      title: "\\( f(x)=5\\cot x+2\\csc x \\)",
+      note: "Covers cot x and csc x — notice both pick up a minus sign.",
+      steps: [
+        "\\[ \\dfrac{d}{dx}(5\\cot x)=-5\\csc^2 x \\]",
+        "\\[ \\dfrac{d}{dx}(2\\csc x)=-2\\csc x\\cot x \\]"
+      ],
+      result: "\\boxed{f'(x)=-5\\csc^2 x-2\\csc x\\cot x}"
+    },
+    {
+      title: "\\( f(x)=3\\sin^{-1}x-2\\cos^{-1}x \\)",
+      note: "Covers \\(\\sin^{-1}x\\) and \\(\\cos^{-1}x\\) — same denominator, opposite signs.",
+      steps: [
+        "\\[ \\dfrac{d}{dx}(3\\sin^{-1}x)=\\dfrac{3}{\\sqrt{1-x^2}} \\]",
+        "\\[ \\dfrac{d}{dx}(-2\\cos^{-1}x)=-2\\left(-\\dfrac{1}{\\sqrt{1-x^2}}\\right)=\\dfrac{2}{\\sqrt{1-x^2}} \\]"
+      ],
+      result: "\\boxed{f'(x)=\\dfrac{5}{\\sqrt{1-x^2}}}"
+    },
+    {
+      title: "\\( f(x)=4\\tan^{-1}x+6\\sec^{-1}x \\)",
+      note: "Covers \\(\\tan^{-1}x\\) and \\(\\sec^{-1}x\\).",
+      steps: [
+        "\\[ \\dfrac{d}{dx}(4\\tan^{-1}x)=\\dfrac{4}{1+x^2} \\]",
+        "\\[ \\dfrac{d}{dx}(6\\sec^{-1}x)=\\dfrac{6}{x\\sqrt{x^2-1}} \\]"
+      ],
+      result: "\\boxed{f'(x)=\\dfrac{4}{1+x^2}+\\dfrac{6}{x\\sqrt{x^2-1}}}"
+    }
+  ];
+
+  function renderExample(n){
+    trackEvent("derivative_example_viewed", { example_number: n });
+    const data = EXAMPLES[n - 1];
+    const isLast = n === EXAMPLES.length;
+    const panel = document.getElementById("stagePanel");
+
+    const stepsHtml = data.steps.map((s, i) => `
+      <div class="step-reveal ${i === 0 ? "shown" : ""}" id="exStep${i + 1}">
+        <div class="step-num">Term ${i + 1}</div>
+        <p>${s}</p>
+      </div>
+    `).join("");
+
+    panel.innerHTML = `
+      <div class="card">
+        <p class="eyebrow">Worked Example ${n}</p>
+        <h2>${data.title}</h2>
+        <p class="muted">${data.note}</p>
+        ${stepsHtml}
+        <div class="step-reveal" id="exStepResult">
+          <div class="step-num">Result</div>
+          <div class="rule-box small">\\[ ${data.result} \\]</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="exNextStepBtn">SHOW NEXT STEP →</button>
+          <button class="btn amber" id="exContinueBtn" style="display:none;">${isLast ? "START CHALLENGE 🎮" : "NEXT EXAMPLE →"}</button>
+        </div>
+      </div>
+    `;
+    typeset();
+
+    const totalReveals = data.steps.length; // steps beyond the first, plus the result
+    let revealed = 1;
+    const nextBtn = document.getElementById("exNextStepBtn");
+    const contBtn = document.getElementById("exContinueBtn");
+
+    nextBtn.addEventListener("click", () => {
+      revealed++;
+      if(revealed <= totalReveals){
+        document.getElementById(`exStep${revealed}`).classList.add("shown");
+        typeset();
+      }
+      if(revealed === totalReveals){
+        document.getElementById("exStepResult").classList.add("shown");
+        typeset();
+        nextBtn.style.display = "none";
+        contBtn.style.display = "inline-block";
+      }
+    });
+
+    contBtn.addEventListener("click", () => {
+      goToStage(isLast ? "challenge1" : `example${n + 1}`);
+    });
+  }
+
+  /* =========================================================
+     10. CHALLENGE ENGINE (shared by Challenges 1-4)
+  ========================================================= */
+  function ensureChallenge(num){
+    if(state.challenges[num]) return state.challenges[num];
+    let main;
+    if(num === 1){
+      const term = { kind: "tan", coeff: 5 };
+      main = { terms: [term], questionLatex: "f(x)=5\\tan x", correctResult: termsToDerivative([term]) };
+    } else if(num === 2){
+      const term = { kind: "arcsin", coeff: 6 };
+      main = { terms: [term], questionLatex: "f(x)=6\\sin^{-1}x", correctResult: termsToDerivative([term]) };
+    } else if(num === 3){
+      main = generateMixedFromPool(DIRECT_KINDS);
+    } else {
+      main = generateMixedFromPool(INVERSE_KINDS);
+    }
+    const challenge = { main, attempts: 0, hintsShown: 0, practice: null, practiceAttempts: 0, resolved: false, earnedScore: 0 };
+    state.challenges[num] = challenge;
+    saveState();
+    return challenge;
+  }
+
+  function makePractice(num){
+    if(num === 1) return generateSingleFromPool(DIRECT_KINDS);
+    if(num === 2) return generateSingleFromPool(INVERSE_KINDS);
+    if(num === 3) return generateMixedFromPool(DIRECT_KINDS);
+    return generateMixedFromPool(INVERSE_KINDS);
+  }
+
+  function scoreForAttempt(attemptNumber){
+    if(attemptNumber === 1) return 100;
+    if(attemptNumber === 2) return 80;
+    return 60;
+  }
+
+  function formatHintForChallenge(num){
+    if(num <= 2){
+      return "Differentiate the single term using the rule from the reference table above.";
+    }
+    return "Differentiate each term separately — check which of the six ratios (or inverse ratios) it is, then apply its rule from the table.";
+  }
+
+  function renderChallenge(num){
+    trackEvent("derivative_question_started", { question_number: num });
+    const ch = ensureChallenge(num);
+    const panel = document.getElementById("stagePanel");
+
+    if(ch.resolved){
+      renderChallengeResolved(num, ch);
+      return;
+    }
+
+    panel.innerHTML = `
+      <div class="card">
+        <div class="challenge-head">
+          <span class="challenge-badge">CHALLENGE ${num} / ${TOTAL_CHALLENGES}</span>
+          <h2 style="margin:0;">⚡ Differentiate</h2>
+        </div>
+        <div class="rule-box">\\[ ${ch.main.questionLatex} \\]</div>
+
+        <div class="answer-row">
+          <label class="visually-hidden" for="answerInput${num}">Enter your derivative</label>
+          <input type="text" id="answerInput${num}" placeholder="Enter your derivative" autocomplete="off" inputmode="text">
+          <button class="btn amber" id="checkBtn${num}">CHECK ANSWER</button>
+        </div>
+        <p class="format-hint">Accepted formats: <code>sec^2x</code>, <code>secxtanx</code>, <code>1/sqrt(1-x^2)</code>, <code>1/(1+x^2)</code>, <code>1/(x*sqrt(x^2-1))</code> — plus everything from earlier levels.</p>
+
+        <div id="feedbackArea${num}"></div>
+        <div id="hintArea${num}"></div>
+        <div id="solutionArea${num}"></div>
+      </div>
+    `;
+    typeset();
+
+    const input = document.getElementById(`answerInput${num}`);
+    const checkBtn = document.getElementById(`checkBtn${num}`);
+    const submit = () => handleMainSubmit(num);
+    checkBtn.addEventListener("click", submit);
+    input.addEventListener("keydown", (e) => { if(e.key === "Enter") submit(); });
+    input.focus();
+  }
+
+  function handleMainSubmit(num){
+    const ch = state.challenges[num];
+    const input = document.getElementById(`answerInput${num}`);
+    const value = input.value;
+    if(!value || !value.trim()) return;
+
+    ch.attempts++;
+    state.totalAttempts++;
+    const result = checkMixedAnswer(value, ch.main.correctResult);
+
+    const feedbackArea = document.getElementById(`feedbackArea${num}`);
+    const hintArea = document.getElementById(`hintArea${num}`);
+    const solutionArea = document.getElementById(`solutionArea${num}`);
+
+    if(result.valid && result.correct){
+      const pts = scoreForAttempt(ch.attempts);
+      ch.earnedScore = pts;
+      ch.resolved = true;
+      if(ch.attempts === 1) state.correctFirstTry++;
+      state.score += pts;
+      trackEvent("derivative_question_correct", { question_number: num, attempt_number: ch.attempts, hints_used: ch.hintsShown, score: pts });
+      saveState();
+      const nextLabel = num < TOTAL_CHALLENGES ? "NEXT CHALLENGE →" : "SEE YOUR RESULTS →";
+      feedbackArea.innerHTML = `
+        <div class="feedback correct">
+          🎉 CORRECT! Excellent! You applied the rule correctly.
+          <div class="pts">+${pts} points</div>
+          <div class="btn-row"><button class="btn teal" id="advanceBtn${num}">${nextLabel}</button></div>
+        </div>`;
+      hintArea.innerHTML = "";
+      document.getElementById(`advanceBtn${num}`).addEventListener("click", () => goToStage(NEXT_AFTER_CHALLENGE[num]));
+      renderRail();
+      return;
+    }
+
+    trackEvent("derivative_question_wrong", { question_number: num, attempt_number: ch.attempts, hints_used: ch.hintsShown });
+    input.value = "";
+    input.focus();
+
+    if(!result.valid){
+      feedbackArea.innerHTML = `<div class="feedback wrong">❌ I couldn't read that expression. Check the accepted formats above and try again.</div>`;
+    } else {
+      feedbackArea.innerHTML = `<div class="feedback wrong">❌ Not quite. Try again!</div>`;
+    }
+
+    if(ch.attempts === 1){
+      ch.hintsShown = 1;
+      state.hintsUsed++;
+      trackEvent("derivative_hint_used", { question_number: num, hint_number: 1 });
+      hintArea.innerHTML = `<div class="hint-box">💡 <strong>Hint 1:</strong> ${formatHintForChallenge(num)}</div>`;
+      typeset();
+    } else if(ch.attempts === 2){
+      ch.hintsShown = 2;
+      state.hintsUsed++;
+      trackEvent("derivative_hint_used", { question_number: num, hint_number: 2 });
+      hintArea.innerHTML = `<div class="hint-box">💡 <strong>Hint 2:</strong> Watch your signs — cofunctions (cos, cot, csc, cos⁻¹, cot⁻¹, csc⁻¹) always introduce a minus sign when differentiated.</div>`;
+      typeset();
+    } else if(ch.attempts >= 3){
+      hintArea.innerHTML = "";
+      document.getElementById(`checkBtn${num}`).disabled = true;
+      input.disabled = true;
+      ch.practice = makePractice(num);
+      saveState();
+      renderPractice(num, solutionArea);
+      return;
+    }
+    saveState();
+  }
+
+  function renderPractice(num, solutionArea){
+    const ch = state.challenges[num];
+    solutionArea.innerHTML = `
+      <div class="solution-box">
+        <strong>Here's the worked solution:</strong>
+        <div style="margin-top:8px;">\\[ \\dfrac{d}{dx}\\left(${ch.main.questionLatex.split("=")[1]}\\right) = ${derivativeToLatex(ch.main.correctResult)} \\]</div>
+      </div>
+      <div class="practice-block">
+        <p class="eyebrow">💪 One more like it, to lock it in</p>
+        <div class="rule-box small">\\[ ${ch.practice.questionLatex} \\]</div>
+        <div class="answer-row">
+          <label class="visually-hidden" for="practiceInput${num}">Enter your derivative</label>
+          <input type="text" id="practiceInput${num}" placeholder="Enter your derivative" autocomplete="off">
+          <button class="btn amber" id="practiceCheckBtn${num}">CHECK ANSWER</button>
+        </div>
+        <div id="practiceFeedback${num}"></div>
+      </div>
+    `;
+    typeset();
+
+    const pInput = document.getElementById(`practiceInput${num}`);
+    const pBtn = document.getElementById(`practiceCheckBtn${num}`);
+    const submit = () => handlePracticeSubmit(num);
+    pBtn.addEventListener("click", submit);
+    pInput.addEventListener("keydown", (e) => { if(e.key === "Enter") submit(); });
+    pInput.focus();
+  }
+
+  function handlePracticeSubmit(num){
+    const ch = state.challenges[num];
+    const input = document.getElementById(`practiceInput${num}`);
+    const value = input.value;
+    if(!value || !value.trim()) return;
+
+    ch.practiceAttempts++;
+    state.totalAttempts++;
+    const result = checkMixedAnswer(value, ch.practice.correctResult);
+    const feedback = document.getElementById(`practiceFeedback${num}`);
+
+    if(result.valid && result.correct){
+      ch.earnedScore = 40;
+      ch.resolved = true;
+      state.score += 40;
+      trackEvent("derivative_question_correct", { question_number: num, attempt_number: ch.attempts + ch.practiceAttempts, hints_used: ch.hintsShown, score: 40 });
+      saveState();
+      const isLast = num === TOTAL_CHALLENGES;
+      feedback.innerHTML = `
+        <div class="feedback correct">
+          🎉 CORRECT! You've got it.
+          <div class="pts">+40 points</div>
+          <div class="btn-row"><button class="btn teal" id="practiceAdvance${num}">${isLast ? "SEE YOUR RESULTS →" : "NEXT CHALLENGE →"}</button></div>
+        </div>`;
+      document.getElementById(`practiceAdvance${num}`).addEventListener("click", () => goToStage(NEXT_AFTER_CHALLENGE[num]));
+      renderRail();
+    } else {
+      input.value = "";
+      input.focus();
+      const msg = result.valid ? "❌ Not quite. Compare it term-by-term with the rule above and try again." : "❌ I couldn't read that expression. Check the accepted formats and try again.";
+      feedback.innerHTML = `<div class="feedback wrong">${msg}</div>`;
+      saveState();
+    }
+  }
+
+  function renderChallengeResolved(num, ch){
+    const panel = document.getElementById("stagePanel");
+    const isLast = num === TOTAL_CHALLENGES;
+    panel.innerHTML = `
+      <div class="card">
+        <div class="challenge-head">
+          <span class="challenge-badge">CHALLENGE ${num} / ${TOTAL_CHALLENGES}</span>
+          <h2 style="margin:0;">✓ Already completed</h2>
+        </div>
+        <p>You earned <strong>${ch.earnedScore} points</strong> on this challenge.</p>
+        <div class="btn-row">
+          <button class="btn teal" id="moveOnBtn">${isLast ? "SEE YOUR RESULTS →" : "NEXT CHALLENGE →"}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("moveOnBtn").addEventListener("click", () => goToStage(NEXT_AFTER_CHALLENGE[num]));
+  }
+
+  /* =========================================================
+     11. STAGE: COMPLETE
+  ========================================================= */
+  function renderComplete(){
+    if(!state.completionTime){
+      state.completionTime = Date.now();
+      trackEvent("derivative_level3_completed", {
+        total_score: state.score,
+        hints_used: state.hintsUsed,
+        attempts: state.totalAttempts,
+        time_taken_seconds: Math.floor((state.completionTime - state.startTime) / 1000)
+      });
+      saveState();
+      launchConfetti();
+    }
+    stopTimer();
+
+    const totalTime = Math.floor((state.completionTime - state.startTime) / 1000);
+    const maxScore = TOTAL_CHALLENGES * 100;
+    const panel = document.getElementById("stagePanel");
+    panel.innerHTML = `
+      <div class="card complete-hero">
+        <div class="trophy">🏆</div>
+        <h2>LEVEL 3 COMPLETE!</h2>
+        <p class="muted">You have mastered all six trigonometric ratios and all six inverse ratios.</p>
+
+        <table class="stats-table">
+          <tr><td>Direct Ratios (sin, cos, tan, cot, sec, csc)</td><td class="check">✓</td></tr>
+          <tr><td>Inverse Ratios (sin⁻¹ … csc⁻¹)</td><td class="check">✓</td></tr>
+          <tr><td>Mixed Derivatives</td><td class="check">✓</td></tr>
+          <tr><td>Challenge Score</td><td>${state.score}/${maxScore}</td></tr>
+          <tr><td>Hints Used</td><td>${state.hintsUsed}</td></tr>
+          <tr><td>Attempts</td><td>${state.totalAttempts}</td></tr>
+          <tr><td>Time</td><td>${formatDuration(totalTime)}</td></tr>
+        </table>
+
+        <div class="unlock-card">
+          <div class="lock-title">🔓 LEVEL 4 UNLOCKED</div>
+          <p style="margin:4px 0 0; color:#C9D4E8;">Level 4 will introduce the Product and Quotient Rules.</p>
+        </div>
+
+        <div class="btn-row" style="justify-content:center; margin-top:20px;">
+          <button class="btn amber" id="level4Btn">CONTINUE TO LEVEL 4 →</button>
+        </div>
+        <p id="level4Note" class="locked-note" style="display:none;">Level 4 isn't built yet in this prototype — check back soon!</p>
+      </div>
+    `;
+    document.getElementById("level4Btn").addEventListener("click", () => {
+      document.getElementById("level4Note").style.display = "block";
+    });
+    updateTimerDisplay();
+  }
+
+  function launchConfetti(){
+    const colors = ["#E8A33D","#2A9D8F","#E4572E","#16213A"];
+    for(let i = 0; i < 26; i++){
+      const el = document.createElement("div");
+      el.className = "confetti";
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.background = colors[i % colors.length];
+      el.style.animationDuration = (2 + Math.random() * 1.5) + "s";
+      el.style.opacity = "0.9";
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+  }
+
+  /* =========================================================
+     12. TIME'S UP OVERLAY
+  ========================================================= */
+  function renderTimeUp(){
+    stopTimer();
+    const panel = document.getElementById("stagePanel");
+    panel.innerHTML = `
+      <div class="card timeup-overlay">
+        <h2>⏰ TIME'S UP</h2>
+        <p>You reached stage <strong>${STAGE_LABELS[STAGES.indexOf(state.stage)]}</strong> with a score of <strong>${state.score}</strong> points.</p>
+        <p class="muted">No problem — take another run at Level 3 whenever you're ready.</p>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn" id="timeUpRestartBtn">RESTART LEVEL 3</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("timeUpRestartBtn").addEventListener("click", resetLevel);
+  }
+
+  /* =========================================================
+     13. STAGE ROUTER
+  ========================================================= */
+  function goToStage(stage){
+    state.stage = stage;
+    saveState();
+    render();
+  }
+
+  function render(){
+    renderRail();
+
+    if(state.timeUp && state.stage !== "complete"){
+      renderTimeUp();
+      return;
+    }
+
+    if(state.stage === "learn"){ renderLearn(); return; }
+    if(state.stage.startsWith("example")){ renderExample(parseInt(state.stage.slice(7), 10)); return; }
+    if(state.stage.startsWith("challenge")){ renderChallenge(parseInt(state.stage.slice(9), 10)); return; }
+    if(state.stage === "complete"){ renderComplete(); return; }
+    renderLearn();
+  }
+
+  function resetLevel(){
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+    stopTimer();
+    state = defaultState();
+    init();
+  }
+
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    if(confirm("Restart Level 3? Your current progress and score will be cleared.")){
+      resetLevel();
+    }
+  });
+
+  /* =========================================================
+     14. INIT
+  ========================================================= */
+  function init(){
+    if(!state.startTime){
+      state.startTime = Date.now();
+    }
+    if(!state.startedEventFired){
+      state.startedEventFired = true;
+      trackEvent("derivative_level3_started", {});
+    }
+    saveState();
+    startTimer();
+    render();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
+  });
+})();
+
+</script>
+
+</body>
+</html>
