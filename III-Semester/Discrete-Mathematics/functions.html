@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Functions — Interactive Mathematics Lab</title>
+<style>
+  :root{
+    --ink-navy:#16233B;
+    --ink-navy-2:#1E3050;
+    --paper:#FAF9F5;
+    --paper-dim:#F1EFE7;
+    --line:#3F5872;
+    --line-soft:#C8CFDA;
+    --amber:#E1A94C;
+    --amber-dim:#F3DCA8;
+    --teal:#2F8F86;
+    --teal-dim:#CFE8E4;
+    --green:#2E7D5B;
+    --green-bg:#E4F1EA;
+    --red:#C24949;
+    --red-bg:#FBE6E6;
+    --grey:#8B93A0;
+    --text-main:#20293A;
+    --text-sub:#5B6576;
+    --serif: "Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono: "JetBrains Mono","SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper-dim);
+    color:var(--text-main);
+    font-family:var(--sans);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber-dim);}
+
+  /* ---------- header ---------- */
+  header.hero{
+    background:
+      linear-gradient(180deg, rgba(22,35,59,0.0), rgba(22,35,59,0.0)),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 34px),
+      var(--ink-navy);
+    color:var(--paper);
+    padding:52px 24px 40px;
+    text-align:center;
+    border-bottom:3px solid var(--amber);
+  }
+  header.hero .eyebrow{
+    font-family:var(--mono);
+    letter-spacing:.28em;
+    font-size:12px;
+    color:var(--amber);
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  header.hero h1{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:clamp(40px,7vw,68px);
+    margin:0;
+    letter-spacing:.04em;
+  }
+  header.hero p.sub{
+    font-family:var(--sans);
+    font-size:16px;
+    color:#C9D3E2;
+    max-width:620px;
+    margin:16px auto 0;
+  }
+
+  main{
+    max-width:1180px;
+    margin:0 auto;
+    padding:36px 20px 80px;
+    display:flex;
+    flex-direction:column;
+    gap:34px;
+  }
+
+  /* ---------- card / figure plate ---------- */
+  .plate{
+    position:relative;
+    background:var(--paper);
+    border:1px solid var(--line-soft);
+    border-radius:6px;
+    padding:30px clamp(18px,4vw,42px) 34px;
+  }
+  .plate::before,.plate::after,
+  .plate .tick-br::before,.plate .tick-br::after{
+    content:"";
+    position:absolute;
+    width:14px;height:14px;
+    border-color:var(--line);
+    border-style:solid;
+    opacity:.55;
+  }
+  .plate::before{ top:-1px;left:-1px; border-width:2px 0 0 2px; }
+  .plate::after{ top:-1px;right:-1px; border-width:2px 2px 0 0; }
+  .plate .corner-bl{ position:absolute; bottom:-1px;left:-1px;width:14px;height:14px;border:solid var(--line);border-width:0 0 2px 2px;opacity:.55; }
+  .plate .corner-br{ position:absolute; bottom:-1px;right:-1px;width:14px;height:14px;border:solid var(--line);border-width:0 2px 2px 0;opacity:.55; }
+
+  .fig-label{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.16em;
+    color:var(--amber);
+    text-transform:uppercase;
+    display:block;
+    margin-bottom:6px;
+  }
+  .plate h2{
+    font-family:var(--serif);
+    font-size:26px;
+    margin:0 0 6px;
+    color:var(--ink-navy);
+  }
+  .plate .plate-desc{
+    color:var(--text-sub);
+    font-size:14.5px;
+    margin:0 0 22px;
+    max-width:760px;
+  }
+
+  /* ---------- controls ---------- */
+  .controls-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px 26px;
+    align-items:flex-end;
+    margin-bottom:22px;
+  }
+  .control{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .control label{
+    font-family:var(--mono);
+    font-size:11.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--text-sub);
+  }
+  .stepper{
+    display:flex;
+    align-items:center;
+    border:1px solid var(--line-soft);
+    border-radius:6px;
+    overflow:hidden;
+    background:#fff;
+  }
+  .stepper button{
+    width:32px;height:32px;
+    border:none;
+    background:var(--paper-dim);
+    color:var(--ink-navy);
+    font-size:16px;
+    cursor:pointer;
+    font-family:var(--mono);
+  }
+  .stepper button:hover{ background:var(--amber-dim); }
+  .stepper .val{
+    width:44px;text-align:center;
+    font-family:var(--mono);
+    font-size:15px;
+    font-weight:600;
+  }
+  select, .btn, input[type=text], input[type=number]{
+    font-family:var(--sans);
+    font-size:14px;
+  }
+  select{
+    padding:8px 10px;
+    border:1px solid var(--line-soft);
+    border-radius:6px;
+    background:#fff;
+    color:var(--text-main);
+    min-width:220px;
+  }
+  .btn{
+    padding:9px 16px;
+    border-radius:6px;
+    border:1px solid var(--ink-navy);
+    background:var(--ink-navy);
+    color:#fff;
+    cursor:pointer;
+    font-weight:600;
+    letter-spacing:.01em;
+    transition:transform .06s ease, background .15s ease;
+  }
+  .btn:hover{ background:var(--ink-navy-2); }
+  .btn:active{ transform:translateY(1px); }
+  .btn.secondary{
+    background:#fff;
+    color:var(--ink-navy);
+    border:1px solid var(--line-soft);
+  }
+  .btn.secondary:hover{ background:var(--paper-dim); }
+  .btn.amber{
+    background:var(--amber);
+    border-color:var(--amber);
+    color:var(--ink-navy);
+  }
+  .btn.amber:hover{ filter:brightness(1.05); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+  /* ---------- explorer diagram ---------- */
+  .diagram-wrap{
+    background:
+      repeating-linear-gradient(0deg, rgba(63,88,114,0.06) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, rgba(63,88,114,0.06) 0 1px, transparent 1px 28px),
+      #fff;
+    border:1px solid var(--line-soft);
+    border-radius:6px;
+    padding:6px 0;
+  }
+  .set-heads{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 8% 0;
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:.12em;
+    color:var(--text-sub);
+  }
+  svg.diagram{ width:100%; height:auto; display:block; }
+  .node-label{ font-family:var(--mono); font-weight:700; font-size:16px; fill:var(--ink-navy); }
+  .node circle{ fill:#fff; stroke:var(--ink-navy); stroke-width:2; transition:stroke .15s, fill .15s; }
+  .node.domain circle{ stroke:var(--teal); }
+  .node.domain.selected circle{ fill:var(--amber-dim); stroke:var(--amber); stroke-width:3; }
+  .node.codomain circle{ stroke:var(--ink-navy); }
+  .node.codomain.reached circle{ fill:var(--teal-dim); }
+  .node.codomain.unreached-flag circle{ stroke:var(--red); stroke-dasharray:4 3; }
+  .node.domain.missing-flag circle{ stroke:var(--red); stroke-dasharray:4 3; }
+  .node.conflict circle{ stroke:var(--red); fill:var(--red-bg); }
+  .arrow{ fill:none; stroke:var(--ink-navy); stroke-width:2; opacity:.8; }
+  .arrow.conflict{ stroke:var(--red); stroke-width:2.5; opacity:1; }
+
+  /* ---------- analysis panel ---------- */
+  .analysis-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:16px;
+    margin-bottom:18px;
+  }
+  .analysis-card{
+    border:1px solid var(--line-soft);
+    border-radius:6px;
+    padding:16px 18px;
+    background:#fff;
+  }
+  .analysis-card.neutral{ border-color:var(--line-soft); }
+  .analysis-card.pass{ border-color:var(--green); background:var(--green-bg); }
+  .analysis-card.fail{ border-color:var(--red); background:var(--red-bg); }
+  .analysis-card h3{
+    margin:0 0 8px;
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--text-sub);
+  }
+  .analysis-card .verdict{
+    font-family:var(--serif);
+    font-size:22px;
+    margin-bottom:6px;
+  }
+  .analysis-card.pass .verdict{ color:var(--green); }
+  .analysis-card.fail .verdict{ color:var(--red); }
+  .analysis-card.neutral .verdict{ color:var(--grey); }
+  .analysis-card .reason{ font-size:13.5px; color:var(--text-sub); }
+
+  /* ---------- set boxes ---------- */
+  .set-boxes{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+  }
+  .set-box{
+    border:1px solid var(--line-soft);
+    border-radius:6px;
+    background:#fff;
+    padding:16px 18px;
+  }
+  .set-box h4{
+    margin:0 0 8px;
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--text-sub);
+  }
+  .set-box .braces{ font-family:var(--mono); font-size:19px; color:var(--ink-navy); }
+  .set-box.range .braces{ color:var(--teal); }
+  .subset-note{
+    grid-column:1/-1;
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--text-sub);
+    text-align:center;
+    padding-top:4px;
+  }
+  .subset-note b{ color:var(--ink-navy); }
+
+  /* ---------- challenge ---------- */
+  .challenge-box{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .task-banner{
+    background:var(--ink-navy);
+    color:#fff;
+    padding:16px 20px;
+    border-radius:6px;
+    font-family:var(--serif);
+    font-size:18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .task-banner .task-tag{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    color:var(--amber);
+    text-transform:uppercase;
+    display:block;
+    margin-bottom:4px;
+  }
+  .challenge-result{
+    font-size:14.5px;
+    padding:12px 16px;
+    border-radius:6px;
+    border:1px solid var(--line-soft);
+    display:none;
+  }
+  .challenge-result.show{ display:block; }
+  .challenge-result.pass{ background:var(--green-bg); border-color:var(--green); color:var(--green); }
+  .challenge-result.fail{ background:var(--red-bg); border-color:var(--red); color:#8f2f2f; }
+
+  /* ---------- domain/codomain matter ---------- */
+  .dcm-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+  }
+  @media (max-width:760px){ .dcm-grid{ grid-template-columns:1fr; } }
+  .dcm-presets{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .dcm-presets button{
+    font-family:var(--mono);
+    font-size:12.5px;
+    padding:8px 12px;
+    border-radius:20px;
+    border:1px solid var(--line-soft);
+    background:#fff;
+    cursor:pointer;
+    color:var(--text-main);
+  }
+  .dcm-presets button.active{ background:var(--ink-navy); color:#fff; border-color:var(--ink-navy); }
+  .graph-wrap{ border:1px solid var(--line-soft); border-radius:6px; background:#fff; }
+  svg.graph{ width:100%; height:auto; display:block; }
+  .axis{ stroke:var(--line); stroke-width:1.4; }
+  .curve{ fill:none; stroke:var(--ink-navy); stroke-width:2.4; }
+  .region{ fill:var(--teal); opacity:.12; }
+  .dcm-analysis .analysis-grid{ margin-bottom:0; }
+  .dcm-formula{
+    font-family:var(--mono);
+    font-size:15px;
+    color:var(--ink-navy);
+    background:var(--paper-dim);
+    padding:8px 12px;
+    border-radius:6px;
+    display:inline-block;
+    margin-bottom:14px;
+  }
+  .dcm-explain{ font-size:13.5px; color:var(--text-sub); margin-top:14px; }
+
+  /* ---------- function machine ---------- */
+  .machine-row{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
+  .machine-track{ display:flex; flex-direction:column; gap:10px; }
+  .machine-step{
+    display:grid;
+    grid-template-columns:70px 1fr 70px;
+    align-items:center;
+    gap:10px;
+    font-family:var(--mono);
+    font-size:16px;
+  }
+  .machine-step .x-val, .machine-step .fx-val{
+    text-align:center;
+    background:var(--paper-dim);
+    border:1px solid var(--line-soft);
+    border-radius:6px;
+    padding:8px 0;
+    font-weight:700;
+    color:var(--ink-navy);
+  }
+  .machine-step .fx-val{ background:var(--teal-dim); border-color:var(--teal); color:#184843; }
+  .machine-box{
+    text-align:center;
+    background:var(--ink-navy);
+    color:var(--amber);
+    border-radius:6px;
+    padding:8px 6px;
+    font-size:13px;
+    position:relative;
+  }
+  .machine-box::before,.machine-box::after{
+    content:"→";
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--text-sub);
+    font-size:18px;
+  }
+  .machine-box::before{ left:-20px; }
+  .machine-box::after{ right:-20px; color:transparent; }
+  .machine-custom{ display:flex; gap:10px; align-items:center; margin-top:8px; }
+  .machine-custom input{ width:90px; padding:8px 10px; border:1px solid var(--line-soft); border-radius:6px; }
+
+  /* ---------- key ideas ---------- */
+  .key-ideas{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; }
+  details.term{
+    border:1px solid var(--line-soft);
+    border-radius:6px;
+    background:#fff;
+    padding:0;
+  }
+  details.term summary{
+    cursor:pointer;
+    padding:13px 16px;
+    font-family:var(--serif);
+    font-size:16.5px;
+    color:var(--ink-navy);
+    list-style:none;
+  }
+  details.term summary::-webkit-details-marker{ display:none; }
+  details.term summary::before{
+    content:"+ ";
+    color:var(--amber);
+    font-family:var(--mono);
+    font-weight:700;
+  }
+  details.term[open] summary::before{ content:"– "; }
+  details.term p{
+    margin:0;
+    padding:0 16px 15px;
+    font-size:14px;
+    color:var(--text-sub);
+  }
+
+  footer.reset-bar{
+    text-align:center;
+    padding:20px;
+  }
+  footer.reset-bar .btn{ padding:11px 26px; }
+
+  code.notation{ font-family:var(--mono); background:var(--paper-dim); padding:1px 6px; border-radius:4px; }
+
+  @media (max-width:600px){
+    .set-boxes{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Engineering Mathematics · Interactive Lab</span>
+  <h1>FUNCTIONS</h1>
+  <p class="sub">Explore domain, codomain, range and the properties of functions interactively.</p>
+</header>
+
+<main>
+
+  <!-- FIG 01 : FUNCTION EXPLORER -->
+  <section class="plate" id="explorer">
+    <span class="corner-bl"></span><span class="corner-br"></span>
+    <span class="fig-label">Fig. 01 — Function Explorer</span>
+    <h2>Build a mapping</h2>
+    <p class="plate-desc">Click a domain element, then a codomain element, to draw an arrow. Clicking a second codomain element replaces the image of the selected domain element — a domain element may only point to one place.</p>
+
+    <div class="controls-row">
+      <div class="control">
+        <label>Domain size</label>
+        <div class="stepper">
+          <button type="button" id="domainMinus">−</button>
+          <span class="val" id="domainVal">3</span>
+          <button type="button" id="domainPlus">+</button>
+        </div>
+      </div>
+      <div class="control">
+        <label>Codomain size</label>
+        <div class="stepper">
+          <button type="button" id="codomainMinus">−</button>
+          <span class="val" id="codomainVal">4</span>
+          <button type="button" id="codomainPlus">+</button>
+        </div>
+      </div>
+      <div class="control">
+        <label>Choose an example</label>
+        <select id="presetSelect">
+          <option value="custom">Custom</option>
+          <option value="ex1">1. One-One but Not Onto</option>
+          <option value="ex2">2. Onto but Not One-One</option>
+          <option value="ex3">3. Bijective</option>
+          <option value="ex4">4. Function but Neither One-One nor Onto</option>
+          <option value="ex5">5. Not a Function</option>
+        </select>
+      </div>
+      <div class="control">
+        <button class="btn amber" type="button" id="randomBtn">Random Function</button>
+      </div>
+      <div class="control">
+        <button class="btn secondary" type="button" id="clearBtn">Clear Mapping</button>
+      </div>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="set-heads"><span>DOMAIN</span><span>CODOMAIN</span></div>
+      <svg class="diagram" id="diagramSvg" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-navy" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#16233B"></path>
+          </marker>
+          <marker id="arr-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#E1A94C"></path>
+          </marker>
+          <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#C24949"></path>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </section>
+
+  <!-- FIG 02 : ANALYSIS -->
+  <section class="plate" id="analysisSection">
+    <span class="corner-bl"></span><span class="corner-br"></span>
+    <span class="fig-label">Fig. 02 — Analysis</span>
+    <h2>Test the mapping</h2>
+    <p class="plate-desc">Press Check Function to evaluate the current mapping. One-one and onto are only meaningful once the mapping is confirmed to be a function.</p>
+
+    <div class="controls-row">
+      <button class="btn" type="button" id="checkBtn">Check Function</button>
+    </div>
+
+    <div class="analysis-grid">
+      <div class="analysis-card neutral" id="card-function">
+        <h3>Function?</h3>
+        <div class="verdict" id="verdict-function">— Not checked</div>
+        <div class="reason" id="reason-function"></div>
+      </div>
+      <div class="analysis-card neutral" id="card-oneone">
+        <h3>One-One?</h3>
+        <div class="verdict" id="verdict-oneone">— Not checked</div>
+        <div class="reason" id="reason-oneone"></div>
+      </div>
+      <div class="analysis-card neutral" id="card-onto">
+        <h3>Onto?</h3>
+        <div class="verdict" id="verdict-onto">— Not checked</div>
+        <div class="reason" id="reason-onto"></div>
+      </div>
+      <div class="analysis-card neutral" id="card-bijective">
+        <h3>Bijective?</h3>
+        <div class="verdict" id="verdict-bijective">— Not checked</div>
+        <div class="reason" id="reason-bijective"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIG 03 : DOMAIN / CODOMAIN / RANGE -->
+  <section class="plate" id="rangeSection">
+    <span class="corner-bl"></span><span class="corner-br"></span>
+    <span class="fig-label">Fig. 03 — Sets</span>
+    <h2>Domain, codomain &amp; range</h2>
+    <p class="plate-desc">The range updates automatically as the mapping changes, and is always a subset of the codomain.</p>
+    <div class="set-boxes">
+      <div class="set-box">
+        <h4>Domain</h4>
+        <div class="braces" id="domainSetText">{1,2,3}</div>
+      </div>
+      <div class="set-box">
+        <h4>Codomain</h4>
+        <div class="braces" id="codomainSetText">{a,b,c,d}</div>
+      </div>
+      <div class="set-box range">
+        <h4>Range</h4>
+        <div class="braces" id="rangeSetText">{ }</div>
+      </div>
+      <div class="subset-note">RANGE&nbsp;⊆&nbsp;CODOMAIN &nbsp;—&nbsp; <span id="subsetDetail">the range grows as more codomain elements are reached.</span></div>
+    </div>
+  </section>
+
+  <!-- FIG 04 : CHALLENGE MODE -->
+  <section class="plate" id="challengeSection">
+    <span class="corner-bl"></span><span class="corner-br"></span>
+    <span class="fig-label">Fig. 04 — Challenge Mode</span>
+    <h2>Construct it yourself</h2>
+    <p class="plate-desc">A task will appear below. Edit the mapping in Fig. 01 to satisfy it, then check your answer.</p>
+    <div class="challenge-box">
+      <div class="task-banner">
+        <div><span class="task-tag">Task</span><span id="taskText">Press "New Challenge" to begin.</span></div>
+        <button class="btn amber" type="button" id="newChallengeBtn">New Challenge</button>
+      </div>
+      <div class="controls-row" style="margin-bottom:0;">
+        <button class="btn" type="button" id="checkAnswerBtn" disabled>Check My Answer</button>
+      </div>
+      <div class="challenge-result" id="challengeResult"></div>
+    </div>
+  </section>
+
+  <!-- FIG 05 : WHY DOMAIN AND CODOMAIN MATTER -->
+  <section class="plate" id="dcmSection">
+    <span class="corner-bl"></span><span class="corner-br"></span>
+    <span class="fig-label">Fig. 05 — Why Domain and Codomain Matter</span>
+    <h2>Same rule, different sets, different answer</h2>
+    <p class="plate-desc">The formula stays fixed at <code class="notation">f(x) = x²</code>. Only the domain and codomain restriction change below — watch how the classification changes with them.</p>
+
+    <div class="dcm-presets" id="dcmPresets">
+      <button type="button" data-key="rr" class="active">ℝ → ℝ</button>
+      <button type="button" data-key="pr">[0,∞) → ℝ</button>
+      <button type="button" data-key="rp">ℝ → [0,∞)</button>
+      <button type="button" data-key="pp">[0,∞) → [0,∞)</button>
+    </div>
+
+    <div class="dcm-grid">
+      <div class="graph-wrap">
+        <svg class="graph" id="dcmGraph" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="dcm-analysis">
+        <div class="dcm-formula" id="dcmFormula">f : ℝ → ℝ , f(x) = x²</div>
+        <div class="analysis-grid" id="dcmAnalysisGrid"></div>
+        <p class="dcm-explain" id="dcmExplain"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIG 06 : FUNCTION MACHINE -->
+  <section class="plate" id="machineSection">
+    <span class="corner-bl"></span><span class="corner-br"></span>
+    <span class="fig-label">Fig. 06 — Function Machine</span>
+    <h2>x → [ machine ] → f(x)</h2>
+    <p class="plate-desc">Choose a rule and watch each input pass through the machine to produce an output.</p>
+
+    <div class="machine-row">
+      <div class="control">
+        <label>Function</label>
+        <select id="machineSelect">
+          <option value="xp1">x + 1</option>
+          <option value="2x">2x</option>
+          <option value="2xp1" selected>2x + 1</option>
+          <option value="xsq">x²</option>
+          <option value="xm3">x − 3</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="machine-track" id="machineTrack"></div>
+
+    <div class="machine-custom">
+      <label style="font-family:var(--mono);font-size:12px;color:var(--text-sub);text-transform:uppercase;">Try your own input</label>
+      <input type="number" id="machineCustomX" placeholder="x" value="4">
+      <button class="btn secondary" type="button" id="machineCustomBtn">Run</button>
+      <span id="machineCustomResult" style="font-family:var(--mono);font-weight:700;color:var(--ink-navy);"></span>
+    </div>
+  </section>
+
+  <!-- FIG 07 : KEY IDEAS -->
+  <section class="plate" id="keyIdeasSection">
+    <span class="corner-bl"></span><span class="corner-br"></span>
+    <span class="fig-label">Fig. 07 — Key Ideas</span>
+    <h2>Definitions</h2>
+    <div class="key-ideas">
+      <details class="term"><summary>Function</summary><p>Every element of the domain has exactly one image in the codomain.</p></details>
+      <details class="term"><summary>Domain</summary><p>The set of input values.</p></details>
+      <details class="term"><summary>Codomain</summary><p>The set in which the output values are specified to lie.</p></details>
+      <details class="term"><summary>Range</summary><p>The set of actual output values.</p></details>
+      <details class="term"><summary>One-One (Injective)</summary><p>Different inputs have different outputs.</p></details>
+      <details class="term"><summary>Onto (Surjective)</summary><p>Every element of the codomain has at least one preimage.</p></details>
+      <details class="term"><summary>Bijective</summary><p>A function that is both one-one and onto.</p></details>
+    </div>
+  </section>
+
+  <footer class="reset-bar">
+    <button class="btn secondary" type="button" id="resetBtn">Reset to Default</button>
+  </footer>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  var DOMAIN_LABELS = ["1","2","3","4","5","6"];
+  var CODOMAIN_LABELS = ["a","b","c","d","e","f"];
+
+  var state = {
+    domainSize: 3,
+    codomainSize: 4,
+    mapping: [],          // mapping[i] = array of codomain indices (usually length 0 or 1)
+    selectedDomain: null,
+    checked: false,
+    lastAnalysis: null
+  };
+
+  var challengeState = { active:false, task:null };
+
+  var TASKS = [
+    {
+      id:'oneone-not-onto',
+      desc:'Create a function that is one-one but not onto.',
+      domainSize:3, codomainSize:4,
+      check:function(a){ return a.isFunction && a.isOneOne && !a.isOnto; },
+      hint:'Give every domain element a different image, but leave at least one codomain element with no arrow pointing to it.'
+    },
+    {
+      id:'onto-not-oneone',
+      desc:'Create a function that is onto but not one-one.',
+      domainSize:4, codomainSize:3,
+      check:function(a){ return a.isFunction && a.isOnto && !a.isOneOne; },
+      hint:'Make sure every codomain element receives at least one arrow, but let two domain elements share the same image.'
+    },
+    {
+      id:'bijective',
+      desc:'Create a bijective function.',
+      domainSize:3, codomainSize:3,
+      check:function(a){ return a.isFunction && a.isOneOne && a.isOnto; },
+      hint:'With equal domain and codomain sizes, connect each domain element to a different codomain element so nothing is repeated or left out.'
+    },
+    {
+      id:'not-function',
+      desc:'Create a relation that is not a function.',
+      domainSize:3, codomainSize:3,
+      check:function(a){ return !a.isFunction; },
+      hint:'A relation fails to be a function if some domain element is left without an arrow. Try leaving one domain element unmapped.'
+    }
+  ];
+
+  // ---------- DOM refs ----------
+  var $ = function(id){ return document.getElementById(id); };
+  var svg = $('diagramSvg');
+
+  // ---------- state helpers ----------
+  function resetMapping(){
+    state.mapping = [];
+    for (var i=0;i<state.domainSize;i++){ state.mapping.push([]); }
+    state.selectedDomain = null;
+    state.checked = false;
+  }
+
+  function setSizes(d,c){
+    state.domainSize = d;
+    state.codomainSize = c;
+    resetMapping();
+  }
+
+  // ---------- analysis ----------
+  function analyze(){
+    var missingDomain = -1, duplicateDomain = -1;
+    for (var i=0;i<state.domainSize;i++){
+      var imgs = state.mapping[i] || [];
+      if (imgs.length === 0 && missingDomain === -1) missingDomain = i;
+      if (imgs.length > 1 && duplicateDomain === -1) duplicateDomain = i;
+    }
+    var isFunction = (missingDomain === -1 && duplicateDomain === -1);
+
+    var images = []; // images[i] = codomain index or -1
+    for (var i2=0;i2<state.domainSize;i2++){
+      var arr = state.mapping[i2] || [];
+      images.push(arr.length===1 ? arr[0] : -1);
+    }
+
+    var isOneOne = null, oneOneConflict = null;
+    var isOnto = null, unreached = [];
+    var reached = [];
+
+    if (isFunction){
+      // one-one
+      var seen = {};
+      var conflictA=-1, conflictB=-1, conflictImg=-1;
+      for (var j=0;j<state.domainSize;j++){
+        var img = images[j];
+        if (seen.hasOwnProperty(img)){
+          conflictA = seen[img]; conflictB = j; conflictImg = img;
+        } else {
+          seen[img] = j;
+        }
+      }
+      isOneOne = (conflictImg === -1);
+      if (!isOneOne){ oneOneConflict = {a:conflictA,b:conflictB,img:conflictImg}; }
+
+      // onto
+      var reachedSet = {};
+      for (var k=0;k<images.length;k++){ reachedSet[images[k]] = true; }
+      for (var c=0;c<state.codomainSize;c++){
+        if (reachedSet[c]) reached.push(c); else unreached.push(c);
+      }
+      isOnto = (unreached.length === 0);
+    } else {
+      // still compute reached for range display purposes
+      var reachedSet2 = {};
+      for (var m=0;m<images.length;m++){ if (images[m] !== -1) reachedSet2[images[m]] = true; }
+      for (var c2=0;c2<state.codomainSize;c2++){
+        if (reachedSet2[c2]) reached.push(c2); else unreached.push(c2);
+      }
+    }
+
+    var isBijective = isFunction && isOneOne && isOnto;
+
+    return {
+      isFunction: isFunction,
+      missingDomain: missingDomain,
+      duplicateDomain: duplicateDomain,
+      images: images,
+      isOneOne: isOneOne,
+      oneOneConflict: oneOneConflict,
+      isOnto: isOnto,
+      unreached: unreached,
+      reached: reached,
+      isBijective: isBijective
+    };
+  }
+
+  // ---------- diagram rendering ----------
+  function layout(){
+    var n = Math.max(state.domainSize, state.codomainSize);
+    var spacing = 56;
+    var topPad = 44;
+    var height = topPad*2 + (n-1)*spacing;
+    height = Math.max(height, 200);
+    return { spacing:spacing, topPad:topPad, height:height, domainX:110, codomainX:490, r:20 };
+  }
+
+  function nodeY(index, size, L){
+    var n = Math.max(state.domainSize, state.codomainSize);
+    var blockHeight = (size-1)*L.spacing;
+    var totalHeight = (n-1)*L.spacing;
+    var offset = (totalHeight - blockHeight)/2;
+    return L.topPad + offset + index*L.spacing;
+  }
+
+  function renderDiagram(){
+    var L = layout();
+    svg.setAttribute('viewBox', '0 0 600 ' + L.height);
+
+    var html = '';
+    // keep defs
+    var defs = svg.querySelector('defs').outerHTML;
+
+    var analysis = state.checked ? state.lastAnalysis : null;
+
+    // arrows first (so nodes sit on top)
+    for (var i=0;i<state.domainSize;i++){
+      var imgs = state.mapping[i] || [];
+      for (var k=0;k<imgs.length;k++){
+        var j = imgs[k];
+        var y1 = nodeY(i, state.domainSize, L);
+        var y2 = nodeY(j, state.codomainSize, L);
+        var x1 = L.domainX + L.r;
+        var x2 = L.codomainX - L.r - 8;
+        var mx = (x1+x2)/2;
+        var isConflict = analysis && analysis.oneOneConflict && !analysis.isOneOne &&
+            (( analysis.oneOneConflict.a === i || analysis.oneOneConflict.b === i) && analysis.oneOneConflict.img === j);
+        var cls = isConflict ? 'arrow conflict' : 'arrow';
+        var marker = isConflict ? 'arr-red' : (state.selectedDomain===i ? 'arr-amber' : 'arr-navy');
+        html += '<path class="'+cls+'" d="M'+x1+','+y1+' Q'+mx+','+((y1+y2)/2)+' '+x2+','+y2+'" marker-end="url(#'+marker+')"></path>';
+      }
+    }
+
+    // domain nodes
+    for (var d=0; d<state.domainSize; d++){
+      var yd = nodeY(d, state.domainSize, L);
+      var missing = analysis && !analysis.isFunction && analysis.missingDomain !== -1 && (state.mapping[d]||[]).length===0;
+      var dup = analysis && !analysis.isFunction && (state.mapping[d]||[]).length>1;
+      var flag = (missing || dup) ? ' missing-flag' : '';
+      var sel = state.selectedDomain === d ? ' selected' : '';
+      html += '<g class="node domain'+sel+flag+'" data-role="domain" data-index="'+d+'" style="cursor:pointer;">'
+        + '<circle cx="'+L.domainX+'" cy="'+yd+'" r="'+L.r+'"></circle>'
+        + '<text class="node-label" x="'+L.domainX+'" y="'+(yd+5)+'" text-anchor="middle">'+DOMAIN_LABELS[d]+'</text>'
+        + '</g>';
+    }
+
+    // codomain nodes
+    for (var c=0;c<state.codomainSize;c++){
+      var yc = nodeY(c, state.codomainSize, L);
+      var isReached = analysis && analysis.isFunction ? analysis.reached.indexOf(c)>=0 : false;
+      var isUnreachedFlag = analysis && analysis.isFunction && !analysis.isOnto && analysis.unreached.indexOf(c)>=0;
+      var cls = 'node codomain' + (isReached?' reached':'') + (isUnreachedFlag?' unreached-flag':'');
+      html += '<g class="'+cls+'" data-role="codomain" data-index="'+c+'" style="cursor:pointer;">'
+        + '<circle cx="'+L.codomainX+'" cy="'+yc+'" r="'+L.r+'"></circle>'
+        + '<text class="node-label" x="'+L.codomainX+'" y="'+(yc+5)+'" text-anchor="middle">'+CODOMAIN_LABELS[c]+'</text>'
+        + '</g>';
+    }
+
+    svg.innerHTML = defs + html;
+
+    // attach handlers
+    var domainNodes = svg.querySelectorAll('[data-role="domain"]');
+    var codomainNodes = svg.querySelectorAll('[data-role="codomain"]');
+    domainNodes.forEach(function(n){
+      n.addEventListener('click', function(){
+        var idx = parseInt(this.getAttribute('data-index'),10);
+        state.selectedDomain = (state.selectedDomain===idx) ? null : idx;
+        renderDiagram();
+      });
+    });
+    codomainNodes.forEach(function(n){
+      n.addEventListener('click', function(){
+        if (state.selectedDomain === null) return;
+        var idx = parseInt(this.getAttribute('data-index'),10);
+        state.mapping[state.selectedDomain] = [idx];
+        state.selectedDomain = null;
+        state.checked = false;
+        renderDiagram();
+        renderAnalysisUnchecked();
+        renderSets();
+        refreshChallengeButtonState();
+      });
+    });
+  }
+
+  // ---------- analysis panel ----------
+  function setCard(prefix, status, verdictText, reasonText){
+    var card = $('card-'+prefix);
+    card.classList.remove('neutral','pass','fail');
+    card.classList.add(status);
+    $('verdict-'+prefix).textContent = verdictText;
+    $('reason-'+prefix).textContent = reasonText;
+  }
+
+  function renderAnalysisUnchecked(){
+    ['function','oneone','onto','bijective'].forEach(function(p){
+      setCard(p, 'neutral', '— Not checked', '');
+    });
+  }
+
+  function runCheck(){
+    var a = analyze();
+    state.checked = true;
+    state.lastAnalysis = a;
+
+    if (a.isFunction){
+      setCard('function','pass','✓ FUNCTION','Every element of the domain has exactly one image.');
+    } else if (a.missingDomain !== -1) {
+      setCard('function','fail','✗ NOT A FUNCTION','Every element of the domain must have exactly one image. Element '+DOMAIN_LABELS[a.missingDomain]+' has none.');
+    } else {
+      setCard('function','fail','✗ NOT A FUNCTION','An element of the domain cannot have two different images. Element '+DOMAIN_LABELS[a.duplicateDomain]+' points to more than one codomain element.');
+    }
+
+    if (!a.isFunction){
+      setCard('oneone','neutral','— N/A','Checked only after the mapping is confirmed to be a function.');
+      setCard('onto','neutral','— N/A','Checked only after the mapping is confirmed to be a function.');
+      setCard('bijective','fail','✗ NOT BIJECTIVE','Not bijective because the mapping is not even a function.');
+    } else {
+      if (a.isOneOne){
+        setCard('oneone','pass','✓ ONE-ONE','No two different elements of the domain have the same image.');
+      } else {
+        var c = a.oneOneConflict;
+        setCard('oneone','fail','✗ NOT ONE-ONE', DOMAIN_LABELS[c.a]+' and '+DOMAIN_LABELS[c.b]+' both map to '+CODOMAIN_LABELS[c.img]+'. Therefore the function is not one-one.');
+      }
+      if (a.isOnto){
+        setCard('onto','pass','✓ ONTO','Every element of the codomain has at least one preimage.');
+      } else {
+        var names = a.unreached.map(function(x){return CODOMAIN_LABELS[x];}).join(', ');
+        var verb = a.unreached.length===1 ? 'is' : 'are';
+        setCard('onto','fail','✗ NOT ONTO', names + ' ' + verb + ' not an image of any element of the domain.');
+      }
+      if (a.isBijective){
+        setCard('bijective','pass','✓ BIJECTIVE','The function is both one-one and onto.');
+      } else {
+        var why;
+        if (!a.isOneOne && !a.isOnto) why = 'Not bijective because the function is neither one-one nor onto.';
+        else if (!a.isOneOne) why = 'Not bijective because the function is not one-one.';
+        else why = 'Not bijective because the function is not onto.';
+        setCard('bijective','fail','✗ NOT BIJECTIVE', why);
+      }
+    }
+
+    renderDiagram();
+  }
+
+  // ---------- sets / range ----------
+  function renderSets(){
+    var dList = [];
+    for (var i=0;i<state.domainSize;i++) dList.push(DOMAIN_LABELS[i]);
+    var cList = [];
+    for (var j=0;j<state.codomainSize;j++) cList.push(CODOMAIN_LABELS[j]);
+
+    var reachedSet = {};
+    for (var k=0;k<state.domainSize;k++){
+      var arr = state.mapping[k]||[];
+      if (arr.length>=1){ arr.forEach(function(v){ reachedSet[v]=true; }); }
+    }
+    var rList = [];
+    for (var c=0;c<state.codomainSize;c++){ if (reachedSet[c]) rList.push(CODOMAIN_LABELS[c]); }
+
+    $('domainSetText').textContent = '{'+dList.join(',')+'}';
+    $('codomainSetText').textContent = '{'+cList.join(',')+'}';
+    $('rangeSetText').textContent = '{'+rList.join(',')+'}';
+    $('subsetDetail').textContent = rList.length===cList.length && cList.length>0
+      ? 'currently every codomain element has been reached.'
+      : (rList.length+' of '+cList.length+' codomain element(s) reached so far.');
+  }
+
+  // ---------- controls ----------
+  function refreshSizeLabels(){
+    $('domainVal').textContent = state.domainSize;
+    $('codomainVal').textContent = state.codomainSize;
+  }
+
+  $('domainMinus').addEventListener('click', function(){
+    if (state.domainSize>2){ setSizes(state.domainSize-1, state.codomainSize); afterMappingChange(); }
+  });
+  $('domainPlus').addEventListener('click', function(){
+    if (state.domainSize<6){ setSizes(state.domainSize+1, state.codomainSize); afterMappingChange(); }
+  });
+  $('codomainMinus').addEventListener('click', function(){
+    if (state.codomainSize>2){ setSizes(state.domainSize, state.codomainSize-1); afterMappingChange(); }
+  });
+  $('codomainPlus').addEventListener('click', function(){
+    if (state.codomainSize<6){ setSizes(state.domainSize, state.codomainSize+1); afterMappingChange(); }
+  });
+
+  $('clearBtn').addEventListener('click', function(){
+    resetMapping();
+    afterMappingChange();
+  });
+
+  $('randomBtn').addEventListener('click', function(){
+    resetMapping();
+    for (var i=0;i<state.domainSize;i++){
+      state.mapping[i] = [Math.floor(Math.random()*state.codomainSize)];
+    }
+    state.checked = false;
+    afterMappingChange();
+  });
+
+  function afterMappingChange(){
+    refreshSizeLabels();
+    renderDiagram();
+    renderAnalysisUnchecked();
+    renderSets();
+    refreshChallengeButtonState();
+  }
+
+  $('checkBtn').addEventListener('click', runCheck);
+
+  // ---------- presets ----------
+  var PRESETS = {
+    ex1: { domainSize:3, codomainSize:4, mapping:[[0],[1],[2]] },
+    ex2: { domainSize:4, codomainSize:3, mapping:[[0],[1],[1],[2]] },
+    ex3: { domainSize:3, codomainSize:3, mapping:[[0],[1],[2]] },
+    ex4: { domainSize:4, codomainSize:4, mapping:[[0],[1],[1],[2]] },
+    ex5: { domainSize:3, codomainSize:4, mapping:[[0,1],[2],[3]] }
+  };
+
+  $('presetSelect').addEventListener('change', function(){
+    var v = this.value;
+    if (v === 'custom'){ return; }
+    var p = PRESETS[v];
+    state.domainSize = p.domainSize;
+    state.codomainSize = p.codomainSize;
+    state.mapping = p.mapping.map(function(a){ return a.slice(); });
+    state.selectedDomain = null;
+    refreshSizeLabels();
+    renderDiagram();
+    runCheck();
+    renderSets();
+    refreshChallengeButtonState();
+  });
+
+  // ---------- reset ----------
+  $('resetBtn').addEventListener('click', function(){
+    $('presetSelect').value = 'custom';
+    setSizes(3,4);
+    afterMappingChange();
+  });
+
+  // ---------- challenge mode ----------
+  function newChallenge(){
+    var t = TASKS[Math.floor(Math.random()*TASKS.length)];
+    challengeState.active = true;
+    challengeState.task = t;
+    $('taskText').textContent = t.desc;
+    $('challengeResult').className = 'challenge-result';
+    $('challengeResult').textContent = '';
+    $('presetSelect').value = 'custom';
+    setSizes(t.domainSize, t.codomainSize);
+    afterMappingChange();
+    $('checkAnswerBtn').disabled = false;
+  }
+  $('newChallengeBtn').addEventListener('click', newChallenge);
+
+  $('checkAnswerBtn').addEventListener('click', function(){
+    if (!challengeState.active) return;
+    var a = analyze();
+    var ok = challengeState.task.check(a);
+    var box = $('challengeResult');
+    box.className = 'challenge-result show ' + (ok ? 'pass' : 'fail');
+    box.textContent = ok ? '✓ Correct! ' + challengeState.task.desc : '✗ Try again. Hint: ' + challengeState.task.hint;
+  });
+
+  function refreshChallengeButtonState(){
+    // keep button enabled once a challenge is active; nothing else needed
+  }
+
+  // ---------- Fig 05: domain/codomain matter ----------
+  var DCM_DATA = {
+    rr: {
+      label:'f : ℝ → ℝ , f(x) = x²',
+      isFunction:true, isOneOne:false, isOnto:false, isBijective:false,
+      xRange:[-4,4], yRange:[-2,16], domainAll:true, codomainAll:true,
+      explain:'Every real number squares to exactly one value, so it is a function. But f(−2) = f(2) = 4, so it is not one-one, and no negative number is ever produced, so it is not onto.'
+    },
+    pr: {
+      label:'f : [0,∞) → ℝ , f(x) = x²',
+      isFunction:true, isOneOne:true, isOnto:false, isBijective:false,
+      xRange:[0,4], yRange:[-2,16], domainAll:false, codomainAll:true,
+      explain:'Restricting the domain to non-negative numbers removes the mirrored pair, so x² is now strictly increasing and one-one. The codomain is still all of ℝ, and negative outputs are still never produced, so it remains not onto.'
+    },
+    rp: {
+      label:'f : ℝ → [0,∞) , f(x) = x²',
+      isFunction:true, isOneOne:false, isOnto:true, isBijective:false,
+      xRange:[-4,4], yRange:[-1,16], domainAll:true, codomainAll:false,
+      explain:'The codomain is shrunk to match the actual outputs of x², so every non-negative number now has a preimage — the function is onto. But the full real domain still produces the mirrored pair f(−2)=f(2), so it is still not one-one.'
+    },
+    pp: {
+      label:'f : [0,∞) → [0,∞) , f(x) = x²',
+      isFunction:true, isOneOne:true, isOnto:true, isBijective:true,
+      xRange:[0,4], yRange:[-1,16], domainAll:false, codomainAll:false,
+      explain:'With the domain restricted to non-negative numbers, x² is strictly increasing (one-one). With the codomain restricted to non-negative numbers, every output is reached (onto). Both together make this restriction of x² bijective.'
+    }
+  };
+
+  function renderDcm(key){
+    var d = DCM_DATA[key];
+    $('dcmFormula').textContent = d.label;
+
+    // analysis cards
+    var grid = $('dcmAnalysisGrid');
+    grid.innerHTML = '';
+    var rows = [
+      {p:'Function', v:d.isFunction},
+      {p:'One-One', v:d.isOneOne},
+      {p:'Onto', v:d.isOnto},
+      {p:'Bijective', v:d.isBijective}
+    ];
+    rows.forEach(function(r){
+      var status = r.v ? 'pass' : 'fail';
+      var mark = r.v ? '✓' : '✗';
+      grid.innerHTML += '<div class="analysis-card '+status+'" style="padding:12px 14px;">'
+        + '<h3>'+r.p+'</h3><div class="verdict" style="font-size:19px;">'+mark+'</div></div>';
+    });
+
+    $('dcmExplain').textContent = d.explain;
+
+    // graph
+    var g = $('dcmGraph');
+    var W=340,H=300, ox=50, oy=250, sx=(W-70)/8, sy=(H-40)/18;
+    function px(x){ return ox + (x+4)*sx; }
+    function py(y){ return oy - (y+2)*sy; }
+
+    var pts = [];
+    for (var xv=-4; xv<=4.001; xv+=0.2){
+      pts.push(px(xv)+','+py(xv*xv));
+    }
+    var pathD = 'M'+pts.join(' L');
+
+    var html = '';
+    // shaded region for restricted domain
+    if (!d.domainAll){
+      html += '<rect x="'+px(0)+'" y="0" width="'+(px(4)-px(0))+'" height="'+H+'" class="region"></rect>';
+    }
+    if (!d.codomainAll){
+      html += '<rect x="0" y="0" width="'+W+'" height="'+(py(0)-py(16))+'" class="region"></rect>';
+    }
+    // axes
+    html += '<line class="axis" x1="0" y1="'+py(0)+'" x2="'+W+'" y2="'+py(0)+'"></line>';
+    html += '<line class="axis" x1="'+px(0)+'" y1="0" x2="'+px(0)+'" y2="'+H+'"></line>';
+    html += '<text x="'+(W-14)+'" y="'+(py(0)-6)+'" font-family="JetBrains Mono, monospace" font-size="11" fill="#5B6576">x</text>';
+    html += '<text x="'+(px(0)+6)+'" y="12" font-family="JetBrains Mono, monospace" font-size="11" fill="#5B6576">y</text>';
+    html += '<path class="curve" d="'+pathD+'"></path>';
+
+    g.innerHTML = html;
+  }
+
+  var dcmButtons = document.querySelectorAll('#dcmPresets button');
+  dcmButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      dcmButtons.forEach(function(b){ b.classList.remove('active'); });
+      this.classList.add('active');
+      renderDcm(this.getAttribute('data-key'));
+    });
+  });
+
+  // ---------- Fig 06: function machine ----------
+  var MACHINES = {
+    xp1:{ label:'x + 1', fn:function(x){return x+1;} },
+    '2x':{ label:'2x', fn:function(x){return 2*x;} },
+    '2xp1':{ label:'2x + 1', fn:function(x){return 2*x+1;} },
+    xsq:{ label:'x²', fn:function(x){return x*x;} },
+    xm3:{ label:'x − 3', fn:function(x){return x-3;} }
+  };
+
+  function renderMachine(){
+    var key = $('machineSelect').value;
+    var m = MACHINES[key];
+    var track = $('machineTrack');
+    var html = '';
+    [1,2,3].forEach(function(x){
+      html += '<div class="machine-step">'
+        + '<div class="x-val">'+x+'</div>'
+        + '<div class="machine-box">'+m.label+'</div>'
+        + '<div class="fx-val">'+m.fn(x)+'</div>'
+        + '</div>';
+    });
+    track.innerHTML = html;
+    $('machineCustomResult').textContent = '';
+  }
+  $('machineSelect').addEventListener('change', renderMachine);
+  $('machineCustomBtn').addEventListener('click', function(){
+    var key = $('machineSelect').value;
+    var m = MACHINES[key];
+    var xv = parseFloat($('machineCustomX').value);
+    if (isNaN(xv)){ $('machineCustomResult').textContent = 'Enter a number.'; return; }
+    $('machineCustomResult').textContent = m.label+' at x = '+xv+'  →  f(x) = '+m.fn(xv);
+  });
+
+  // ---------- init ----------
+  resetMapping();
+  refreshSizeLabels();
+  renderDiagram();
+  renderAnalysisUnchecked();
+  renderSets();
+  renderDcm('rr');
+  renderMachine();
+
+})();
+</script>
+
+</body>
+</html>
