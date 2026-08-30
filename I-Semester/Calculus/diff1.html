@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Differential Equation Detective</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0e1826;
+    --panel:#152238;
+    --panel-2:#1b2c48;
+    --line: rgba(232,192,120,0.18);
+    --paper:#f4ecd8;
+    --amber:#e0a63d;
+    --amber-deep:#b5791f;
+    --evidence-blue:#57a8d6;
+    --good:#57b88a;
+    --bad:#d9654f;
+    --text:#eef1f6;
+    --text-dim:#9fadc4;
+    --font-display:'Special Elite', 'Courier Prime', monospace;
+    --font-body:'Inter', -apple-system, sans-serif;
+    --font-mono:'Courier Prime', monospace;
+    --radius: 16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 800px at 15% -10%, rgba(224,166,61,0.08), transparent 60%),
+      radial-gradient(1000px 700px at 100% 10%, rgba(87,168,214,0.07), transparent 55%),
+      var(--ink);
+    color:var(--text);
+    font-family:var(--font-body);
+    min-height:100vh;
+    line-height:1.5;
+  }
+  .app{max-width:1080px;margin:0 auto;padding:0 20px 80px;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 4px 18px;border-bottom:1px solid var(--line);
+    margin-bottom:8px;
+  }
+  .brand{
+    font-family:var(--font-display);
+    letter-spacing:0.5px;
+    font-size:0.95rem;
+    color:var(--amber);
+    display:flex;align-items:center;gap:10px;
+  }
+  .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);}
+  .case-id{font-family:var(--font-mono);font-size:0.78rem;color:var(--text-dim);}
+
+  .screen{display:none;animation:fadeUp 0.5s ease;}
+  .screen.active{display:block;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- WELCOME ---------- */
+  .hero{
+    text-align:center;padding:64px 10px 40px;position:relative;
+  }
+  .hero .stamp{
+    display:inline-block;
+    font-family:var(--font-display);
+    font-size:0.78rem;
+    color:var(--amber);
+    border:1.5px solid var(--amber);
+    padding:5px 14px;
+    border-radius:3px;
+    transform:rotate(-3deg);
+    letter-spacing:2px;
+    margin-bottom:22px;
+  }
+  .hero h1{
+    font-family:var(--font-display);
+    font-size:clamp(2rem, 5vw, 3.4rem);
+    margin:0 0 14px;
+    color:var(--text);
+    text-shadow:0 0 30px rgba(224,166,61,0.15);
+  }
+  .hero h1 .magnify{display:inline-block;transform:rotate(-8deg);}
+  .hero .subtitle{
+    font-size:1.15rem;color:var(--evidence-blue);font-weight:600;margin-bottom:20px;
+  }
+  .hero p.intro{
+    max-width:620px;margin:0 auto 36px;color:var(--text-dim);font-size:1.02rem;
+  }
+  .btn{
+    font-family:var(--font-body);
+    font-weight:700;
+    font-size:1.02rem;
+    padding:15px 34px;
+    border-radius:999px;
+    border:none;
+    cursor:pointer;
+    background:linear-gradient(135deg, var(--amber), var(--amber-deep));
+    color:#241705;
+    box-shadow:0 8px 24px rgba(224,166,61,0.28);
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(224,166,61,0.38);}
+  .btn:active{transform:translateY(0);}
+  .btn.ghost{
+    background:transparent;border:1.5px solid var(--line);color:var(--text);
+    box-shadow:none;
+  }
+  .btn.ghost:hover{border-color:var(--amber);color:var(--amber);}
+  .btn.small{padding:10px 20px;font-size:0.9rem;}
+  .btn-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px;}
+
+  .file-tabs{
+    display:flex;justify-content:center;gap:10px;margin-top:46px;flex-wrap:wrap;
+  }
+  .file-tab{
+    font-family:var(--font-mono);font-size:0.78rem;color:var(--text-dim);
+    border:1px dashed var(--line);padding:8px 14px;border-radius:8px;
+  }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .section-head{text-align:center;margin:56px 0 30px;}
+  .section-head .eyebrow{
+    font-family:var(--font-mono);font-size:0.78rem;letter-spacing:2px;
+    color:var(--evidence-blue);text-transform:uppercase;
+  }
+  .section-head h2{
+    font-family:var(--font-display);font-size:clamp(1.5rem,3.4vw,2.1rem);
+    margin:8px 0 6px;color:var(--text);
+  }
+  .section-head p{color:var(--text-dim);max-width:560px;margin:0 auto;}
+
+  /* ---------- METHOD CARDS ---------- */
+  .card-grid{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(300px,1fr));
+    gap:22px;margin-bottom:20px;
+  }
+  .method-card{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 24px 22px;
+    position:relative;
+    overflow:hidden;
+    transition:transform 0.25s ease, border-color 0.25s ease;
+  }
+  .method-card:hover{transform:translateY(-4px);border-color:rgba(224,166,61,0.4);}
+  .method-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:var(--tag-color, var(--amber));
+  }
+  .method-card .tag{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);font-size:0.72rem;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--tag-color, var(--amber));
+    margin-bottom:12px;
+  }
+  .method-card h3{font-family:var(--font-display);font-size:1.2rem;margin:0 0 12px;color:var(--text);}
+  .form-box{
+    background:rgba(0,0,0,0.28);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;margin-bottom:14px;text-align:center;color:var(--paper);
+    font-size:1.05rem;overflow-x:auto;
+  }
+  .clue{
+    font-size:0.9rem;color:var(--text-dim);font-style:italic;margin-bottom:14px;
+    border-left:2px solid var(--tag-color, var(--amber));padding-left:10px;
+  }
+  .example-box{
+    background:rgba(87,168,214,0.06);border:1px solid rgba(87,168,214,0.25);
+    border-radius:10px;padding:14px 16px;margin-bottom:12px;font-size:0.92rem;
+  }
+  .example-box .ex-label{font-family:var(--font-mono);font-size:0.7rem;color:var(--evidence-blue);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase;}
+  .reveal-row{display:flex;justify-content:flex-end;}
+  .reveal-btn{
+    font-family:var(--font-mono);font-size:0.8rem;background:none;border:1px solid var(--line);
+    color:var(--text-dim);padding:6px 14px;border-radius:8px;cursor:pointer;transition:all 0.2s;
+  }
+  .reveal-btn:hover{color:var(--amber);border-color:var(--amber);}
+  .why-panel{
+    max-height:0;overflow:hidden;transition:max-height 0.35s ease, margin 0.35s ease, padding 0.35s ease;
+    font-size:0.88rem;color:var(--text-dim);
+    background:rgba(224,166,61,0.06);border-radius:8px;
+  }
+  .why-panel.open{max-height:220px;margin-top:10px;padding:12px 14px;}
+  .verdict{
+    display:inline-flex;align-items:center;gap:8px;margin-top:10px;
+    font-weight:700;color:var(--good);font-size:0.95rem;
+  }
+  .partials-anim{
+    display:flex;justify-content:space-around;align-items:center;margin:10px 0;gap:10px;flex-wrap:wrap;
+  }
+  .partials-anim .pval{
+    background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:8px;padding:10px 16px;
+    transition:border-color 0.6s ease, box-shadow 0.6s ease;
+  }
+  .partials-anim .pval.match{border-color:var(--good);box-shadow:0 0 16px rgba(87,184,138,0.35);}
+  .partials-anim .arrow{color:var(--text-dim);font-size:1.2rem;}
+  .reduce-flow{
+    display:flex;flex-direction:column;align-items:center;gap:6px;margin:12px 0;font-size:0.85rem;
+  }
+  .reduce-step{
+    padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,0.25);
+    text-align:center;min-width:200px;
+  }
+  .reduce-step.no{border-color:var(--bad);color:var(--bad);}
+  .reduce-step.yes{border-color:var(--good);color:var(--good);}
+  .reduce-arrow{color:var(--text-dim);}
+
+  /* ---------- DECISION TREE ---------- */
+  .tree-wrap{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:34px 20px;margin-bottom:20px;
+  }
+  .tree-node{
+    max-width:520px;margin:0 auto 6px;
+    background:rgba(0,0,0,0.25);border:1px solid var(--line);border-radius:12px;
+    padding:16px 20px;text-align:center;
+  }
+  .tree-node .q{font-size:0.98rem;}
+  .tree-branches{
+    display:flex;justify-content:center;gap:16px;margin:12px 0 26px;flex-wrap:wrap;
+  }
+  .tree-btn{
+    font-family:var(--font-body);font-weight:700;padding:9px 22px;border-radius:999px;
+    border:1.5px solid var(--line);background:transparent;color:var(--text);cursor:pointer;
+    transition:all 0.2s ease;
+  }
+  .tree-btn.yes:hover{border-color:var(--good);color:var(--good);}
+  .tree-btn.no:hover{border-color:var(--bad);color:var(--bad);}
+  .tree-btn.active-yes{border-color:var(--good);color:var(--good);background:rgba(87,184,138,0.1);}
+  .tree-btn.active-no{border-color:var(--bad);color:var(--bad);background:rgba(217,101,79,0.1);}
+  .tree-result{
+    text-align:center;font-family:var(--font-display);font-size:1.3rem;padding:14px;
+    border-radius:10px;margin-top:6px;opacity:0;transform:scale(0.9);transition:all 0.35s ease;
+  }
+  .tree-result.show{opacity:1;transform:scale(1);}
+  .tree-result.linear{background:rgba(87,184,138,0.12);color:var(--good);}
+  .tree-result.bernoulli{background:rgba(160,110,220,0.15);color:#c19bef;}
+  .tree-result.exact{background:rgba(87,168,214,0.15);color:var(--evidence-blue);}
+  .tree-result.reducible{background:rgba(224,166,61,0.15);color:var(--amber);}
+  .tree-hint{text-align:center;color:var(--text-dim);font-size:0.85rem;margin-top:4px;}
+  .tree-reset{display:flex;justify-content:center;margin-top:16px;}
+
+  /* ---------- CHALLENGE ---------- */
+  .progress-wrap{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px;flex-wrap:wrap;
+  }
+  .progress-label{font-family:var(--font-mono);font-size:0.85rem;color:var(--text-dim);}
+  .progress-bar{
+    flex:1;min-width:160px;height:8px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;background:linear-gradient(90deg, var(--amber), var(--evidence-blue));
+    border-radius:99px;transition:width 0.5s ease;
+  }
+  .score-chip{
+    font-family:var(--font-mono);font-weight:700;color:var(--amber);
+    border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-size:0.85rem;
+    white-space:nowrap;
+  }
+  .case-file{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:36px 30px;position:relative;
+  }
+  .case-file::before{
+    content:'EVIDENCE';position:absolute;top:18px;right:24px;
+    font-family:var(--font-mono);font-size:0.68rem;letter-spacing:2px;color:var(--text-dim);
+    border:1px solid var(--line);padding:3px 8px;border-radius:4px;
+  }
+  .eq-display{
+    text-align:center;font-size:clamp(1.3rem,3vw,1.8rem);color:var(--paper);
+    background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:12px;
+    padding:30px 20px;margin:18px 0 26px;overflow-x:auto;
+  }
+  .q-prompt{text-align:center;font-weight:600;font-size:1.05rem;margin-bottom:22px;color:var(--text);}
+  .answers-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:6px;
+  }
+  @media (max-width:560px){.answers-grid{grid-template-columns:1fr;}}
+  .answer-btn{
+    font-family:var(--font-body);font-weight:700;font-size:0.98rem;
+    padding:18px 16px;border-radius:12px;border:1.5px solid var(--line);
+    background:rgba(255,255,255,0.02);color:var(--text);cursor:pointer;
+    display:flex;align-items:center;gap:10px;justify-content:center;
+    transition:all 0.18s ease;
+  }
+  .answer-btn:hover:not(:disabled){transform:translateY(-2px);border-color:var(--amber);}
+  .answer-btn:disabled{cursor:default;}
+  .answer-btn.correct{
+    background:rgba(87,184,138,0.16);border-color:var(--good);color:var(--good);
+    animation:pulseGood 0.5s ease;
+  }
+  .answer-btn.incorrect{
+    background:rgba(217,101,79,0.16);border-color:var(--bad);color:var(--bad);
+    animation:shake 0.4s ease;
+  }
+  @keyframes pulseGood{0%{transform:scale(1);}50%{transform:scale(1.04);}100%{transform:scale(1);}}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+  .feedback{
+    margin-top:22px;padding:18px 20px;border-radius:12px;
+    display:none;
+  }
+  .feedback.show{display:block;animation:fadeUp 0.4s ease;}
+  .feedback.correct-fb{background:rgba(87,184,138,0.1);border:1px solid rgba(87,184,138,0.35);}
+  .feedback.incorrect-fb{background:rgba(217,101,79,0.1);border:1px solid rgba(217,101,79,0.35);}
+  .feedback .fb-title{font-weight:800;font-size:1.05rem;margin-bottom:6px;}
+  .feedback.correct-fb .fb-title{color:var(--good);}
+  .feedback.incorrect-fb .fb-title{color:var(--bad);}
+  .feedback .fb-body{color:var(--text-dim);font-size:0.92rem;}
+  .feedback .fb-actions{margin-top:14px;display:flex;justify-content:flex-end;}
+
+  /* ---------- COMPLETION ---------- */
+  .completion{text-align:center;padding:40px 10px;}
+  .completion .trophy{font-size:3.2rem;margin-bottom:10px;}
+  .completion h2{font-family:var(--font-display);font-size:2rem;margin:6px 0;}
+  .completion .score-big{
+    font-family:var(--font-mono);font-size:2.6rem;font-weight:700;color:var(--amber);margin:14px 0;
+  }
+  .completion .verdict-msg{font-size:1.1rem;color:var(--text-dim);max-width:520px;margin:0 auto 30px;}
+
+  table.summary{
+    width:100%;border-collapse:collapse;margin-top:16px;
+    background:var(--panel);border-radius:var(--radius);overflow:hidden;
+  }
+  table.summary th,table.summary td{
+    padding:14px 18px;text-align:left;border-bottom:1px solid var(--line);font-size:0.92rem;
+  }
+  table.summary th{
+    background:rgba(224,166,61,0.1);color:var(--amber);font-family:var(--font-mono);
+    font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;
+  }
+  table.summary tr:last-child td{border-bottom:none;}
+
+  footer{
+    text-align:center;margin-top:70px;padding-top:22px;border-top:1px solid var(--line);
+    font-family:var(--font-mono);font-size:0.78rem;color:var(--text-dim);
+  }
+
+  @media (max-width:600px){
+    .case-file{padding:26px 18px;}
+    .tree-branches{gap:10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span>Interactive Mathematics | Differential Equations</div>
+    <div class="case-id">CASE FILE #DE-104</div>
+  </div>
+
+  <!-- ================= WELCOME SCREEN ================= -->
+  <section id="screen-welcome" class="screen active">
+    <div class="hero">
+      <div class="stamp">CASE FILE &middot; OPEN</div>
+      <h1><span class="magnify">🎯</span> Differential Equation Detective</h1>
+      <div class="subtitle">Can you identify the correct method?</div>
+      <p class="intro">A differential equation can often be recognized by its form. Learn the four important types below, then test your skills in the challenge round.</p>
+      <button class="btn" onclick="goTo('learn')">START LEARNING →</button>
+    </div>
+    <div class="file-tabs">
+      <div class="file-tab">01 · Linear</div>
+      <div class="file-tab">02 · Bernoulli</div>
+      <div class="file-tab">03 · Exact</div>
+      <div class="file-tab">04 · Reducible to Exact</div>
+    </div>
+  </section>
+
+  <!-- ================= LEARN SCREEN ================= -->
+  <section id="screen-learn" class="screen">
+    <div class="section-head">
+      <div class="eyebrow">Field Guide</div>
+      <h2>Learn the Four Types</h2>
+      <p>Each type has a recognizable form. Study the clue, check the example, then reveal the reasoning.</p>
+    </div>
+
+    <div class="card-grid">
+
+      <!-- CARD 1: LINEAR -->
+      <div class="method-card" style="--tag-color:var(--good);">
+        <div class="tag">🟢 Type 01</div>
+        <h3>1️⃣ Linear Differential Equation</h3>
+        <div class="form-box">\( \dfrac{dy}{dx} + P(x)y = Q(x) \)</div>
+        <div class="clue">y and dy/dx appear only to the first power and are not multiplied together.</div>
+        <div class="example-box">
+          <div class="ex-label">Example</div>
+          \( \dfrac{dy}{dx} + 2y = x \)
+          <div style="margin-top:8px;">P(x) = 2 &nbsp;&nbsp; Q(x) = x</div>
+          <div class="verdict">✅ Linear Differential Equation</div>
+        </div>
+        <div class="reveal-row"><button class="reveal-btn" onclick="toggleWhy(this)">Why?</button></div>
+        <div class="why-panel">The equation matches the standard form y' + P(x)y = Q(x), with y appearing only to the first power.</div>
+      </div>
+
+      <!-- CARD 2: BERNOULLI -->
+      <div class="method-card" style="--tag-color:#a06edc;">
+        <div class="tag">🟣 Type 02</div>
+        <h3>2️⃣ Bernoulli Differential Equation</h3>
+        <div class="form-box">\( \dfrac{dy}{dx} + P(x)y = Q(x)y^{n} \)</div>
+        <div class="clue">Looks almost like a linear equation, but contains a non-linear power of y.</div>
+        <div class="example-box">
+          <div class="ex-label">Example</div>
+          \( \dfrac{dy}{dx} + y = xy^{2} \)
+          <div style="margin-top:8px;">n = 2</div>
+          <div class="verdict" style="color:#c19bef;">✅ Bernoulli Differential Equation</div>
+        </div>
+        <div class="reveal-row"><button class="reveal-btn" onclick="toggleWhy(this)">Why?</button></div>
+        <div class="why-panel">The equation contains y² and matches the Bernoulli form y' + P(x)y = Q(x)y^n. Substitution v = y^(1−n) converts it into a linear differential equation.</div>
+      </div>
+
+      <!-- CARD 3: EXACT -->
+      <div class="method-card" style="--tag-color:var(--evidence-blue);">
+        <div class="tag">🔵 Type 03</div>
+        <h3>3️⃣ Exact Differential Equation</h3>
+        <div class="form-box">\( M(x,y)\,dx + N(x,y)\,dy = 0 \)</div>
+        <div class="clue">Exact when \( \partial M/\partial y = \partial N/\partial x \).</div>
+        <div class="example-box">
+          <div class="ex-label">Example</div>
+          \( (2xy+3)\,dx + (x^{2}+4y)\,dy = 0 \)
+          <div style="margin-top:8px;">M = 2xy + 3 &nbsp;&nbsp; N = x² + 4y</div>
+          <div class="reveal-row" style="margin-top:10px;"><button class="reveal-btn" onclick="animateExact(this)">Check Partial Derivatives</button></div>
+          <div class="partials-anim" data-anim="exact-card">
+            <div class="pval" id="ec-my">∂M/∂y = ?</div>
+            <div class="arrow">⇄</div>
+            <div class="pval" id="ec-nx">∂N/∂x = ?</div>
+          </div>
+          <div class="verdict" id="ec-verdict" style="visibility:hidden;">✅ MATCH! → EXACT</div>
+        </div>
+      </div>
+
+      <!-- CARD 4: REDUCIBLE TO EXACT -->
+      <div class="method-card" style="--tag-color:var(--amber);">
+        <div class="tag">🟠 Type 04</div>
+        <h3>4️⃣ Reducible to Exact Differential Equation</h3>
+        <div class="clue">Not exact at first — but multiplying by a suitable integrating factor μ makes it exact.</div>
+        <div class="example-box">
+          <div class="ex-label">Example</div>
+          \( y\,dx + (2x - y)\,dy = 0 \)
+          <div class="reduce-flow">
+            <div class="reduce-step no">∂M/∂y = 1 &nbsp;≠&nbsp; ∂N/∂x = 2 &nbsp;→ Not Exact</div>
+            <div class="reduce-arrow">↓ multiply by μ(y) = y</div>
+            <div class="reduce-step yes">∂(μM)/∂y = 2y = ∂(μN)/∂x = 2y &nbsp;→ Exact</div>
+          </div>
+          <div class="verdict" style="color:var(--amber);">✅ Reducible to Exact</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="btn-row">
+      <button class="btn ghost" onclick="goTo('welcome')">← Back</button>
+      <button class="btn" onclick="goTo('tree')">Continue to Decision Tree →</button>
+    </div>
+  </section>
+
+  <!-- ================= DECISION TREE SCREEN ================= -->
+  <section id="screen-tree" class="screen">
+    <div class="section-head">
+      <div class="eyebrow">Method</div>
+      <h2>🔍 How Do I Identify the Type?</h2>
+      <p>Answer each question below and follow the trail.</p>
+    </div>
+
+    <div class="tree-wrap">
+      <div id="tree-step-1">
+        <div class="tree-node"><div class="q">Can it be written as \( y' + P(x)y = Q(x) \)?</div></div>
+        <div class="tree-branches">
+          <button class="tree-btn yes" onclick="treeChoose(1,'yes')">YES</button>
+          <button class="tree-btn no" onclick="treeChoose(1,'no')">NO</button>
+        </div>
+      </div>
+
+      <div id="tree-step-2" style="display:none;">
+        <div class="tree-node"><div class="q">Does it have the form \( y' + P(x)y = Q(x)y^{n} \)?</div></div>
+        <div class="tree-branches">
+          <button class="tree-btn yes" onclick="treeChoose(2,'yes')">YES</button>
+          <button class="tree-btn no" onclick="treeChoose(2,'no')">NO</button>
+        </div>
+      </div>
+
+      <div id="tree-step-3" style="display:none;">
+        <div class="tree-node"><div class="q">Can it be written as \( M\,dx + N\,dy = 0 \)?</div></div>
+        <div class="tree-branches">
+          <button class="tree-btn yes" onclick="treeChoose(3,'yes')">YES</button>
+          <button class="tree-btn no" onclick="treeChoose(3,'no')">NO</button>
+        </div>
+      </div>
+
+      <div id="tree-step-4" style="display:none;">
+        <div class="tree-node"><div class="q">Check: \( \partial M/\partial y = \partial N/\partial x \)?</div></div>
+        <div class="tree-branches">
+          <button class="tree-btn yes" onclick="treeChoose(4,'yes')">YES</button>
+          <button class="tree-btn no" onclick="treeChoose(4,'no')">NO</button>
+        </div>
+      </div>
+
+      <div id="tree-step-5" style="display:none;">
+        <div class="tree-node"><div class="q">Can an integrating factor make it exact?</div></div>
+        <div class="tree-branches">
+          <button class="tree-btn yes" onclick="treeChoose(5,'yes')">YES</button>
+        </div>
+      </div>
+
+      <div id="tree-result" class="tree-result"></div>
+      <div id="tree-hint" class="tree-hint"></div>
+      <div class="tree-reset"><button class="btn ghost small" onclick="resetTree()">↺ Reset Tree</button></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn ghost" onclick="goTo('learn')">← Back</button>
+      <button class="btn" onclick="startChallenge()">🎮 Start Challenge →</button>
+    </div>
+  </section>
+
+  <!-- ================= CHALLENGE SCREEN ================= -->
+  <section id="screen-challenge" class="screen">
+    <div class="section-head" style="margin-top:20px;">
+      <div class="eyebrow">Challenge Round</div>
+      <h2>🎮 Differential Equation Detective</h2>
+      <p>You have learned the four types. Now prove your skills! Identify all 4 equations correctly.</p>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label" id="q-counter">Question 1 of 4</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:25%;"></div></div>
+      <div class="score-chip">⭐ Score: <span id="score-val">0</span>/4</div>
+    </div>
+
+    <div class="case-file">
+      <div class="eq-display" id="eq-display"></div>
+      <div class="q-prompt">Which type of differential equation is this?</div>
+      <div class="answers-grid" id="answers-grid"></div>
+
+      <div class="feedback" id="feedback">
+        <div class="fb-title" id="fb-title"></div>
+        <div class="fb-body" id="fb-body"></div>
+        <div class="fb-actions" id="fb-actions"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= COMPLETION SCREEN ================= -->
+  <section id="screen-complete" class="screen">
+    <div class="completion">
+      <div class="trophy" id="complete-emoji">🎉</div>
+      <h2>Challenge Complete!</h2>
+      <div class="score-big">Your Score: <span id="final-score">0</span>/4</div>
+      <div class="verdict-msg" id="verdict-msg"></div>
+      <div class="btn-row">
+        <button class="btn" onclick="restartChallenge()">🔄 Play Again</button>
+        <button class="btn ghost" onclick="goTo('learn')">📚 Review the Four Types</button>
+      </div>
+    </div>
+
+    <table class="summary">
+      <thead><tr><th>Type</th><th>Main Clue</th></tr></thead>
+      <tbody>
+        <tr><td>Linear</td><td>y' + P(x)y = Q(x)</td></tr>
+        <tr><td>Bernoulli</td><td>y' + P(x)y = Q(x)y^n</td></tr>
+        <tr><td>Exact</td><td>Mdx + Ndy = 0 and ∂M/∂y = ∂N/∂x</td></tr>
+        <tr><td>Reducible to Exact</td><td>Not exact initially; integrating factor makes it exact</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>Developed for Engineering Mathematics Learning</footer>
+</div>
+
+<script>
+/* ---------------- SCREEN NAVIGATION ---------------- */
+function goTo(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise(); }
+}
+
+/* ---------------- LEARN CARD INTERACTIONS ---------------- */
+function toggleWhy(btn){
+  const panel = btn.closest('.method-card').querySelector('.why-panel');
+  panel.classList.toggle('open');
+}
+
+function animateExact(btn){
+  const myBox = document.getElementById('ec-my');
+  const nxBox = document.getElementById('ec-nx');
+  const verdict = document.getElementById('ec-verdict');
+  btn.disabled = true;
+  btn.textContent = 'Calculating...';
+  setTimeout(()=>{
+    myBox.textContent = '∂M/∂y = 2x';
+    nxBox.textContent = '∂N/∂x = 2x';
+  }, 350);
+  setTimeout(()=>{
+    myBox.classList.add('match');
+    nxBox.classList.add('match');
+    verdict.style.visibility = 'visible';
+    btn.textContent = 'Check Partial Derivatives';
+    btn.disabled = false;
+  }, 900);
+}
+
+/* ---------------- DECISION TREE ---------------- */
+const treeResults = {
+  linear: {label:'🟢 LINEAR', cls:'linear'},
+  bernoulli: {label:'🟣 BERNOULLI', cls:'bernoulli'},
+  exact: {label:'🔵 EXACT', cls:'exact'},
+  reducible: {label:'🟠 REDUCIBLE TO EXACT', cls:'reducible'}
+};
+
+function treeChoose(step, answer){
+  // highlight chosen button
+  const stepEl = document.getElementById('tree-step-'+step);
+  stepEl.querySelectorAll('.tree-btn').forEach(b=>b.classList.remove('active-yes','active-no'));
+  const clicked = [...stepEl.querySelectorAll('.tree-btn')].find(b=>b.textContent.trim()===answer.toUpperCase());
+  if(clicked) clicked.classList.add(answer==='yes' ? 'active-yes' : 'active-no');
+
+  const hint = document.getElementById('tree-hint');
+  hint.textContent = '';
+
+  if(step===1 && answer==='yes'){ showTreeResult('linear'); return; }
+  if(step===1 && answer==='no'){ revealStep(2); return; }
+  if(step===2 && answer==='yes'){ showTreeResult('bernoulli'); return; }
+  if(step===2 && answer==='no'){ revealStep(3); return; }
+  if(step===3 && answer==='yes'){ revealStep(4); return; }
+  if(step===3 && answer==='no'){ hint.textContent = 'Try rewriting the equation into one of the standard forms above.'; return; }
+  if(step===4 && answer==='yes'){ showTreeResult('exact'); return; }
+  if(step===4 && answer==='no'){ revealStep(5); return; }
+  if(step===5 && answer==='yes'){ showTreeResult('reducible'); return; }
+}
+
+function revealStep(step){
+  document.getElementById('tree-step-'+step).style.display = 'block';
+  document.getElementById('tree-step-'+step).scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function showTreeResult(key){
+  const result = document.getElementById('tree-result');
+  const info = treeResults[key];
+  result.textContent = info.label;
+  result.className = 'tree-result show ' + info.cls;
+}
+
+function resetTree(){
+  for(let i=2;i<=5;i++){ document.getElementById('tree-step-'+i).style.display='none'; }
+  document.querySelectorAll('.tree-btn').forEach(b=>b.classList.remove('active-yes','active-no'));
+  const result = document.getElementById('tree-result');
+  result.className = 'tree-result';
+  result.textContent = '';
+  document.getElementById('tree-hint').textContent = '';
+}
+
+/* ---------------- CHALLENGE DATA ---------------- */
+const questionPool = {
+  linear: [
+    {
+      eq: "\\[ \\dfrac{dy}{dx} + 3y = x^{2} \\]",
+      correctExplain: "The equation has the form y' + P(x)y = Q(x), with P(x) = 3 and Q(x) = x².",
+      clue: "Look closely — is y raised to any power other than 1, or is there an M dx + N dy = 0 form here?"
+    },
+    {
+      eq: "\\[ \\dfrac{dy}{dx} + \\dfrac{y}{x} = x^{2} \\]",
+      correctExplain: "The equation has the form y' + P(x)y = Q(x), with P(x) = 1/x and Q(x) = x². Every term with y is first power.",
+      clue: "Check whether y appears only to the first power, with no y raised to another power on the right."
+    },
+    {
+      eq: "\\[ \\dfrac{dy}{dx} - 2y = e^{3x} \\]",
+      correctExplain: "The equation has the form y' + P(x)y = Q(x), with P(x) = -2 and Q(x) = e^{3x}. No power of y beyond 1 appears anywhere.",
+      clue: "Is there any y^n term on the right-hand side, or is this a straightforward first-power case?"
+    }
+  ],
+  bernoulli: [
+    {
+      eq: "\\[ \\dfrac{dy}{dx} + 2y = xy^{3} \\]",
+      correctExplain: "The equation contains y³ and matches the form y' + P(x)y = Q(x)y^n, with n = 3.",
+      clue: "Check the power of y on the right-hand side — is it really equal to 1?"
+    },
+    {
+      eq: "\\[ \\dfrac{dy}{dx} + \\dfrac{y}{x} = x^{2}y^{2} \\]",
+      correctExplain: "The equation contains y² and matches the form y' + P(x)y = Q(x)y^n, with n = 2.",
+      clue: "Compare this to the linear form — is the right-hand side really just Q(x), or does it carry a power of y too?"
+    },
+    {
+      eq: "\\[ \\dfrac{dy}{dx} - y = e^{x}y^{2} \\]",
+      correctExplain: "The equation contains y² and matches the form y' + P(x)y = Q(x)y^n, with n = 2.",
+      clue: "Look at the y-term on the right-hand side — is its exponent equal to 1?"
+    }
+  ],
+  exact: [
+    {
+      eq: "\\[ (2xy+3)\\,dx + (x^{2}+4y)\\,dy = 0 \\]",
+      correctExplain: "Here M = 2xy + 3 and N = x² + 4y. Computing partials: ∂M/∂y = 2x and ∂N/∂x = 2x — they match, so it's exact.",
+      clue: "Identify M and N, then compare ∂M/∂y with ∂N/∂x."
+    },
+    {
+      eq: "\\[ (2x+y)\\,dx + (x+2y)\\,dy = 0 \\]",
+      correctExplain: "Here M = 2x + y and N = x + 2y. Computing partials: ∂M/∂y = 1 and ∂N/∂x = 1 — they match, so it's exact.",
+      clue: "Identify M and N, then compare ∂M/∂y with ∂N/∂x."
+    },
+    {
+      eq: "\\[ (y^{2}+2xy)\\,dx + (x^{2}+2xy)\\,dy = 0 \\]",
+      correctExplain: "Here M = y² + 2xy and N = x² + 2xy. Computing partials: ∂M/∂y = 2y + 2x and ∂N/∂x = 2x + 2y — they match, so it's exact.",
+      clue: "Identify M and N, then compare ∂M/∂y with ∂N/∂x."
+    }
+  ],
+  reducible: [
+    {
+      eq: "\\[ (x^{2}+y^{2}+x)\\,dx + xy\\,dy = 0 \\]",
+      correctExplain: "Here M = x²+y²+x, N = xy. ∂M/∂y = 2y while ∂N/∂x = y — not exact. But (∂M/∂y − ∂N/∂x)/N = 1/x depends only on x, so μ(x) = x is an integrating factor. Multiplying through makes ∂(μM)/∂y = ∂(μN)/∂x = 2xy — exact.",
+      clue: "First check if it's exact as written. If not, could a factor depending only on x or y fix it?"
+    },
+    {
+      eq: "\\[ (3xy+y^{2})\\,dx + (x^{2}+xy)\\,dy = 0 \\]",
+      correctExplain: "Here M = 3xy+y², N = x²+xy. ∂M/∂y = 3x+2y while ∂N/∂x = 2x+y — not exact. But (∂M/∂y − ∂N/∂x)/N = 1/x depends only on x, so μ(x) = x makes it exact.",
+      clue: "First check if it's exact as written. If not, could a factor depending only on x or y fix it?"
+    },
+    {
+      eq: "\\[ y\\,dx - x\\,dy = 0 \\]",
+      correctExplain: "Here M = y, N = -x. ∂M/∂y = 1 while ∂N/∂x = -1 — not exact. But (∂N/∂x − ∂M/∂y)/M = -2/y depends only on y, so μ(y) = 1/y² makes it exact.",
+      clue: "First check if it's exact as written. If not, could a factor depending only on x or y fix it?"
+    }
+  ]
+};
+
+const typeMeta = {
+  linear: {label:'🟢 Linear'},
+  bernoulli: {label:'🟣 Bernoulli'},
+  exact: {label:'🔵 Exact'},
+  reducible: {label:'🟠 Reducible to Exact'}
+};
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildQuestionSet(){
+  const types = ['linear','bernoulli','exact','reducible'];
+  const picked = types.map(type=>{
+    const pool = questionPool[type];
+    const item = pool[Math.floor(Math.random()*pool.length)];
+    return Object.assign({correct:type}, item);
+  });
+  return shuffleArray(picked);
+}
+
+const answerOptions = [
+  {key:'linear', label:'🟢 Linear'},
+  {key:'bernoulli', label:'🟣 Bernoulli'},
+  {key:'exact', label:'🔵 Exact'},
+  {key:'reducible', label:'🟠 Reducible to Exact'}
+];
+
+let questions = [];
+let currentQ = 0;
+let score = 0;
+let answeredCorrectly = false;
+
+function startChallenge(){
+  questions = buildQuestionSet();
+  currentQ = 0; score = 0; answeredCorrectly = false;
+  updateScoreUI();
+
+  renderQuestion();
+  goTo('challenge');
+}
+
+function updateScoreUI(){
+  document.getElementById('score-val').textContent = score;
+  document.getElementById('q-counter').textContent = `Question ${currentQ+1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((currentQ)/questions.length)*100 + 25}%`;
+}
+
+function renderQuestion(){
+  answeredCorrectly = false;
+  const q = questions[currentQ];
+  document.getElementById('eq-display').innerHTML = q.eq;
+  const grid = document.getElementById('answers-grid');
+  grid.innerHTML = '';
+  shuffleArray(answerOptions).forEach(opt=>{
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = opt.label;
+    btn.onclick = ()=> selectAnswer(opt.key, btn);
+    grid.appendChild(btn);
+  });
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.removeAttribute('style');
+  updateScoreUI();
+  if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise([document.getElementById('eq-display')]); }
+}
+
+function selectAnswer(key, btn){
+  if(answeredCorrectly) return; // already solved, ignore further clicks
+  const q = questions[currentQ];
+  const allBtns = document.querySelectorAll('#answers-grid .answer-btn');
+
+  if(key === q.correct){
+    answeredCorrectly = true;
+    btn.classList.add('correct');
+    allBtns.forEach(b=>b.disabled=true);
+    score++;
+    updateScoreUI();
+    showFeedback(true, q.correctExplain);
+  } else {
+    btn.classList.add('incorrect');
+    setTimeout(()=>btn.classList.remove('incorrect'), 500);
+    showFeedback(false, q.clue);
+  }
+}
+
+function showFeedback(isCorrect, text){
+  const fb = document.getElementById('feedback');
+  const title = document.getElementById('fb-title');
+  const body = document.getElementById('fb-body');
+  const actions = document.getElementById('fb-actions');
+
+  fb.className = 'feedback show ' + (isCorrect ? 'correct-fb' : 'incorrect-fb');
+  title.textContent = isCorrect ? '🎉 Correct!' : '❌ Not quite!';
+  body.textContent = text;
+  actions.innerHTML = '';
+
+  if(isCorrect){
+    const btn = document.createElement('button');
+    btn.className = 'btn small';
+    btn.textContent = currentQ < questions.length-1 ? 'CONTINUE →' : 'SEE RESULTS →';
+    btn.onclick = nextQuestion;
+    actions.appendChild(btn);
+  } else {
+    const btn = document.createElement('button');
+    btn.className = 'btn ghost small';
+    btn.textContent = 'Try Again';
+    btn.onclick = ()=>{ fb.className='feedback'; fb.removeAttribute('style'); };
+    actions.appendChild(btn);
+  }
+}
+
+function nextQuestion(){
+  if(currentQ < questions.length-1){
+    currentQ++;
+    renderQuestion();
+  } else {
+    showCompletion();
+  }
+}
+
+function showCompletion(){
+  document.getElementById('final-score').textContent = score;
+  const emoji = document.getElementById('complete-emoji');
+  const msg = document.getElementById('verdict-msg');
+
+  if(score === 4){
+    emoji.textContent = '🏆';
+    msg.textContent = 'Excellent! You are a Differential Equation Detective!';
+  } else if(score === 3){
+    emoji.textContent = '🌟';
+    msg.textContent = 'Great work! You have a strong understanding of DE types.';
+  } else if(score === 2){
+    emoji.textContent = '👍';
+    msg.textContent = 'Good attempt! Review the identification clues and try again.';
+  } else {
+    emoji.textContent = '💡';
+    msg.textContent = 'Keep practising! Go back to the learning section and try the challenge again.';
+  }
+  goTo('complete');
+}
+
+function restartChallenge(){
+  startChallenge();
+}
+</script>
+</body>
+</html>
