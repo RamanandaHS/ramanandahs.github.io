@@ -1,0 +1,2265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Integration Quest - Level 1</title>
+
+<!-- =========================
+     MATHJAX
+========================= -->
+
+<script>
+window.MathJax = {
+    tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+    },
+    svg: {
+        fontCache: 'global'
+    }
+};
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+
+<!-- =========================
+     CSS
+========================= -->
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f7ff, #eef4ff);
+    color: #1f2937;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    background: linear-gradient(135deg, #263b80, #4b5fc3);
+    color: white;
+    padding: 22px 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.header-inner {
+    max-width: 1150px;
+    margin: auto;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+}
+
+.title-area h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+.title-area p {
+    margin: 5px 0 0;
+    opacity: 0.9;
+}
+
+.score-area {
+    text-align: right;
+}
+
+.level-label {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.score {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+
+/* =========================
+   MAIN CONTAINER
+========================= */
+
+.container {
+    max-width: 1100px;
+    margin: 30px auto 60px;
+    padding: 0 20px;
+}
+
+
+/* =========================
+   PROGRESS
+========================= */
+
+.progress-card {
+    background: white;
+    border-radius: 16px;
+
+    padding: 20px;
+
+    box-shadow:
+        0 5px 18px rgba(40,60,100,0.08);
+
+    margin-bottom: 25px;
+}
+
+.progress-top {
+    display: flex;
+    justify-content: space-between;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+
+    background: #e5e7eb;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 20%;
+    height: 100%;
+
+    background: linear-gradient(
+        90deg,
+        #4b5fc3,
+        #7b61ff
+    );
+
+    border-radius: 10px;
+
+    transition: width 0.5s ease;
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+    background: white;
+
+    border-radius: 20px;
+
+    padding: 35px;
+
+    text-align: center;
+
+    box-shadow:
+        0 8px 25px rgba(40,60,100,0.10);
+
+    margin-bottom: 30px;
+}
+
+.hero-icon {
+    font-size: 55px;
+    margin-bottom: 10px;
+}
+
+.hero h2 {
+    margin: 5px 0 10px;
+
+    font-size: 30px;
+
+    color: #263b80;
+}
+
+.hero p {
+    max-width: 700px;
+
+    margin: auto;
+
+    line-height: 1.7;
+
+    color: #5b6472;
+}
+
+.start-btn {
+    margin-top: 22px;
+
+    padding: 13px 30px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #4b5fc3;
+
+    color: white;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.start-btn:hover {
+    background: #36499e;
+
+    transform: translateY(-2px);
+}
+
+
+/* =========================
+   SECTIONS
+========================= */
+
+.section {
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 28px;
+
+    margin-bottom: 28px;
+
+    box-shadow:
+        0 6px 20px rgba(40,60,100,0.08);
+}
+
+.section-header {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 22px;
+}
+
+.section-number {
+    width: 38px;
+    height: 38px;
+
+    background: #4b5fc3;
+
+    color: white;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-weight: bold;
+}
+
+.section h2 {
+    margin: 0;
+
+    color: #263b80;
+
+    font-size: 24px;
+}
+
+
+/* =========================
+   FORMULA CARDS
+========================= */
+
+.formula-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(280px, 1fr));
+
+    gap: 16px;
+}
+
+.formula-card {
+    border: 1px solid #e3e7f4;
+
+    border-radius: 14px;
+
+    padding: 20px;
+
+    background: #fafbff;
+
+    transition: 0.2s;
+}
+
+.formula-card:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 6px 16px rgba(50,70,130,0.10);
+}
+
+.formula-name {
+
+    font-weight: bold;
+
+    color: #4b5fc3;
+
+    margin-bottom: 12px;
+}
+
+.formula {
+
+    font-size: 19px;
+
+    text-align: center;
+}
+
+.remember {
+
+    margin-top: 20px;
+
+    background: #fff8df;
+
+    border-left: 5px solid #f0b429;
+
+    padding: 15px 18px;
+
+    border-radius: 8px;
+}
+
+.remember strong {
+
+    color: #9a6b00;
+}
+
+
+/* =========================
+   EXAMPLES
+========================= */
+
+.example {
+
+    border: 1px solid #e1e6f5;
+
+    border-radius: 15px;
+
+    padding: 22px;
+
+    margin-bottom: 18px;
+
+    background: #fbfcff;
+}
+
+.example:last-child {
+
+    margin-bottom: 0;
+}
+
+.example-title {
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    color: #4b5fc3;
+
+    margin-bottom: 15px;
+}
+
+.example-problem {
+
+    font-size: 22px;
+
+    text-align: center;
+
+    margin: 15px 0;
+}
+
+.steps {
+
+    margin-top: 15px;
+}
+
+.step {
+
+    padding: 8px 0;
+
+    color: #4b5563;
+}
+
+.answer-box {
+
+    margin-top: 15px;
+
+    background: #edf7ee;
+
+    border-left: 5px solid #3d9b52;
+
+    padding: 15px;
+
+    border-radius: 8px;
+
+    text-align: center;
+
+    font-size: 20px;
+}
+
+
+/* =========================
+   CHALLENGE
+========================= */
+
+.challenge {
+
+    border-radius: 18px;
+
+    padding: 28px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f5f3ff,
+            #eef1ff
+        );
+
+    border: 2px solid #dfe3ff;
+}
+
+.challenge-badge {
+
+    display: inline-block;
+
+    background: #4b5fc3;
+
+    color: white;
+
+    padding: 6px 13px;
+
+    border-radius: 20px;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    margin-bottom: 12px;
+}
+
+.challenge h3 {
+
+    margin: 5px 0 15px;
+
+    color: #263b80;
+}
+
+.challenge-question {
+
+    font-size: 26px;
+
+    text-align: center;
+
+    background: white;
+
+    border-radius: 12px;
+
+    padding: 20px;
+
+    margin: 20px 0;
+}
+
+
+/* =========================
+   INPUT
+========================= */
+
+.answer-input {
+
+    width: 100%;
+
+    max-width: 600px;
+
+    display: block;
+
+    margin: auto;
+
+    padding: 13px;
+
+    border: 2px solid #cdd4ef;
+
+    border-radius: 9px;
+
+    font-size: 18px;
+
+    text-align: center;
+
+    outline: none;
+
+    background: white;
+
+    transition: 0.2s;
+}
+
+.answer-input:focus {
+
+    border-color: #4b5fc3;
+
+    box-shadow:
+        0 0 0 3px rgba(75,95,195,0.10);
+}
+
+.answer-input:disabled {
+
+    background: #e9f7ec;
+
+    border-color: #65a875;
+
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.button-row {
+
+    text-align: center;
+
+    margin-top: 15px;
+}
+
+.check-btn,
+.hint-btn,
+.next-btn {
+
+    border: none;
+
+    padding: 11px 23px;
+
+    border-radius: 9px;
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    margin: 5px;
+}
+
+.check-btn {
+
+    background: #4b5fc3;
+
+    color: white;
+}
+
+.check-btn:hover {
+
+    background: #36499e;
+}
+
+.hint-btn {
+
+    background: #fff1c7;
+
+    color: #805d00;
+}
+
+.hint-btn:hover {
+
+    background: #ffe7a0;
+}
+
+.next-btn {
+
+    background: #3d9b52;
+
+    color: white;
+
+    display: none;
+}
+
+.next-btn:hover {
+
+    background: #2d7c40;
+}
+
+
+/* =========================
+   FEEDBACK
+========================= */
+
+.feedback {
+
+    margin-top: 18px;
+
+    text-align: center;
+
+    padding: 13px;
+
+    border-radius: 9px;
+
+    display: none;
+
+    font-weight: 600;
+}
+
+.feedback.correct {
+
+    display: block;
+
+    background: #e7f7eb;
+
+    color: #26723a;
+}
+
+.feedback.incorrect {
+
+    display: block;
+
+    background: #fff0f0;
+
+    color: #a33b3b;
+}
+
+
+/* =========================
+   HINT
+========================= */
+
+.hint {
+
+    display: none;
+
+    margin-top: 12px;
+
+    text-align: center;
+
+    background: #fff9e8;
+
+    border-radius: 9px;
+
+    padding: 12px;
+
+    color: #7b5d0a;
+}
+
+
+/* =========================
+   COMPLETION
+========================= */
+
+.completion {
+
+    display: none;
+
+    text-align: center;
+
+    background: white;
+
+    border-radius: 20px;
+
+    padding: 45px 25px;
+
+    box-shadow:
+        0 8px 25px rgba(40,60,100,0.12);
+}
+
+.trophy {
+
+    font-size: 70px;
+}
+
+.completion h2 {
+
+    color: #263b80;
+
+    font-size: 30px;
+}
+
+.completion p {
+
+    color: #5b6472;
+
+    line-height: 1.6;
+}
+
+.locked {
+
+    margin-top: 25px;
+
+    padding: 18px;
+
+    background: #f1f3f7;
+
+    border-radius: 12px;
+
+    color: #6b7280;
+}
+
+.restart-btn {
+
+    margin-top: 20px;
+
+    padding: 12px 25px;
+
+    border: none;
+
+    background: #4b5fc3;
+
+    color: white;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 700px) {
+
+    .header-inner {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .score-area {
+
+        text-align: left;
+    }
+
+    .hero {
+
+        padding: 25px 18px;
+    }
+
+    .section {
+
+        padding: 20px;
+    }
+
+    .formula-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .challenge-question {
+
+        font-size: 21px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
+
+<header class="header">
+
+    <div class="header-inner">
+
+        <div class="title-area">
+
+            <h1>
+                ∫ Integration Quest
+            </h1>
+
+            <p>
+                Master the basics of indefinite integration
+            </p>
+
+        </div>
+
+
+        <div class="score-area">
+
+            <div class="level-label">
+                LEVEL 1
+            </div>
+
+            <div class="score">
+
+                ⭐ Score:
+
+                <span id="score">
+                    0
+                </span>
+
+                /2
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<!-- =====================================================
+     MAIN
+====================================================== -->
+
+<main class="container">
+
+
+<!-- =====================================================
+     PROGRESS
+====================================================== -->
+
+<div class="progress-card">
+
+    <div class="progress-top">
+
+        <span id="progressText">
+            Getting Started
+        </span>
+
+        <span id="progressPercent">
+            20%
+        </span>
+
+    </div>
+
+
+    <div class="progress-bar">
+
+        <div
+            class="progress-fill"
+            id="progressFill">
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     INTRO
+====================================================== -->
+
+<section
+    class="hero"
+    id="intro">
+
+    <div class="hero-icon">
+        ∫
+    </div>
+
+    <h2>
+        Level 1: Basic Integration
+    </h2>
+
+    <p>
+
+        Integration is the reverse process of
+        differentiation.
+
+        In this level, you will learn the most
+        important basic integration formulas,
+        see worked examples, and solve two
+        challenges.
+
+    </p>
+
+
+    <button
+        class="start-btn"
+        onclick="startQuest()">
+
+        Start Level 1 →
+
+    </button>
+
+</section>
+
+
+
+<!-- =====================================================
+     SECTION 1 : FORMULAS
+====================================================== -->
+
+<section
+    class="section"
+    id="formulas">
+
+
+    <div class="section-header">
+
+        <div class="section-number">
+            1
+        </div>
+
+        <h2>
+            Know the Basic Rules
+        </h2>
+
+    </div>
+
+
+
+    <div class="formula-grid">
+
+
+        <!-- POWER -->
+
+        <div class="formula-card">
+
+            <div class="formula-name">
+                Power Rule
+            </div>
+
+            <div class="formula">
+
+                \[
+                \int x^n dx
+                =
+                \frac{x^{n+1}}{n+1}+C
+                \]
+
+            </div>
+
+            <small>
+                \(n\neq -1\)
+            </small>
+
+        </div>
+
+
+        <!-- CONSTANT -->
+
+        <div class="formula-card">
+
+            <div class="formula-name">
+                Constant
+            </div>
+
+            <div class="formula">
+
+                \[
+                \int k\,dx
+                =
+                kx+C
+                \]
+
+            </div>
+
+        </div>
+
+
+        <!-- EXPONENTIAL -->
+
+        <div class="formula-card">
+
+            <div class="formula-name">
+                Exponential
+            </div>
+
+            <div class="formula">
+
+                \[
+                \int e^x dx
+                =
+                e^x+C
+                \]
+
+            </div>
+
+        </div>
+
+
+        <!-- RECIPROCAL -->
+
+        <div class="formula-card">
+
+            <div class="formula-name">
+                Reciprocal
+            </div>
+
+            <div class="formula">
+
+                \[
+                \int\frac{1}{x}dx
+                =
+                \ln|x|+C
+                \]
+
+            </div>
+
+        </div>
+
+
+        <!-- SINE -->
+
+        <div class="formula-card">
+
+            <div class="formula-name">
+                Sine
+            </div>
+
+            <div class="formula">
+
+                \[
+                \int\sin x\,dx
+                =
+                -\cos x+C
+                \]
+
+            </div>
+
+        </div>
+
+
+        <!-- COSINE -->
+
+        <div class="formula-card">
+
+            <div class="formula-name">
+                Cosine
+            </div>
+
+            <div class="formula">
+
+                \[
+                \int\cos x\,dx
+                =
+                \sin x+C
+                \]
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="remember">
+
+        ⭐
+
+        <strong>
+            Remember:
+        </strong>
+
+        For an indefinite integral,
+        always remember the constant of
+        integration
+
+        <strong>
+            + C
+        </strong>.
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     SECTION 2 : EXAMPLES
+====================================================== -->
+
+<section class="section">
+
+
+    <div class="section-header">
+
+        <div class="section-number">
+            2
+        </div>
+
+        <h2>
+            See How It Works
+        </h2>
+
+    </div>
+
+
+
+    <!-- EXAMPLE 1 -->
+
+    <div class="example">
+
+        <div class="example-title">
+
+            Example 1 — Power Rule
+
+        </div>
+
+
+        <div class="example-problem">
+
+            \[
+            \int x^4\,dx
+            \]
+
+        </div>
+
+
+        <div class="steps">
+
+            <div class="step">
+
+                <strong>
+                    Step 1:
+                </strong>
+
+                Increase the power:
+
+                \(4+1=5\)
+
+            </div>
+
+
+            <div class="step">
+
+                <strong>
+                    Step 2:
+                </strong>
+
+                Divide by the new power, 5.
+
+            </div>
+
+        </div>
+
+
+        <div class="answer-box">
+
+            \[
+            \boxed{
+            \int x^4dx
+            =
+            \frac{x^5}{5}+C
+            }
+            \]
+
+        </div>
+
+    </div>
+
+
+
+    <!-- EXAMPLE 2 -->
+
+    <div class="example">
+
+        <div class="example-title">
+
+            Example 2 — Constant
+
+        </div>
+
+
+        <div class="example-problem">
+
+            \[
+            \int7\,dx
+            \]
+
+        </div>
+
+
+        <div class="answer-box">
+
+            \[
+            \boxed{7x+C}
+            \]
+
+        </div>
+
+    </div>
+
+
+
+    <!-- EXAMPLE 3 -->
+
+    <div class="example">
+
+        <div class="example-title">
+
+            Example 3 — Trigonometric
+
+        </div>
+
+
+        <div class="example-problem">
+
+            \[
+            \int\cos x\,dx
+            \]
+
+        </div>
+
+
+        <div class="answer-box">
+
+            \[
+            \boxed{\sin x+C}
+            \]
+
+        </div>
+
+    </div>
+
+
+
+    <!-- EXAMPLE 4 -->
+
+    <div class="example">
+
+        <div class="example-title">
+
+            Example 4 — Exponential
+
+        </div>
+
+
+        <div class="example-problem">
+
+            \[
+            \int e^x\,dx
+            \]
+
+        </div>
+
+
+        <div class="answer-box">
+
+            \[
+            \boxed{e^x+C}
+            \]
+
+        </div>
+
+    </div>
+
+
+
+    <!-- EXAMPLE 5 -->
+
+    <div class="example">
+
+        <div class="example-title">
+
+            Example 5 — Reciprocal Function
+
+        </div>
+
+
+        <div class="example-problem">
+
+            \[
+            \int\frac{1}{x}\,dx
+            \]
+
+        </div>
+
+
+        <div class="answer-box">
+
+            \[
+            \boxed{\ln|x|+C}
+            \]
+
+        </div>
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     CHALLENGE 1
+====================================================== -->
+
+<section
+    class="section"
+    id="challenge1">
+
+
+    <div class="section-header">
+
+        <div class="section-number">
+            3
+        </div>
+
+        <h2>
+            Challenge 1 — Your Turn
+        </h2>
+
+    </div>
+
+
+
+    <div class="challenge">
+
+
+        <span class="challenge-badge">
+            EASY
+        </span>
+
+
+        <h3>
+            Use the Power Rule
+        </h3>
+
+
+        <p>
+            Find the indefinite integral:
+        </p>
+
+
+        <div class="challenge-question">
+
+            \[
+            \int5x^3\,dx
+            \]
+
+        </div>
+
+
+        <input
+            type="text"
+            id="answer1"
+            class="answer-input"
+            placeholder="Enter your answer"
+            autocomplete="off"
+        >
+
+
+        <div class="button-row">
+
+            <button
+                class="check-btn"
+                onclick="checkChallenge1()">
+
+                ✓ Check Answer
+
+            </button>
+
+
+            <button
+                class="hint-btn"
+                onclick="showHint1()">
+
+                💡 Hint
+
+            </button>
+
+        </div>
+
+
+        <div
+            class="hint"
+            id="hint1">
+
+            <strong>
+                Hint:
+            </strong>
+
+            Increase the power \(3\) by \(1\),
+            then divide by the new power.
+
+            <br><br>
+
+            So:
+
+            \[
+            3+1=4
+            \]
+
+        </div>
+
+
+        <div
+            class="feedback"
+            id="feedback1">
+        </div>
+
+
+        <div class="button-row">
+
+            <button
+                class="next-btn"
+                id="next1"
+                onclick="goToChallenge2()">
+
+                Next Challenge →
+
+            </button>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     CHALLENGE 2
+====================================================== -->
+
+<section
+    class="section"
+    id="challenge2">
+
+
+    <div class="section-header">
+
+        <div class="section-number">
+            4
+        </div>
+
+        <h2>
+            Challenge 2 — A Little More Involved
+        </h2>
+
+    </div>
+
+
+
+    <div class="challenge">
+
+
+        <span class="challenge-badge">
+            LEVEL UP
+        </span>
+
+
+        <h3>
+            Integrate Term by Term
+        </h3>
+
+
+        <p>
+
+            Remember:
+
+            The integral of a sum can be
+            found by integrating each term
+            separately.
+
+        </p>
+
+
+        <div class="challenge-question">
+
+            \[
+            \int(3x^2+4x-5)\,dx
+            \]
+
+        </div>
+
+
+        <p style="text-align:center;">
+
+            Enter the complete answer:
+
+        </p>
+
+
+        <input
+            type="text"
+            id="answer2"
+            class="answer-input"
+            placeholder="Enter your answer"
+            autocomplete="off"
+        >
+
+
+        <div class="button-row">
+
+
+            <button
+                class="check-btn"
+                onclick="checkChallenge2()">
+
+                ✓ Check Answer
+
+            </button>
+
+
+            <button
+                class="hint-btn"
+                onclick="showHint2()">
+
+                💡 Hint
+
+            </button>
+
+
+        </div>
+
+
+        <div
+            class="hint"
+            id="hint2">
+
+            <strong>
+                Hint:
+            </strong>
+
+            Integrate each term separately:
+
+            <br><br>
+
+            \[
+            \int3x^2dx
+            \]
+
+            \[
+            \int4xdx
+            \]
+
+            \[
+            \int-5dx
+            \]
+
+            <br>
+
+            Then combine the three answers.
+
+        </div>
+
+
+        <div
+            class="feedback"
+            id="feedback2">
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     COMPLETION
+====================================================== -->
+
+<section
+    class="completion"
+    id="completion">
+
+
+    <div class="trophy">
+        🏆
+    </div>
+
+
+    <h2>
+        Level 1 Complete!
+    </h2>
+
+
+    <p>
+
+        Excellent work!
+
+        You have learned the basic rules
+        of indefinite integration and
+        successfully completed both
+        challenges.
+
+    </p>
+
+
+    <h3>
+
+        ⭐ Final Score:
+
+        <span id="finalScore">
+            2
+        </span>
+
+        /2
+
+    </h3>
+
+
+    <div class="locked">
+
+        🔒
+
+        <strong>
+            Level 2
+        </strong>
+
+        <br><br>
+
+        More integration techniques
+        are waiting for you.
+
+    </div>
+
+
+    <button
+        class="restart-btn"
+        onclick="restartQuest()">
+
+        ↻ Try Level 1 Again
+
+    </button>
+
+
+</section>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script>
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let score = 0;
+
+let challenge1Completed = false;
+
+let challenge2Completed = false;
+
+
+
+/* =====================================================
+   START QUEST
+===================================================== */
+
+function startQuest() {
+
+    document.getElementById("formulas")
+        .scrollIntoView({
+            behavior: "smooth"
+        });
+
+    updateProgress(
+        30,
+        "Learning the Basic Rules"
+    );
+}
+
+
+
+/* =====================================================
+   UPDATE PROGRESS
+===================================================== */
+
+function updateProgress(percent, text) {
+
+    document.getElementById("progressFill")
+        .style.width = percent + "%";
+
+    document.getElementById("progressPercent")
+        .innerText = percent + "%";
+
+    document.getElementById("progressText")
+        .innerText = text;
+}
+
+
+
+/* =====================================================
+   HINT 1
+===================================================== */
+
+function showHint1() {
+
+    const hint =
+        document.getElementById("hint1");
+
+    if (hint.style.display === "block") {
+
+        hint.style.display = "none";
+
+    } else {
+
+        hint.style.display = "block";
+
+    }
+
+}
+
+
+
+/* =====================================================
+   HINT 2
+===================================================== */
+
+function showHint2() {
+
+    const hint =
+        document.getElementById("hint2");
+
+    if (hint.style.display === "block") {
+
+        hint.style.display = "none";
+
+    } else {
+
+        hint.style.display = "block";
+
+    }
+
+}
+
+
+
+/* =====================================================
+   NORMALIZE ANSWER
+===================================================== */
+
+function normalizeAnswer(answer) {
+
+    return answer
+
+        .toLowerCase()
+
+        .replace(/\s+/g, "")
+
+        .replace(/−/g, "-")
+
+        .replace(/–/g, "-")
+
+        .replace(/⁴/g, "^4")
+
+        .replace(/³/g, "^3")
+
+        .replace(/²/g, "^2")
+
+        .replace(/¹/g, "^1")
+
+        .replace(/⁵/g, "^5");
+
+}
+
+
+
+/* =====================================================
+   CHALLENGE 1
+===================================================== */
+
+function checkChallenge1() {
+
+
+    if (challenge1Completed) {
+
+        return;
+
+    }
+
+
+    const input =
+        document.getElementById("answer1");
+
+
+    const feedback =
+        document.getElementById("feedback1");
+
+
+    let answer =
+        normalizeAnswer(input.value);
+
+
+
+    /* EMPTY ANSWER */
+
+    if (answer === "") {
+
+        feedback.className =
+            "feedback incorrect";
+
+        feedback.innerHTML =
+            "⚠️ Please enter an answer.";
+
+        input.focus();
+
+        return;
+    }
+
+
+
+    /* ACCEPTED ANSWERS */
+
+    const correctAnswers = [
+
+        "5x^4/4+c",
+
+        "(5x^4)/4+c",
+
+        "5/4x^4+c",
+
+        "5x4/4+c",
+
+        "5x⁴/4+c"
+
+    ];
+
+
+
+    /* CORRECT */
+
+    if (correctAnswers.includes(answer)) {
+
+
+        challenge1Completed = true;
+
+
+        score++;
+
+
+        document.getElementById("score")
+            .innerText = score;
+
+
+
+        feedback.className =
+            "feedback correct";
+
+
+        feedback.innerHTML =
+            "🎉 Correct! Excellent use of the Power Rule.";
+
+
+
+        /* LOCK INPUT */
+
+        input.disabled = true;
+
+
+
+        /* SHOW NEXT BUTTON */
+
+        document.getElementById("next1")
+            .style.display = "inline-block";
+
+
+
+        updateProgress(
+            60,
+            "Challenge 1 Completed"
+        );
+
+
+    }
+
+
+    /* WRONG */
+
+    else {
+
+
+        feedback.className =
+            "feedback incorrect";
+
+
+        feedback.innerHTML =
+            "❌ That's not correct. Please try again!";
+
+
+        /*
+         * CLEAR INPUT
+         */
+
+        input.value = "";
+
+
+        /*
+         * PUT CURSOR BACK
+         */
+
+        input.focus();
+
+    }
+
+}
+
+
+
+/* =====================================================
+   GO TO CHALLENGE 2
+===================================================== */
+
+function goToChallenge2() {
+
+    document.getElementById("challenge2")
+        .scrollIntoView({
+            behavior: "smooth"
+        });
+
+
+    updateProgress(
+        70,
+        "Challenge 2 — Term by Term"
+    );
+
+}
+
+
+
+/* =====================================================
+   CHALLENGE 2
+===================================================== */
+
+function checkChallenge2() {
+
+
+    if (challenge2Completed) {
+
+        return;
+
+    }
+
+
+    const input =
+        document.getElementById("answer2");
+
+
+    const feedback =
+        document.getElementById("feedback2");
+
+
+    let answer =
+        normalizeAnswer(input.value);
+
+
+
+    /* EMPTY ANSWER */
+
+    if (answer === "") {
+
+        feedback.className =
+            "feedback incorrect";
+
+        feedback.innerHTML =
+            "⚠️ Please enter an answer.";
+
+        input.focus();
+
+        return;
+
+    }
+
+
+
+    /* ACCEPTED ANSWERS */
+
+    const correctAnswers = [
+
+        "x^3+2x^2-5x+c",
+
+        "x3+2x2-5x+c",
+
+        "x³+2x²-5x+c"
+
+    ];
+
+
+
+    /* CORRECT */
+
+    if (correctAnswers.includes(answer)) {
+
+
+        challenge2Completed = true;
+
+
+        score++;
+
+
+        document.getElementById("score")
+            .innerText = score;
+
+
+        document.getElementById("finalScore")
+            .innerText = score;
+
+
+
+        feedback.className =
+            "feedback correct";
+
+
+        feedback.innerHTML =
+            "🎉 Excellent! You integrated each term correctly.";
+
+
+
+        /* LOCK INPUT */
+
+        input.disabled = true;
+
+
+
+        updateProgress(
+            100,
+            "Level 1 Complete!"
+        );
+
+
+
+        /*
+         * SHOW COMPLETION
+         */
+
+        setTimeout(function() {
+
+
+            document.getElementById("completion")
+                .style.display = "block";
+
+
+            document.getElementById("completion")
+                .scrollIntoView({
+                    behavior: "smooth"
+                });
+
+
+        }, 800);
+
+
+    }
+
+
+    /* WRONG */
+
+    else {
+
+
+        feedback.className =
+            "feedback incorrect";
+
+
+        feedback.innerHTML =
+            "❌ That's not correct. Please try again!";
+
+
+        /*
+         * CLEAR INPUT
+         */
+
+        input.value = "";
+
+
+        /*
+         * RETURN CURSOR
+         */
+
+        input.focus();
+
+    }
+
+}
+
+
+
+/* =====================================================
+   RESTART QUEST
+===================================================== */
+
+function restartQuest() {
+
+
+    score = 0;
+
+    challenge1Completed = false;
+
+    challenge2Completed = false;
+
+
+
+    /* SCORE */
+
+    document.getElementById("score")
+        .innerText = "0";
+
+    document.getElementById("finalScore")
+        .innerText = "0";
+
+
+
+    /* INPUTS */
+
+    const input1 =
+        document.getElementById("answer1");
+
+    const input2 =
+        document.getElementById("answer2");
+
+
+    input1.value = "";
+
+    input2.value = "";
+
+
+    input1.disabled = false;
+
+    input2.disabled = false;
+
+
+
+    /* FEEDBACK 1 */
+
+    const feedback1 =
+        document.getElementById("feedback1");
+
+
+    feedback1.className =
+        "feedback";
+
+
+    feedback1.innerHTML =
+        "";
+
+
+
+    /* FEEDBACK 2 */
+
+    const feedback2 =
+        document.getElementById("feedback2");
+
+
+    feedback2.className =
+        "feedback";
+
+
+    feedback2.innerHTML =
+        "";
+
+
+
+    /* HINTS */
+
+    document.getElementById("hint1")
+        .style.display = "none";
+
+    document.getElementById("hint2")
+        .style.display = "none";
+
+
+
+    /* NEXT BUTTON */
+
+    document.getElementById("next1")
+        .style.display = "none";
+
+
+
+    /* COMPLETION */
+
+    document.getElementById("completion")
+        .style.display = "none";
+
+
+
+    /* PROGRESS */
+
+    updateProgress(
+        20,
+        "Getting Started"
+    );
+
+
+
+    /* SCROLL TOP */
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
+
+
+
+/* =====================================================
+   ENTER KEY
+===================================================== */
+
+document.getElementById("answer1")
+    .addEventListener(
+        "keypress",
+        function(event) {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                checkChallenge1();
+
+            }
+
+        }
+    );
+
+
+
+document.getElementById("answer2")
+    .addEventListener(
+        "keypress",
+        function(event) {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                checkChallenge2();
+
+            }
+
+        }
+    );
+
+
+</script>
+
+
+</body>
+</html>

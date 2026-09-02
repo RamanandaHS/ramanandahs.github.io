@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Derivative Quest – Level 4</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg1:#1e1b4b; --bg2:#0f172a; --purple:#8b5cf6; --purple-d:#6d28d9;
+    --blue:#3b82f6; --orange:#f59e0b; --green:#22c55e; --red:#ef4444;
+    --gold:#fbbf24; --card:#1e293b; --card-l:#293548; --text:#e2e8f0; --muted:#94a3b8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; font-family:'Segoe UI',Verdana,sans-serif;
+    background:radial-gradient(circle at 20% 10%, #312e81 0%, var(--bg2) 55%);
+    color:var(--text); overflow-x:hidden;
+  }
+  #topbar{
+    position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:16px;
+    padding:12px 20px; background:rgba(15,23,42,0.92); backdrop-filter:blur(6px);
+    border-bottom:2px solid var(--purple-d);
+  }
+  #topbar h1{font-size:1.05rem; margin:0; white-space:nowrap; color:#c4b5fd;}
+  #progressTrack{flex:1; display:flex; align-items:center; gap:6px;}
+  .stage{
+    flex:1; text-align:center; padding:6px 4px; border-radius:8px; font-size:0.72rem;
+    background:var(--card); color:var(--muted); border:2px solid #334155; transition:.3s;
+    font-weight:600;
+  }
+  .stage.done{background:linear-gradient(135deg,var(--green),#16a34a); color:#fff; border-color:var(--green);}
+  .stage.active{background:linear-gradient(135deg,var(--purple),var(--purple-d)); color:#fff; border-color:#c4b5fd; box-shadow:0 0 14px #a78bfa;}
+  #scoreBox{display:flex; align-items:center; gap:6px; font-weight:700; background:var(--card); padding:6px 12px; border-radius:20px; border:2px solid var(--gold); white-space:nowrap;}
+  #app{max-width:920px; margin:0 auto; padding:28px 18px 60px;}
+  .screen{display:none; animation:fadeIn .4s ease;}
+  .screen.visible{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);}}
+  .card{
+    background:linear-gradient(160deg, var(--card-l), var(--card));
+    border-radius:18px; padding:26px 28px; margin-bottom:20px; border:1px solid #334155;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  h2.title{
+    text-align:center; font-size:1.9rem; margin:0 0 6px; letter-spacing:1px;
+    background:linear-gradient(90deg,#c4b5fd,#93c5fd); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .subtitle{text-align:center; color:var(--muted); margin-bottom:18px; font-size:.95rem;}
+  .funcbox{
+    text-align:center; font-size:1.9rem; font-weight:700; margin:18px 0; letter-spacing:1px;
+    background:#0f172a; border-radius:14px; padding:20px; border:2px dashed #475569;
+  }
+  .u{color:#60a5fa; font-weight:800;}
+  .v{color:#fb923c; font-weight:800;}
+  .outer{color:#c084fc; font-weight:800;}
+  .inner{color:#4ade80; font-weight:800;}
+  .frac{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 6px;}
+  .frac .num, .frac .den{padding:2px 8px;}
+  .frac .num{border-bottom:2px solid var(--text);}
+  .note{text-align:center; font-size:1.05rem; margin:10px 0; color:var(--text);}
+  .hintbtn,.nextbtn,.tryagain,.contbtn{
+    display:inline-block; cursor:pointer; border:none; border-radius:12px; padding:12px 22px;
+    font-size:1rem; font-weight:700; margin:6px; transition:.15s; color:#fff;
+  }
+  .nextbtn,.contbtn{background:linear-gradient(135deg,var(--purple),var(--purple-d)); box-shadow:0 4px 0 #4c1d95;}
+  .nextbtn:hover,.contbtn:hover{transform:translateY(-2px);}
+  .hintbtn{background:linear-gradient(135deg,var(--gold),#d97706); box-shadow:0 4px 0 #92400e; color:#1e293b;}
+  .tryagain{background:linear-gradient(135deg,#64748b,#475569); box-shadow:0 4px 0 #334155;}
+  .btnrow{text-align:center; margin-top:18px;}
+  .reveal-stage{min-height:70px; text-align:center;}
+  .pill{display:inline-block; padding:8px 16px; border-radius:20px; background:#0f172a; border:1px solid #475569; margin:4px;}
+  .lockedmsg{text-align:center; color:var(--muted); padding:40px;}
+  .lock{font-size:2rem;}
+  .qmeta{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .hearts{font-size:1.2rem; letter-spacing:3px;}
+  .stepdots{display:flex; gap:6px; justify-content:center; margin-bottom:14px;}
+  .dot{width:10px; height:10px; border-radius:50%; background:#334155;}
+  .dot.filled{background:var(--purple);}
+  .optionsgrid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px;}
+  @media(max-width:560px){.optionsgrid{grid-template-columns:1fr;}}
+  .opt{
+    background:#0f172a; border:2px solid #475569; border-radius:14px; padding:16px;
+    text-align:center; font-size:1.1rem; font-weight:700; cursor:pointer; transition:.15s; color:var(--text);
+  }
+  .opt:hover{border-color:var(--blue); transform:translateY(-2px);}
+  .opt.correct{background:linear-gradient(135deg,#166534,#22c55e); border-color:#22c55e; animation:pop .35s;}
+  .opt.wrong{background:linear-gradient(135deg,#7f1d1d,#ef4444); border-color:#ef4444; animation:shake .35s;}
+  .opt.disabled{pointer-events:none; opacity:.55;}
+  @keyframes pop{0%{transform:scale(1);}50%{transform:scale(1.06);}100%{transform:scale(1);}}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+  .feedback{text-align:center; margin-top:14px; font-weight:700; min-height:26px;}
+  .feedback.good{color:#4ade80;}
+  .feedback.bad{color:#f87171;}
+  .hinttext{text-align:center; margin-top:10px; color:var(--gold); font-style:italic;}
+  .prompt{text-align:center; font-size:1.15rem; font-weight:600; margin-bottom:6px;}
+  .stagelabel{text-align:center; color:#93c5fd; text-transform:uppercase; letter-spacing:2px; font-size:.75rem; margin-bottom:4px;}
+  .completeBanner{
+    text-align:center; padding:24px; border-radius:16px; margin-top:16px;
+    background:linear-gradient(135deg,#064e3b,#166534); border:2px solid #22c55e; animation:pop .5s;
+  }
+  .completeBanner h3{margin:0 0 6px; font-size:1.5rem;}
+  .summaryGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:10px;}
+  @media(max-width:700px){.summaryGrid{grid-template-columns:1fr;}}
+  .sumcard{background:#0f172a; border-radius:14px; padding:18px; text-align:center; border:2px solid #475569;}
+  .sumcard h4{margin:4px 0; font-size:1.1rem;}
+  .sumcard .formula{font-size:1.15rem; font-weight:800; margin:10px 0; color:#93c5fd;}
+  .finalScore{text-align:center; font-size:2.2rem; font-weight:900; color:var(--gold); margin:16px 0;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>🧮 Derivative Quest · L4</h1>
+  <div id="progressTrack"></div>
+  <div id="scoreBox">⭐ <span id="scoreVal">0</span></div>
+</div>
+
+<div id="app"></div>
+
+<script>
+/* ================= CONFIG ================= */
+const STAGES = ["Product Rule","Quotient Rule","Chain Rule","Final Challenge"];
+const SCREENS = [
+  "intro",
+  "productLearn","productC1","productC2",
+  "quotientLearn","quotientC1","quotientC2",
+  "chainLearn","chainC1","chainC2",
+  "final","summary"
+];
+let unlockedIndex = 0;
+let currentScreen = 0;
+let score = 0;
+const TOTAL_POSSIBLE = 140; // 6 rule challenges + 8 final questions, 10 pts max each
+
+function stageOfScreen(name){
+  if(name==="intro") return -1;
+  if(name.startsWith("product")) return 0;
+  if(name.startsWith("quotient")) return 1;
+  if(name.startsWith("chain")) return 2;
+  if(name==="final") return 3;
+  return 4;
+}
+
+function renderTopbar(){
+  const track = document.getElementById("progressTrack");
+  track.innerHTML = "";
+  const curStage = stageOfScreen(SCREENS[currentScreen]);
+  STAGES.forEach((s,i)=>{
+    const d = document.createElement("div");
+    d.className = "stage";
+    if(i < curStage) d.className += " done";
+    else if(i === curStage) d.className += " active";
+    d.textContent = (i<curStage? "✓ ":"") + s;
+    track.appendChild(d);
+  });
+  document.getElementById("scoreVal").textContent = score + " / " + TOTAL_POSSIBLE;
+}
+
+function addScore(n){ score += n; renderTopbar(); }
+
+function goTo(name){
+  const idx = SCREENS.indexOf(name);
+  currentScreen = idx;
+  if(idx > unlockedIndex) unlockedIndex = idx;
+  renderTopbar();
+  renderScreen();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function unlockNext(){
+  if(currentScreen+1 > unlockedIndex) unlockedIndex = currentScreen+1;
+}
+
+/* ================= GENERIC CHALLENGE ENGINE ================= */
+function buildChallengeScreen(container, challenge, nextScreenName, nextLabel){
+  let stepIndex = 0;
+  let mistakesThisStep = 0;
+  let totalMistakes = 0;
+
+  function heartsHTML(){
+    const remaining = Math.max(0, 3-totalMistakes);
+    let h = "";
+    for(let i=0;i<3;i++) h += (i<remaining? "❤️":"🖤");
+    return h;
+  }
+
+  function renderStep(){
+    const step = challenge.steps[stepIndex];
+    mistakesThisStep = 0;
+    container.innerHTML = `
+      <div class="card">
+        <div class="qmeta">
+          <div class="hearts">${heartsHTML()}</div>
+          <div class="stagelabel">${challenge.stageLabel}</div>
+          <div>⭐ ${score}</div>
+        </div>
+        <h2 class="title">${challenge.title}</h2>
+        <div class="funcbox">${challenge.funcHTML}</div>
+        <div class="stepdots">${challenge.steps.map((s,i)=>`<div class="dot ${i<=stepIndex?'filled':''}"></div>`).join("")}</div>
+        <div class="prompt">${step.prompt}</div>
+        <div class="optionsgrid" id="optsWrap"></div>
+        <div class="feedback" id="fbBox"></div>
+        <div class="hinttext" id="hintBox"></div>
+        <div class="btnrow">
+          <button class="hintbtn" id="hintBtn">💡 Hint</button>
+        </div>
+      </div>
+    `;
+    const wrap = container.querySelector("#optsWrap");
+    step.options.forEach((opt,i)=>{
+      const b = document.createElement("div");
+      b.className = "opt";
+      b.innerHTML = opt;
+      b.onclick = ()=>handleAnswer(i,b);
+      wrap.appendChild(b);
+    });
+    container.querySelector("#hintBtn").onclick = ()=>{
+      container.querySelector("#hintBox").textContent = "💡 " + step.hint;
+    };
+  }
+
+  function handleAnswer(i, btnEl){
+    const step = challenge.steps[stepIndex];
+    const allOpts = container.querySelectorAll(".opt");
+    if(i === step.correct){
+      allOpts.forEach(o=>o.classList.add("disabled"));
+      btnEl.classList.add("correct");
+      container.querySelector("#fbBox").textContent = "Correct! Nicely spotted.";
+      container.querySelector("#fbBox").className = "feedback good";
+      setTimeout(()=>{
+        stepIndex++;
+        if(stepIndex < challenge.steps.length){
+          renderStep();
+        } else {
+          finishChallenge();
+        }
+      }, 750);
+    } else {
+      mistakesThisStep++;
+      totalMistakes++;
+      btnEl.classList.add("wrong");
+      container.querySelector(".hearts").textContent = heartsHTML();
+      const fb = container.querySelector("#fbBox");
+      if(mistakesThisStep === 1){
+        fb.textContent = "Not quite. Look at the structure of the function.";
+        fb.className = "feedback bad";
+      } else if(mistakesThisStep === 2){
+        fb.textContent = "Still not quite — check the hint below.";
+        fb.className = "feedback bad";
+        container.querySelector("#hintBox").textContent = "💡 " + step.hint;
+      } else {
+        fb.textContent = "Here's the correct answer, highlighted below.";
+        fb.className = "feedback bad";
+        allOpts.forEach((o,idx)=>{
+          o.classList.add("disabled");
+          if(idx===step.correct) o.classList.add("correct");
+        });
+        setTimeout(()=>{
+          stepIndex++;
+          if(stepIndex < challenge.steps.length){ renderStep(); }
+          else { finishChallenge(); }
+        }, 1600);
+      }
+    }
+  }
+
+  function finishChallenge(){
+    const earned = Math.max(10 - totalMistakes*2, 2);
+    addScore(earned);
+    unlockNext();
+    container.innerHTML = `
+      <div class="card">
+        <div class="completeBanner">
+          <h3>✓ ${challenge.title} Complete!</h3>
+          <p>Excellent! +${earned} points</p>
+        </div>
+        <div class="btnrow">
+          <button class="contbtn" id="goNext">Continue → ${nextLabel}</button>
+        </div>
+      </div>
+    `;
+    container.querySelector("#goNext").onclick = ()=>goTo(nextScreenName);
+  }
+
+  renderStep();
+}
+
+/* ================= LEARN SCREEN ENGINE ================= */
+function buildLearnScreen(container, learn, nextScreenName, nextLabel){
+  let exIndex = 0;
+  let revealIndex = 0;
+
+  function render(){
+    const ex = learn.examples[exIndex];
+    container.innerHTML = `
+      <div class="card">
+        <h2 class="title">${learn.title}</h2>
+        <div class="subtitle">${learn.intro}</div>
+        <div class="note" style="font-size:1.3rem;">${learn.formulaHTML}</div>
+      </div>
+      <div class="card">
+        <div class="stagelabel">Example ${exIndex+1} of ${learn.examples.length}</div>
+        <div class="funcbox">${ex.funcHTML}</div>
+        <div class="reveal-stage" id="revealStage"></div>
+        <div class="btnrow">
+          <button class="nextbtn" id="revealBtn">Reveal Step ▶</button>
+        </div>
+      </div>
+    `;
+    renderReveal();
+    container.querySelector("#revealBtn").onclick = ()=>{
+      if(revealIndex < ex.revealSteps.length-1){
+        revealIndex++;
+        renderReveal();
+      } else {
+        advance();
+      }
+    };
+  }
+
+  function renderReveal(){
+    const ex = learn.examples[exIndex];
+    const stage = container.querySelector("#revealStage");
+    let html = "";
+    for(let i=0;i<=revealIndex;i++){
+      html += `<div class="note">${ex.revealSteps[i]}</div>`;
+    }
+    stage.innerHTML = html;
+    const btn = container.querySelector("#revealBtn");
+    if(btn) btn.textContent = (revealIndex < ex.revealSteps.length-1) ? "Reveal Step ▶" : (exIndex < learn.examples.length-1 ? "Next Example ▶" : "Start Challenge ▶");
+  }
+
+  function advance(){
+    if(exIndex < learn.examples.length-1){
+      exIndex++;
+      revealIndex = 0;
+      render();
+    } else {
+      unlockNext();
+      goTo(nextScreenName);
+    }
+  }
+
+  render();
+}
+
+/* ================= CONTENT DATA ================= */
+
+const productLearn = {
+  title:"PRODUCT RULE",
+  intro:"When two functions are multiplied together, we use the Product Rule.",
+  formulaHTML:`(u·v)′ = <span class="u">u′</span>v + u<span class="v">v′</span>`,
+  examples:[
+    {
+      funcHTML:`y = <span class="u">x²</span> <span class="v">sin x</span>`,
+      revealSteps:[
+        `First function <span class="u">u = x²</span> &nbsp;&nbsp; Second function <span class="v">v = sin x</span>`,
+        `<span class="u">u′ = 2x</span> &nbsp;&nbsp; <span class="v">v′ = cos x</span>`,
+        `y′ = <span class="u">2x</span>·<span class="v">sin x</span> + <span class="u">x²</span>·<span class="v">cos x</span>`,
+        `<b>y′ = 2x sin x + x² cos x</b>`
+      ]
+    },
+    {
+      funcHTML:`y = <span class="u">x</span> <span class="v">ln x</span>`,
+      revealSteps:[
+        `<span class="u">u = x</span> &nbsp;&nbsp; <span class="v">v = ln x</span>`,
+        `<span class="u">u′ = 1</span> &nbsp;&nbsp; <span class="v">v′ = 1/x</span>`,
+        `y′ = (1)(ln x) + (x)(1/x)`,
+        `<b>y′ = ln x + 1</b>`
+      ]
+    }
+  ]
+};
+
+const productC1 = {
+  stageLabel:"Product Rule · Challenge 1", title:"Differentiate: y = x² cos x",
+  funcHTML:`y = x² cos x`,
+  steps:[
+    {prompt:"Which rule should you use?", options:["Power Rule","Product Rule","Quotient Rule","Chain Rule"], correct:1,
+     hint:"Two separate functions, x² and cos x, are being multiplied together."},
+    {prompt:"What is u (the first function)?", options:["x²","cos x","2x","−sin x"], correct:0, hint:"u is the function written first."},
+    {prompt:"What is v (the second function)?", options:["x²","sin x","cos x","−sin x"], correct:2, hint:"v is the function written second."},
+    {prompt:"What is u′?", options:["2x","x²","cos x","−sin x"], correct:0, hint:"Differentiate x² using the power rule."},
+    {prompt:"What is v′?", options:["sin x","cos x","−sin x","−cos x"], correct:2, hint:"The derivative of cos x is −sin x."},
+    {prompt:"Select the correct derivative y′:",
+     options:["2x cos x − x² sin x","2x cos x + x² sin x","x² cos x − 2x sin x","2x sin x − x² cos x"], correct:0,
+     hint:"Combine: u′v + uv′ = (2x)(cos x) + (x²)(−sin x)."}
+  ]
+};
+
+const productC2 = {
+  stageLabel:"Product Rule · Challenge 2", title:"Differentiate: y = x² ln x",
+  funcHTML:`y = x² ln x`,
+  steps:[
+    {prompt:"Which rule should you use?", options:["Product Rule","Quotient Rule","Chain Rule","Power Rule"], correct:0,
+     hint:"x² and ln x are multiplied together."},
+    {prompt:"What is u?", options:["ln x","x²","2x","1/x"], correct:1, hint:"u is the first function, x²."},
+    {prompt:"What is v?", options:["x²","2x","ln x","1/x"], correct:2, hint:"v is the second function, ln x."},
+    {prompt:"What is u′?", options:["2x","x²","1/x","ln x"], correct:0, hint:"Power rule on x²."},
+    {prompt:"What is v′?", options:["x","1/x","ln x","2x"], correct:1, hint:"Derivative of ln x is 1/x."},
+    {prompt:"Select the correct derivative y′:",
+     options:["2x ln x + x","2x ln x + x²","2x ln x − x","x ln x + 2x"], correct:0,
+     hint:"u′v + uv′ = (2x)(ln x) + (x²)(1/x) = 2x ln x + x."}
+  ]
+};
+
+const quotientLearn = {
+  title:"QUOTIENT RULE",
+  intro:"When one function is divided by another, we use the Quotient Rule.",
+  formulaHTML:`<div class="frac"><span class="num">v·<span class="u">u′</span> − u·<span class="v">v′</span></span><span class="den">v²</span></div>`,
+  examples:[
+    {
+      funcHTML:`y = <div class="frac"><span class="num u">sin x</span><span class="den v">x</span></div>`,
+      revealSteps:[
+        `<span class="u">u = sin x</span> &nbsp;&nbsp; <span class="v">v = x</span>`,
+        `<span class="u">u′ = cos x</span> &nbsp;&nbsp; <span class="v">v′ = 1</span>`,
+        `y′ = [ (x)(cos x) − (sin x)(1) ] / x²`,
+        `<b>y′ = (x cos x − sin x) / x²</b>`
+      ]
+    },
+    {
+      funcHTML:`y = <div class="frac"><span class="num u">ln x</span><span class="den v">x</span></div>`,
+      revealSteps:[
+        `<span class="u">u = ln x</span> &nbsp;&nbsp; <span class="v">v = x</span>`,
+        `<span class="u">u′ = 1/x</span> &nbsp;&nbsp; <span class="v">v′ = 1</span>`,
+        `y′ = [ (x)(1/x) − (ln x)(1) ] / x²`,
+        `<b>y′ = (1 − ln x) / x²</b>`
+      ]
+    }
+  ]
+};
+
+const quotientC1 = {
+  stageLabel:"Quotient Rule · Challenge 1", title:"Differentiate: y = sin x / x",
+  funcHTML:`y = sin x / x`,
+  steps:[
+    {prompt:"Which rule should you use?", options:["Product Rule","Quotient Rule","Chain Rule","Power Rule"], correct:1,
+     hint:"sin x is being divided by x — a top and a bottom function."},
+    {prompt:"What is u (the top/numerator)?", options:["sin x","x","cos x","1"], correct:0, hint:"u is the numerator."},
+    {prompt:"What is v (the bottom/denominator)?", options:["sin x","x","cos x","1"], correct:1, hint:"v is the denominator."},
+    {prompt:"What is u′?", options:["cos x","1","−sin x","sin x"], correct:0, hint:"Derivative of sin x is cos x."},
+    {prompt:"What is v′?", options:["1","x","cos x","0"], correct:0, hint:"Derivative of x is 1."},
+    {prompt:"Select the correct derivative y′:",
+     options:["(x cos x − sin x)/x²","(x cos x + sin x)/x²","(sin x − x cos x)/x²","(cos x − x sin x)/x²"], correct:0,
+     hint:"(v·u′ − u·v′)/v² = (x·cos x − sin x·1)/x²."}
+  ]
+};
+
+const quotientC2 = {
+  stageLabel:"Quotient Rule · Challenge 2", title:"Differentiate: y = ln x / x²",
+  funcHTML:`y = ln x / x²`,
+  steps:[
+    {prompt:"Which rule should you use?", options:["Quotient Rule","Product Rule","Chain Rule","Power Rule"], correct:0,
+     hint:"ln x (numerator) is divided by x² (denominator)."},
+    {prompt:"What is u (numerator)?", options:["x²","ln x","1/x","2x"], correct:1, hint:"u is on top: ln x."},
+    {prompt:"What is v (denominator)?", options:["ln x","x²","1/x","2x"], correct:1, hint:"v is on the bottom: x²."},
+    {prompt:"What is u′?", options:["1/x","2x","ln x","x²"], correct:0, hint:"Derivative of ln x is 1/x."},
+    {prompt:"What is v′?", options:["2x","1/x","x²","ln x"], correct:0, hint:"Power rule on x² gives 2x."},
+    {prompt:"Select the correct derivative y′:",
+     options:["(x − 2x ln x)/x⁴","(x + 2x ln x)/x⁴","(2x ln x − x)/x⁴","(x² − 2x ln x)/x⁴"], correct:0,
+     hint:"(v·u′ − u·v′)/v² = (x²·(1/x) − ln x·2x)/x⁴ = (x − 2x ln x)/x⁴."}
+  ]
+};
+
+const chainLearn = {
+  title:"CHAIN RULE",
+  intro:"Sometimes one function is INSIDE another function.",
+  formulaHTML:`[f(g(x))]′ = <span class="outer">f′(g(x))</span> · <span class="inner">g′(x)</span>`,
+  examples:[
+    {
+      funcHTML:`y = <span class="outer">sin</span>( <span class="inner">x²</span> )`,
+      revealSteps:[
+        `Outer function: <span class="outer">sin( )</span> &nbsp;&nbsp; Inner function: <span class="inner">x²</span>`,
+        `Derivative of outer: <span class="outer">cos(x²)</span> &nbsp;&nbsp; Derivative of inner: <span class="inner">2x</span>`,
+        `y′ = <span class="inner">2x</span> · <span class="outer">cos(x²)</span>`,
+        `<b>y′ = 2x cos(x²)</b>`
+      ]
+    },
+    {
+      funcHTML:`y = <span class="outer">ln</span>( <span class="inner">x² + 1</span> )`,
+      revealSteps:[
+        `Outer function: <span class="outer">ln( )</span> &nbsp;&nbsp; Inner function: <span class="inner">x² + 1</span>`,
+        `Derivative of outer: <span class="outer">1/(x²+1)</span> &nbsp;&nbsp; Derivative of inner: <span class="inner">2x</span>`,
+        `y′ = <span class="inner">2x</span> · <span class="outer">1/(x²+1)</span>`,
+        `<b>y′ = 2x / (x² + 1)</b>`
+      ]
+    },
+    {
+      funcHTML:`y = (x² + 1)³`,
+      revealSteps:[
+        `Outer: <span class="outer">( )³</span> &nbsp;&nbsp; Inner: <span class="inner">x² + 1</span>`,
+        `Derivative of outer: <span class="outer">3( )²</span> &nbsp;&nbsp; Derivative of inner: <span class="inner">2x</span>`,
+        `y′ = 3(x² + 1)² · 2x`,
+        `<b>y′ = 6x (x² + 1)²</b>`
+      ]
+    }
+  ]
+};
+
+const chainC1 = {
+  stageLabel:"Chain Rule · Challenge 1", title:"Differentiate: y = sin(x²)",
+  funcHTML:`y = sin(x²)`,
+  steps:[
+    {prompt:"Which rule should you use?", options:["Product Rule","Quotient Rule","Chain Rule","Power Rule"], correct:2,
+     hint:"x² sits inside the sine function — one function inside another."},
+    {prompt:"What is the outer function?", options:["sin( )","x²","cos( )","2x"], correct:0, hint:"The outer function wraps around everything."},
+    {prompt:"What is the inner function?", options:["sin( )","x²","cos( )","2x"], correct:1, hint:"The inner function is what's plugged in: x²."},
+    {prompt:"Derivative of the outer function (kept in terms of x²)?", options:["cos(x²)","−cos(x²)","cos(x)","2x"], correct:0, hint:"Derivative of sin( ) is cos( ), evaluated at the inner function."},
+    {prompt:"Derivative of the inner function?", options:["2x","x²","2","cos x"], correct:0, hint:"Power rule on x² gives 2x."},
+    {prompt:"Select the correct derivative y′:",
+     options:["2x cos(x²)","2x sin(x²)","cos(x²) + 2x","x² cos(x²)"], correct:0,
+     hint:"f′(g(x))·g′(x) = cos(x²) · 2x."}
+  ]
+};
+
+const chainC2 = {
+  stageLabel:"Chain Rule · Challenge 2", title:"Differentiate: y = ln(x² + 3x + 1)",
+  funcHTML:`y = ln(x² + 3x + 1)`,
+  steps:[
+    {prompt:"Which rule should you use?", options:["Chain Rule","Product Rule","Quotient Rule","Power Rule"], correct:0,
+     hint:"x² + 3x + 1 sits inside the natural log function."},
+    {prompt:"What is the outer function?", options:["x² + 3x + 1","ln( )","2x + 3","1/x"], correct:1, hint:"The outer function is ln( )."},
+    {prompt:"What is the inner function?", options:["ln( )","2x + 3","x² + 3x + 1","1/x"], correct:2, hint:"The inner function is what's inside the log."},
+    {prompt:"Derivative of the outer function (in terms of the inner)?", options:["1/(x²+3x+1)","2x+3","x²+3x+1","1/x"], correct:0, hint:"Derivative of ln( ) is 1/( )."},
+    {prompt:"Derivative of the inner function?", options:["2x+3","2x","3","x+3"], correct:0, hint:"Differentiate x² + 3x + 1 term by term."},
+    {prompt:"Select the correct derivative y′:",
+     options:["(2x + 3)/(x² + 3x + 1)","(2x + 3)(x² + 3x + 1)","1/(2x + 3)","(x² + 3x + 1)/(2x + 3)"], correct:0,
+     hint:"f′(g(x))·g′(x) = [1/(x²+3x+1)] · (2x+3)."}
+  ]
+};
+
+const finalPool = [
+  {stageLabel:"Final Challenge", title:"y = x² sin x",
+   funcHTML:`y = x² sin x`,
+   steps:[
+    {prompt:"Which rule applies?", options:["Product Rule","Quotient Rule","Chain Rule","Power Rule"], correct:0, hint:"Two functions multiplied."},
+    {prompt:"Select y′:", options:["2x sin x + x² cos x","2x cos x + x² sin x","x² sin x + 2x cos x","2x sin x − x² cos x"], correct:0, hint:"u′v + uv′ with u=x², v=sin x."}
+   ]},
+  {stageLabel:"Final Challenge", title:"y = x ln x",
+   funcHTML:`y = x ln x`,
+   steps:[
+    {prompt:"Which rule applies?", options:["Quotient Rule","Product Rule","Chain Rule","Power Rule"], correct:1, hint:"x and ln x are multiplied."},
+    {prompt:"Select y′:", options:["ln x + 1","ln x − 1","1/x + x","x ln x"], correct:0, hint:"u′v + uv′ = (1)(ln x) + (x)(1/x)."}
+   ]},
+  {stageLabel:"Final Challenge", title:"y = sin x / x",
+   funcHTML:`y = sin x / x`,
+   steps:[
+    {prompt:"Which rule applies?", options:["Product Rule","Chain Rule","Quotient Rule","Power Rule"], correct:2, hint:"sin x divided by x."},
+    {prompt:"Select y′:", options:["(x cos x − sin x)/x²","(x cos x + sin x)/x²","(sin x − x cos x)/x²","(cos x)/x"], correct:0, hint:"(v·u′ − u·v′)/v²."}
+   ]},
+  {stageLabel:"Final Challenge", title:"y = ln x / x²",
+   funcHTML:`y = ln x / x²`,
+   steps:[
+    {prompt:"Which rule applies?", options:["Chain Rule","Product Rule","Quotient Rule","Power Rule"], correct:2, hint:"ln x divided by x²."},
+    {prompt:"Select y′:", options:["(x − 2x ln x)/x⁴","(x + 2x ln x)/x⁴","(2x ln x − x)/x⁴","1/x³"], correct:0, hint:"(v·u′ − u·v′)/v²."}
+   ]},
+  {stageLabel:"Final Challenge", title:"y = sin(x²)",
+   funcHTML:`y = sin(x²)`,
+   steps:[
+    {prompt:"Which rule applies?", options:["Product Rule","Quotient Rule","Chain Rule","Power Rule"], correct:2, hint:"x² is inside sin( )."},
+    {prompt:"Select y′:", options:["2x cos(x²)","2x sin(x²)","cos(x²)","x² cos(x²)"], correct:0, hint:"f′(g(x))·g′(x)."}
+   ]},
+  {stageLabel:"Final Challenge", title:"y = ln(x² + 1)",
+   funcHTML:`y = ln(x² + 1)`,
+   steps:[
+    {prompt:"Which rule applies?", options:["Quotient Rule","Product Rule","Chain Rule","Power Rule"], correct:2, hint:"x²+1 is inside ln( )."},
+    {prompt:"Select y′:", options:["2x/(x² + 1)","1/(x² + 1)","2x ln(x²+1)","(x²+1)/2x"], correct:0, hint:"f′(g(x))·g′(x) = [1/(x²+1)]·2x."}
+   ]},
+  {stageLabel:"Final Challenge · Combo", title:"y = x² cos(3x)  (Product + Chain)",
+   funcHTML:`y = x² cos(3x)`,
+   steps:[
+    {prompt:"Which rule(s) apply?", options:["Product Rule only","Chain Rule only","Product Rule + Chain Rule","Quotient Rule"], correct:2,
+     hint:"x² and cos(3x) are multiplied — but cos(3x) itself needs the chain rule."},
+    {prompt:"Select y′:", options:["2x cos(3x) − 3x² sin(3x)","2x cos(3x) + 3x² sin(3x)","2x cos(3x) − x² sin(3x)","−3x² sin(3x)"], correct:0,
+     hint:"u=x², v=cos(3x). u′=2x, v′=−3sin(3x) (chain rule on v). Combine u′v+uv′."}
+   ]},
+  {stageLabel:"Final Challenge · Combo", title:"y = x² sin(x²)  (Product + Chain)",
+   funcHTML:`y = x² sin(x²)`,
+   steps:[
+    {prompt:"Which rule(s) apply?", options:["Chain Rule only","Product Rule only","Product Rule + Chain Rule","Quotient Rule"], correct:2,
+     hint:"x² and sin(x²) are multiplied — and sin(x²) needs the chain rule."},
+    {prompt:"Select y′:", options:["2x sin(x²) + 2x³ cos(x²)","2x sin(x²) + x² cos(x²)","2x cos(x²) + 2x³ sin(x²)","2x³ cos(x²)"], correct:0,
+     hint:"u=x², v=sin(x²). u′=2x, v′=2x cos(x²) (chain rule on v). Combine u′v+uv′."}
+   ]}
+];
+
+/* ================= FINAL CHALLENGE RUNNER ================= */
+function runFinalSequence(container){
+  const pool = [...finalPool].sort(()=>Math.random()-0.5);
+  let qIndex = 0;
+
+  function showIntro(){
+    container.innerHTML = `
+      <div class="card">
+        <h2 class="title">LEVEL 4 FINAL CHALLENGE</h2>
+        <div class="subtitle">Mixed questions — Product, Quotient, Chain, and combinations. Spot the structure first!</div>
+        <div class="btnrow"><button class="nextbtn" id="startFinal">Begin Final Challenge ▶ (${pool.length} questions)</button></div>
+      </div>
+    `;
+    container.querySelector("#startFinal").onclick = doQuestion;
+  }
+
+  function doQuestion(){
+    if(qIndex >= pool.length){
+      unlockNext();
+      goTo("summary");
+      return;
+    }
+    const q = pool[qIndex];
+    let stepIndex = 0;
+    let mistakesThisStep = 0;
+    let totalMistakes = 0;
+
+    function heartsHTML(){
+      const remaining = Math.max(0, 3-totalMistakes);
+      let h = "";
+      for(let i=0;i<3;i++) h += (i<remaining? "❤️":"🖤");
+      return h;
+    }
+
+    function renderStep(){
+      const step = q.steps[stepIndex];
+      mistakesThisStep = 0;
+      container.innerHTML = `
+        <div class="card">
+          <div class="qmeta">
+            <div class="hearts">${heartsHTML()}</div>
+            <div class="stagelabel">Question ${qIndex+1} / ${pool.length}</div>
+            <div>⭐ ${score}</div>
+          </div>
+          <h2 class="title">${q.title}</h2>
+          <div class="funcbox">${q.funcHTML}</div>
+          <div class="prompt">${step.prompt}</div>
+          <div class="optionsgrid" id="optsWrap"></div>
+          <div class="feedback" id="fbBox"></div>
+          <div class="hinttext" id="hintBox"></div>
+          <div class="btnrow"><button class="hintbtn" id="hintBtn">💡 Hint</button></div>
+        </div>
+      `;
+      const wrap = container.querySelector("#optsWrap");
+      step.options.forEach((opt,i)=>{
+        const b = document.createElement("div");
+        b.className = "opt";
+        b.innerHTML = opt;
+        b.onclick = ()=>handleAnswer(i,b);
+        wrap.appendChild(b);
+      });
+      container.querySelector("#hintBtn").onclick = ()=>{
+        container.querySelector("#hintBox").textContent = "💡 " + step.hint;
+      };
+    }
+
+    function handleAnswer(i, btnEl){
+      const step = q.steps[stepIndex];
+      const allOpts = container.querySelectorAll(".opt");
+      if(i === step.correct){
+        allOpts.forEach(o=>o.classList.add("disabled"));
+        btnEl.classList.add("correct");
+        container.querySelector("#fbBox").textContent = "Correct!";
+        container.querySelector("#fbBox").className = "feedback good";
+        setTimeout(()=>{
+          stepIndex++;
+          if(stepIndex < q.steps.length) renderStep();
+          else finishQ();
+        }, 650);
+      } else {
+        mistakesThisStep++; totalMistakes++;
+        btnEl.classList.add("wrong");
+        container.querySelector(".hearts").textContent = heartsHTML();
+        const fb = container.querySelector("#fbBox");
+        if(mistakesThisStep===1){ fb.textContent="Not quite. Look at the structure of the function."; fb.className="feedback bad"; }
+        else if(mistakesThisStep===2){ fb.textContent="Check the hint below."; fb.className="feedback bad"; container.querySelector("#hintBox").textContent="💡 "+step.hint; }
+        else {
+          fb.textContent="Here's the correct answer.";
+          fb.className="feedback bad";
+          allOpts.forEach((o,idx)=>{o.classList.add("disabled"); if(idx===step.correct) o.classList.add("correct");});
+          setTimeout(()=>{
+            stepIndex++;
+            if(stepIndex < q.steps.length) renderStep();
+            else finishQ();
+          }, 1500);
+        }
+      }
+    }
+
+    function finishQ(){
+      const earned = Math.max(10 - totalMistakes*2, 2);
+      addScore(earned);
+      qIndex++;
+      container.innerHTML = `
+        <div class="card">
+          <div class="completeBanner">
+            <h3>✓ Question ${qIndex} correct!</h3>
+            <p>+${earned} points</p>
+          </div>
+          <div class="btnrow"><button class="contbtn" id="nextQ">${qIndex<pool.length? "Next Question ▶" : "See Final Summary ▶"}</button></div>
+        </div>
+      `;
+      container.querySelector("#nextQ").onclick = doQuestion;
+    }
+
+    renderStep();
+  }
+
+  showIntro();
+}
+
+/* ================= SCREEN RENDERING ================= */
+function renderScreen(){
+  const app = document.getElementById("app");
+  const name = SCREENS[currentScreen];
+  app.innerHTML = "";
+  const div = document.createElement("div");
+  div.className = "screen visible";
+  app.appendChild(div);
+
+  if(currentScreen > unlockedIndex){
+    div.innerHTML = `<div class="card lockedmsg"><div class="lock">🔒</div><p>Complete the previous step to unlock this section.</p></div>`;
+    return;
+  }
+
+  switch(name){
+    case "intro":
+      div.innerHTML = `
+        <div class="card">
+          <h2 class="title">DERIVATIVE QUEST — LEVEL 4</h2>
+          <div class="subtitle">Product Rule • Quotient Rule • Chain Rule</div>
+          <div class="note">You've already mastered the basic differentiation formulas. Now it's time to learn how to differentiate <b>combinations</b> of functions.</div>
+          <div class="note">Before every question, ask yourself: <b>"WHAT DO YOU NOTICE?"</b><br>Are the functions multiplied? Divided? Or is one hidden inside another?</div>
+          <div class="btnrow"><button class="nextbtn" id="beginBtn">Begin Level 4 ▶</button></div>
+        </div>
+      `;
+      div.querySelector("#beginBtn").onclick = ()=>goTo("productLearn");
+      break;
+
+    case "productLearn":
+      buildLearnScreen(div, productLearn, "productC1", "Challenge 1");
+      break;
+    case "productC1":
+      buildChallengeScreen(div, productC1, "productC2", "Challenge 2");
+      break;
+    case "productC2":
+      buildChallengeScreen(div, productC2, "quotientLearn", "Quotient Rule");
+      break;
+
+    case "quotientLearn":
+      buildLearnScreen(div, quotientLearn, "quotientC1", "Challenge 1");
+      break;
+    case "quotientC1":
+      buildChallengeScreen(div, quotientC1, "quotientC2", "Challenge 2");
+      break;
+    case "quotientC2":
+      buildChallengeScreen(div, quotientC2, "chainLearn", "Chain Rule");
+      break;
+
+    case "chainLearn":
+      buildLearnScreen(div, chainLearn, "chainC1", "Challenge 1");
+      break;
+    case "chainC1":
+      buildChallengeScreen(div, chainC1, "chainC2", "Challenge 2");
+      break;
+    case "chainC2":
+      buildChallengeScreen(div, chainC2, "final", "Final Challenge");
+      break;
+
+    case "final":
+      runFinalSequence(div);
+      break;
+
+    case "summary":
+      div.innerHTML = `
+        <div class="card">
+          <h2 class="title">LEVEL 4 COMPLETE! 🎉</h2>
+          <div class="subtitle">Congratulations! You can now recognize and apply the Product, Quotient and Chain Rules.</div>
+          <div class="summaryGrid">
+            <div class="sumcard">
+              <h4>PRODUCT RULE</h4>
+              <div>u × v</div>
+              <div class="formula">(uv)′ = u′v + uv′</div>
+              <div class="subtitle">"Two functions multiplied"</div>
+            </div>
+            <div class="sumcard">
+              <h4>QUOTIENT RULE</h4>
+              <div>u / v</div>
+              <div class="formula">(u/v)′ = (vu′ − uv′)/v²</div>
+              <div class="subtitle">"One function divided by another"</div>
+            </div>
+            <div class="sumcard">
+              <h4>CHAIN RULE</h4>
+              <div>f(g(x))</div>
+              <div class="formula">f′(g(x))·g′(x)</div>
+              <div class="subtitle">"One function inside another"</div>
+            </div>
+          </div>
+          <div class="finalScore">⭐ Total Score: ${score} / ${TOTAL_POSSIBLE}</div>
+          <div class="btnrow"><button class="tryagain" id="restartBtn">🔄 Play Level 4 Again</button></div>
+        </div>
+      `;
+      div.querySelector("#restartBtn").onclick = ()=>{
+        score = 0; unlockedIndex = 0; currentScreen = 0;
+        goTo("intro");
+      };
+      break;
+  }
+}
+
+/* ================= INIT ================= */
+renderTopbar();
+renderScreen();
+</script>
+</body>
+</html>
