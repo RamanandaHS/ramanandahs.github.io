@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dijkstra's Shortest Path – Step-by-Step Visualizer</title>
+<style>
+  :root{
+    --paper:#EEF2F6;
+    --paper-line: rgba(20,32,43,0.055);
+    --card:#FFFFFF;
+    --ink:#152230;
+    --ink-soft:#54626F;
+    --border:#D8E0E7;
+    --source:#1E7A46;
+    --source-bg:#E4F3EA;
+    --current:#C1790A;
+    --current-bg:#FBEFDA;
+    --final:#204E89;
+    --final-bg:#E4EBF6;
+    --path:#BC3B32;
+    --path-bg:#FBE7E4;
+    --unvisited:#8C99A5;
+    --shadow: 0 1px 2px rgba(21,34,48,0.06), 0 6px 18px rgba(21,34,48,0.06);
+    --radius: 14px;
+    font-size: 16px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--ink);
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    line-height: 1.5;
+    padding-bottom: 60px;
+  }
+  h1,h2,h3,h4{
+    font-family: "Iowan Old Style","Palatino Linotype", Palatino, Georgia, serif;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+    color: var(--ink);
+  }
+  .wrap{ max-width: 1280px; margin: 0 auto; padding: 22px 22px 0; }
+
+  /* ---------- Header ---------- */
+  header.top{
+    text-align:center;
+    padding: 30px 20px 8px;
+  }
+  header.top h1{ font-size: 2.15rem; letter-spacing: 0.2px; }
+  header.top p.subtitle{
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    margin: 4px 0 0;
+    font-style: italic;
+  }
+
+  /* ---------- Mode switch ---------- */
+  .mode-switch{
+    display:flex; justify-content:center; gap:10px; margin: 18px 0 4px;
+  }
+  .mode-switch button{
+    padding: 10px 20px; border-radius: 999px; border:1.5px solid var(--border);
+    background: var(--card); color: var(--ink); font-size: 0.98rem; cursor:pointer;
+    font-weight:600; transition: background .15s, color .15s, border-color .15s;
+  }
+  .mode-switch button.active{
+    background: var(--final); border-color: var(--final); color: #fff;
+  }
+
+  /* ---------- Controls bar ---------- */
+  .controls-card{
+    background: var(--card); border:1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 16px 20px; margin: 16px 0;
+    display:flex; flex-wrap:wrap; gap:18px 26px; align-items:flex-end;
+  }
+  .control-group{ display:flex; flex-direction:column; gap:6px; }
+  .control-group label{ font-size:0.78rem; text-transform: none; color: var(--ink-soft); font-weight:600; }
+  .segmented{ display:flex; border:1.5px solid var(--border); border-radius:10px; overflow:hidden; }
+  .segmented button{
+    border:none; background:var(--card); padding:8px 14px; cursor:pointer; font-size:0.9rem;
+    color: var(--ink); font-weight:600; border-right:1px solid var(--border);
+  }
+  .segmented button:last-child{ border-right:none; }
+  .segmented button.active{ background: var(--final); color:#fff; }
+  select{
+    padding:8px 12px; border-radius:10px; border:1.5px solid var(--border); font-size:0.92rem;
+    background:var(--card); color:var(--ink); min-width: 92px;
+  }
+  .btn{
+    padding: 9px 16px; border-radius:10px; border:1.5px solid var(--border); background:var(--card);
+    color:var(--ink); font-size:0.9rem; font-weight:600; cursor:pointer; transition: transform .08s, background .15s;
+  }
+  .btn:hover{ background:#F2F5F8; }
+  .btn:active{ transform: translateY(1px); }
+  .btn:disabled{ opacity:0.45; cursor:not-allowed; }
+  .btn.primary{ background: var(--final); border-color: var(--final); color:#fff; }
+  .btn.primary:hover{ background:#1a3f70; }
+  .btn.ghost{ background:transparent; }
+  .checkbox-row{ display:flex; align-items:center; gap:8px; font-size:0.88rem; color:var(--ink-soft); font-weight:600; }
+  .checkbox-row input{ width:16px; height:16px; }
+
+  /* ---------- Step nav bar ---------- */
+  .step-nav{
+    background: var(--card); border:1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 14px 20px; margin-bottom: 16px;
+    display:flex; flex-wrap:wrap; align-items:center; gap:14px;
+  }
+  .step-nav .nav-btns{ display:flex; gap:8px; }
+  .progress-wrap{ flex:1; min-width:180px; }
+  .progress-label{ font-size:0.82rem; color:var(--ink-soft); margin-bottom:4px; font-weight:600; }
+  .progress-bar{ height:8px; border-radius:999px; background:#E3E9EE; overflow:hidden; }
+  .progress-fill{ height:100%; background: var(--final); transition: width .3s ease; }
+  .finalized-line{ font-size:0.85rem; color: var(--ink-soft); }
+  .finalized-line b{ color: var(--source); }
+
+  /* ---------- Main grid ---------- */
+  .grid{
+    display:grid; grid-template-columns: 300px 1fr 300px; gap:18px; align-items:start;
+  }
+  @media (max-width: 980px){
+    .grid{ grid-template-columns: 1fr; }
+    .grid .col-center{ order:-1; }
+  }
+  .card{
+    background: var(--card); border:1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 18px 20px; margin-bottom: 16px;
+  }
+  .card h3{ font-size:1.05rem; margin-bottom:8px; }
+  .eyebrow{ font-size:0.72rem; color: var(--ink-soft); font-weight:700; margin-bottom:2px; }
+
+  /* explanation */
+  #explanationText{ font-size:0.96rem; color: var(--ink); }
+  .keyline{ font-size:0.85rem; color:var(--ink-soft); }
+
+  .why-list{ list-style:none; padding:0; margin:10px 0 0; font-size:0.92rem; }
+  .why-list li{ padding:5px 0; display:flex; justify-content:space-between; border-bottom:1px dashed var(--border); }
+  .why-list li.smallest{ font-weight:700; color: var(--current); }
+
+  .relax-box{ background:#FAFBFC; border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-top:10px; font-size:0.92rem;}
+  .relax-row{ display:flex; justify-content:space-between; padding:3px 0; }
+  .relax-eq{ font-weight:700; margin-top:6px; text-align:center; font-size:1.02rem; }
+  .relax-verdict{ margin-top:8px; text-align:center; font-weight:700; padding:6px; border-radius:8px; }
+  .relax-verdict.updated{ background: var(--source-bg); color: var(--source); }
+  .relax-verdict.same{ background:#F1F3F5; color: var(--ink-soft); }
+
+  .predict-box{ border:1.5px dashed var(--current); border-radius:10px; padding:14px; background: var(--current-bg); }
+  .predict-box h4{ margin:0 0 6px; color:#7a4d06; }
+  .predict-choices{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  .predict-choices button{
+    padding:8px 14px; border-radius:8px; border:1.5px solid var(--current); background:#fff;
+    font-weight:700; cursor:pointer; color:var(--current);
+  }
+  .predict-choices button:hover{ background: var(--current); color:#fff; }
+  .predict-choices button:disabled{ opacity:.5; cursor:default; }
+  .predict-feedback{ font-weight:700; margin-top:6px; }
+  .predict-feedback.correct{ color: var(--source); }
+  .predict-feedback.incorrect{ color: var(--path); }
+
+  /* graph */
+  .graph-card{ text-align:center; }
+  svg#graphSvg{ width:100%; height:auto; max-width:640px; }
+  .legend{ display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:10px; font-size:0.8rem; color:var(--ink-soft); }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .swatch{ width:12px; height:12px; border-radius:50%; display:inline-block; border:1.5px solid rgba(0,0,0,0.15); }
+
+  /* table */
+  table.dist-table{ width:100%; border-collapse: collapse; font-size:0.92rem; }
+  table.dist-table th, table.dist-table td{ padding:7px 6px; text-align:center; border-bottom:1px solid var(--border); }
+  table.dist-table th{ color: var(--ink-soft); font-size:0.76rem; text-transform:uppercase; letter-spacing:0.03em; }
+  table.dist-table td.status-final{ color: var(--final); font-weight:700; }
+  table.dist-table td.status-current{ color: var(--current); font-weight:700; }
+  table.dist-table tr.row-final td{ background: var(--final-bg); }
+  table.dist-table tr.row-current td{ background: var(--current-bg); }
+
+  /* pseudocode */
+  details.pseudo{ background:var(--card); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 20px; margin-top: 4px;}
+  details.pseudo summary{ cursor:pointer; font-weight:700; font-size:1rem; }
+  ol.pseudocode{ margin:12px 0 0; padding-left: 22px; font-size:0.92rem; }
+  ol.pseudocode li{ padding:5px 4px; border-radius:6px; }
+  ol.pseudocode li.active{ background: var(--current-bg); font-weight:700; }
+
+  /* compare / summary */
+  .full-card{ margin-top:16px; }
+  .compare-row{ display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed var(--border); font-size:0.94rem; }
+  .compare-row.best{ font-weight:700; color: var(--source); }
+  .summary-card{ text-align:center; }
+  .summary-grid{ display:flex; justify-content:center; gap:34px; flex-wrap:wrap; margin: 14px 0; }
+  .summary-item .label{ font-size:0.75rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em; }
+  .summary-item .value{ font-size:1.3rem; font-weight:700; }
+  .summary-actions{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top: 10px;}
+
+  /* challenge mode */
+  #challengeMode .card{ text-align:left; }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin: 8px 0; }
+  .chip{
+    padding:7px 13px; border-radius:8px; border:1.5px solid var(--border); background:#fff;
+    font-weight:600; cursor:pointer; font-size:0.88rem;
+  }
+  .chip:disabled{ opacity:.4; cursor:default; }
+  .seq-display{ min-height: 30px; padding:8px 10px; border:1.5px dashed var(--border); border-radius:8px; font-weight:700; margin:6px 0; background:#FAFBFC; }
+  .field-block{ margin-bottom:18px; }
+  .field-block label{ display:block; font-weight:700; font-size:0.9rem; margin-bottom:6px; }
+  input[type="number"]{ padding:8px 10px; border-radius:8px; border:1.5px solid var(--border); font-size:0.95rem; width:120px; }
+  .score-pill{
+    display:inline-block; background: var(--source-bg); color: var(--source); font-weight:700;
+    padding:6px 14px; border-radius:999px; font-size:0.9rem;
+  }
+  .verdict-line{ font-weight:700; margin: 4px 0; }
+  .verdict-line.ok{ color: var(--source); }
+  .verdict-line.bad{ color: var(--path); }
+
+  footer.credits{ text-align:center; color: var(--ink-soft); font-size:0.78rem; margin-top: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Dijkstra's Shortest Path</h1>
+    <p class="subtitle">Discover the shortest route — one step at a time.</p>
+  </header>
+
+  <div class="mode-switch">
+    <button id="btnLearnMode" class="active">📘 Step-by-Step Mode</button>
+    <button id="btnChallengeMode">🏆 Challenge Mode</button>
+  </div>
+
+  <!-- ============ LEARN MODE ============ -->
+  <div id="learnMode">
+
+    <div class="controls-card">
+      <div class="control-group">
+        <label>Choose graph</label>
+        <div class="segmented" id="graphSizeSeg">
+          <button data-n="5" class="active">5 Vertices</button>
+          <button data-n="6">6 Vertices</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label>Source</label>
+        <select id="sourceSelect"></select>
+      </div>
+      <div class="control-group">
+        <label>Destination</label>
+        <select id="destSelect"></select>
+      </div>
+      <div class="control-group">
+        <label>&nbsp;</label>
+        <button class="btn" id="randomGraphBtn">🎲 Generate Random Graph</button>
+      </div>
+      <div class="control-group">
+        <label>&nbsp;</label>
+        <div class="checkbox-row">
+          <input type="checkbox" id="predictToggle">
+          <label for="predictToggle" style="margin:0;">🧠 Predict the Next Vertex</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <div class="nav-btns">
+        <button class="btn" id="prevBtn">◀ Previous Step</button>
+        <button class="btn" id="nextBtn">Next Step ▶</button>
+        <button class="btn" id="autoBtn">▶ Auto Play</button>
+        <button class="btn ghost" id="resetBtn">↻ Reset</button>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label" id="progressLabel">Step 1 of 1</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+      <div class="finalized-line" id="finalizedLine"></div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT -->
+      <div class="col-left">
+        <div class="card">
+          <div class="eyebrow" id="stepEyebrow">STEP EXPLANATION</div>
+          <h3 id="explanationTitle">Step 1 – Initialize</h3>
+          <div id="explanationText"></div>
+        </div>
+
+        <div class="card" id="predictCard" style="display:none;">
+          <div class="predict-box">
+            <h4>🧠 Predict the Next Vertex</h4>
+            <p style="margin:0;">Which unvisited vertex will Dijkstra choose next?</p>
+            <div class="predict-choices" id="predictChoices"></div>
+            <div class="predict-feedback" id="predictFeedback"></div>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <button class="btn" id="revealBtn">Reveal Answer</button>
+              <button class="btn primary" id="continueBtn" style="display:none;">Continue ▶</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="whyCard" style="display:none;">
+          <div class="eyebrow">🔎 WHY THIS VERTEX?</div>
+          <h3 id="whyTitle"></h3>
+          <ul class="why-list" id="whyList"></ul>
+          <p class="keyline" id="whyConclusion"></p>
+        </div>
+
+        <div class="card" id="relaxCard" style="display:none;">
+          <div class="eyebrow">⚡ RELAXATION</div>
+          <h3 id="relaxTitle"></h3>
+          <div class="relax-box">
+            <div class="relax-row"><span>Current distance</span><span id="relaxCurrentDist"></span></div>
+            <div class="relax-row"><span>Edge weight</span><span id="relaxWeight"></span></div>
+            <div class="relax-eq" id="relaxEq"></div>
+            <div class="relax-row"><span>Current distance to neighbour</span><span id="relaxOld"></span></div>
+            <div class="relax-verdict" id="relaxVerdict"></div>
+          </div>
+          <p class="keyline" style="margin-top:10px;">💡 <b>Relaxation:</b> checking whether travelling through the current vertex gives a shorter route to its neighbour — <i>new distance = current distance + edge weight</i>.</p>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">💡 KEY IDEA</div>
+          <p class="keyline" style="margin:0;">Dijkstra does not necessarily choose the path with the fewest edges — it chooses the path with the smallest <b>total weight</b>.</p>
+        </div>
+      </div>
+
+      <!-- CENTER -->
+      <div class="col-center">
+        <div class="card graph-card">
+          <svg id="graphSvg" viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div class="legend">
+            <span><i class="swatch" style="background:var(--source)"></i> Source</span>
+            <span><i class="swatch" style="background:var(--current)"></i> Current</span>
+            <span><i class="swatch" style="background:var(--final)"></i> Finalized</span>
+            <span><i class="swatch" style="background:#fff"></i> Unvisited</span>
+            <span><i class="swatch" style="background:var(--path); border-radius:3px;"></i> Shortest path</span>
+          </div>
+        </div>
+
+        <div class="card full-card" id="compareCard" style="display:none;">
+          <h3>Why is this the shortest path?</h3>
+          <div id="compareRows"></div>
+        </div>
+
+        <div class="card summary-card full-card" id="summaryCard" style="display:none;">
+          <div class="eyebrow">🎯 SHORTEST PATH FOUND</div>
+          <div class="summary-grid">
+            <div class="summary-item"><div class="label">Source</div><div class="value" id="sumSource"></div></div>
+            <div class="summary-item"><div class="label">Destination</div><div class="value" id="sumDest"></div></div>
+            <div class="summary-item"><div class="label">Path</div><div class="value" id="sumPath"></div></div>
+            <div class="summary-item"><div class="label">Distance</div><div class="value" id="sumDistance"></div></div>
+            <div class="summary-item"><div class="label">Edges</div><div class="value" id="sumEdges"></div></div>
+          </div>
+          <div class="summary-actions">
+            <button class="btn" id="tryAgainBtn">Try Again</button>
+            <button class="btn" id="newGraphBtn">New Graph</button>
+            <button class="btn primary" id="practiceChallengeBtn">Practice Challenge</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="col-right">
+        <div class="card">
+          <h3>Distance Table</h3>
+          <table class="dist-table" id="distTable">
+            <thead><tr><th>Vertex</th><th>Distance</th><th>Previous</th><th>Status</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <details class="pseudo">
+      <summary>Dijkstra's Algorithm – Pseudocode</summary>
+      <ol class="pseudocode" id="pseudoList">
+        <li>Set distance[source] = 0.</li>
+        <li>Set all other distances to ∞.</li>
+        <li>Choose the unvisited vertex with minimum tentative distance.</li>
+        <li>Mark it as visited/finalized.</li>
+        <li>Relax all its unvisited neighbours.</li>
+        <li>Repeat until the destination is finalized or all reachable vertices are processed.</li>
+        <li>Follow the previous pointers backward to reconstruct the shortest path.</li>
+      </ol>
+    </details>
+  </div>
+
+  <!-- ============ CHALLENGE MODE ============ -->
+  <div id="challengeMode" style="display:none;">
+    <div class="controls-card" style="justify-content:space-between;">
+      <div>
+        <span class="score-pill" id="scorePill">Score: 0 / 0</span>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn" id="newRoundBtn">🎲 New Round</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="col-center" style="grid-column: 1 / -1;">
+        <div class="card graph-card">
+          <h3 style="margin-bottom:2px;">Challenge Graph</h3>
+          <p class="keyline">Source: <b id="chSource"></b> &nbsp;|&nbsp; Destination: <b id="chDest"></b></p>
+          <svg id="challengeSvg" viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="col-left">
+        <div class="card field-block">
+          <label>1. Predict the shortest distance</label>
+          <input type="number" id="chDistanceInput" placeholder="e.g. 7">
+        </div>
+      </div>
+      <div class="col-center">
+        <div class="card field-block">
+          <label>2. Predict the shortest path (click vertices in order)</label>
+          <div class="seq-display" id="chPathDisplay">–</div>
+          <div class="chip-row" id="chPathChips"></div>
+          <button class="btn ghost" id="chPathClear">Clear</button>
+        </div>
+      </div>
+      <div class="col-right">
+        <div class="card field-block">
+          <label>3. Predict the finalization order (click all vertices in order)</label>
+          <div class="seq-display" id="chOrderDisplay">–</div>
+          <div class="chip-row" id="chOrderChips"></div>
+          <button class="btn ghost" id="chOrderClear">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card full-card">
+      <button class="btn primary" id="checkAnswerBtn">Check Answer</button>
+      <div id="chFeedback" style="margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <footer class="credits">Built for the Interactive Mathematics website · Dijkstra's Shortest Path Visualizer</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================================================================
+   1. GRAPH DATA
+=================================================================== */
+const FIXED_GRAPHS = {
+  5: {
+    ids: ['A','B','C','D','E'],
+    edges: [
+      {a:'A',b:'B',w:4},{a:'A',b:'C',w:2},{a:'B',b:'C',w:1},
+      {a:'B',b:'D',w:5},{a:'C',b:'D',w:3},{a:'D',b:'E',w:2}
+    ],
+    defaultSource:'A', defaultDest:'E'
+  },
+  6: {
+    ids: ['A','B','C','D','E','F'],
+    edges: [
+      {a:'A',b:'B',w:4},{a:'A',b:'C',w:2},{a:'B',b:'C',w:1},
+      {a:'B',b:'D',w:5},{a:'C',b:'D',w:3},{a:'D',b:'E',w:2},
+      {a:'D',b:'F',w:4},{a:'E',b:'F',w:1}
+    ],
+    defaultSource:'A', defaultDest:'F'
+  }
+};
+
+function circlePositions(ids, cx, cy, r){
+  const n = ids.length;
+  const pos = {};
+  ids.forEach((id,i)=>{
+    const angle = (-90 + i*(360/n)) * Math.PI/180;
+    pos[id] = { x: cx + r*Math.cos(angle), y: cy + r*Math.sin(angle) };
+  });
+  return pos;
+}
+
+function buildAdjacency(ids, edges){
+  const adj = {};
+  ids.forEach(id=> adj[id]=[]);
+  edges.forEach(e=>{
+    adj[e.a].push({to:e.b, w:e.w});
+    adj[e.b].push({to:e.a, w:e.w});
+  });
+  Object.keys(adj).forEach(k=> adj[k].sort((x,y)=> x.to.localeCompare(y.to)));
+  return adj;
+}
+
+function randomGraph(ids){
+  const shuffled = [...ids].sort(()=> Math.random()-0.5);
+  const edges = [];
+  const seen = new Set();
+  function key(a,b){ return [a,b].sort().join('-'); }
+  function addEdge(a,b,w){
+    const k = key(a,b);
+    if(seen.has(k) || a===b) return false;
+    seen.add(k); edges.push({a,b,w}); return true;
+  }
+  for(let i=1;i<shuffled.length;i++){
+    const a = shuffled[i];
+    const b = shuffled[Math.floor(Math.random()*i)];
+    addEdge(a,b, 1+Math.floor(Math.random()*9));
+  }
+  const extraCount = 1 + Math.floor(Math.random()*2);
+  let attempts=0, added=0;
+  while(added<extraCount && attempts<40){
+    attempts++;
+    const a = ids[Math.floor(Math.random()*ids.length)];
+    const b = ids[Math.floor(Math.random()*ids.length)];
+    if(addEdge(a,b, 1+Math.floor(Math.random()*9))) added++;
+  }
+  return edges;
+}
+
+/* ===================================================================
+   2. DIJKSTRA STEP LOG BUILDER (real algorithm, not hardcoded)
+=================================================================== */
+function computeSteps(ids, edges, source, destination){
+  const adj = buildAdjacency(ids, edges);
+  const dist = {}, prev = {};
+  ids.forEach(id=>{ dist[id] = (id===source)?0:Infinity; prev[id]=null; });
+  const visited = new Set();
+  const steps = [];
+  const fmt = v => v===Infinity ? '∞' : v;
+
+  steps.push({
+    type:'init', dist:{...dist}, prev:{...prev}, visited:[...visited], current:null,
+    pseudocodeLine:[1,2],
+    title:'Step 1 – Initialize',
+    text:`Distance from the source <b>${source}</b> to itself is 0. All other distances are initially infinity (∞) because they are not known yet.`
+  });
+
+  let reachedDest = false;
+  while(true){
+    const unvisited = ids.filter(id=>!visited.has(id));
+    if(unvisited.length===0) break;
+    const candidates = unvisited.map(id=>({id,d:dist[id]})).sort((a,b)=> a.id.localeCompare(b.id));
+    const minD = Math.min(...candidates.map(c=>c.d));
+    if(!isFinite(minD)){
+      steps.push({type:'unreachable', dist:{...dist}, prev:{...prev}, visited:[...visited], current:null,
+        pseudocodeLine:[3], title:'No path remains',
+        text:'All remaining vertices are unreachable from the source — Dijkstra stops here.'});
+      break;
+    }
+    const chosen = candidates.find(c=>c.d===minD).id;
+    steps.push({
+      type:'select', dist:{...dist}, prev:{...prev}, visited:[...visited], current:chosen, candidates,
+      pseudocodeLine:[3],
+      title:`Why was ${chosen} selected?`,
+      text:`Among all unvisited vertices, <b>${chosen}</b> has the smallest tentative distance. Therefore Dijkstra selects ${chosen}.`
+    });
+
+    const neighbors = adj[chosen].filter(n=>!visited.has(n.to));
+    neighbors.forEach(n=>{
+      const candidate = dist[chosen] + n.w;
+      const old = dist[n.to];
+      const updated = candidate < old;
+      if(updated){ dist[n.to]=candidate; prev[n.to]=chosen; }
+      steps.push({
+        type:'examine-edge', dist:{...dist}, prev:{...prev}, visited:[...visited], current:chosen,
+        edge:{from:chosen, to:n.to, w:n.w}, candidate, old, updated,
+        pseudocodeLine:[5],
+        title:`Relaxing edge ${chosen} → ${n.to} (weight ${n.w})`,
+        text: updated
+          ? `Candidate distance ${dist[chosen]} + ${n.w} = ${candidate} is smaller than the current ${fmt(old)}, so we update <b>${n.to} = ${candidate}</b> and set Previous(${n.to}) = ${chosen}.`
+          : `Candidate distance ${dist[chosen]} + ${n.w} = ${candidate} is not smaller than the current ${fmt(old)}, so ${n.to} stays at ${fmt(old)}.`
+      });
+    });
+
+    visited.add(chosen);
+    steps.push({
+      type:'finalize', dist:{...dist}, prev:{...prev}, visited:[...visited], current:chosen,
+      pseudocodeLine:[4],
+      title:`${chosen} is finalized`,
+      text:`No shorter path to <b>${chosen}</b> can be discovered later, so its distance (${fmt(dist[chosen])}) is now permanent.`
+    });
+
+    if(chosen===destination){
+      let path=[]; let u=destination;
+      while(u){ path.unshift(u); u=prev[u]; }
+      steps.push({
+        type:'done', dist:{...dist}, prev:{...prev}, visited:[...visited], current:chosen, path, total:dist[destination],
+        pseudocodeLine:[6,7],
+        title:'🎯 Destination reached!',
+        text:`Following the previous pointers backward gives the shortest path <b>${path.join(' → ')}</b> with total distance <b>${dist[destination]}</b>.`
+      });
+      reachedDest = true;
+      break;
+    }
+  }
+  if(!reachedDest && !steps.some(s=>s.type==='unreachable')){
+    steps.push({type:'no-path', dist:{...dist}, prev:{...prev}, visited:[...visited], current:null,
+      pseudocodeLine:[7], title:'No path exists', text:`${destination} is not reachable from ${source}.`});
+  }
+  return steps;
+}
+
+function allSimplePaths(ids, edges, source, destination){
+  const adj = buildAdjacency(ids, edges);
+  const results = [];
+  function dfs(node, visited, path, weight){
+    if(node===destination){ results.push({path:[...path], weight}); return; }
+    adj[node].forEach(n=>{
+      if(!visited.has(n.to)){
+        visited.add(n.to); path.push(n.to);
+        dfs(n.to, visited, path, weight+n.w);
+        path.pop(); visited.delete(n.to);
+      }
+    });
+  }
+  dfs(source, new Set([source]), [source], 0);
+  results.sort((a,b)=> a.weight-b.weight);
+  return results;
+}
+
+/* ===================================================================
+   3. STATE
+=================================================================== */
+const state = {
+  n: 5,
+  ids: FIXED_GRAPHS[5].ids,
+  edges: FIXED_GRAPHS[5].edges,
+  source: 'A',
+  dest: 'E',
+  steps: [],
+  stepIndex: 0,
+  predictMode: false,
+  answered: {},     // stepIndex -> {correct, chosen}
+  pendingIndex: null,
+  autoTimer: null
+};
+
+function rebuildSteps(){
+  state.steps = computeSteps(state.ids, state.edges, state.source, state.dest);
+  state.stepIndex = 0;
+  state.answered = {};
+  state.pendingIndex = null;
+  stopAuto();
+  render();
+}
+
+/* ===================================================================
+   4. DOM REFERENCES
+=================================================================== */
+const el = id => document.getElementById(id);
+const sourceSelect = el('sourceSelect');
+const destSelect = el('destSelect');
+const graphSizeSeg = el('graphSizeSeg');
+const graphSvg = el('graphSvg');
+
+/* ===================================================================
+   5. RENDERING — GRAPH (SVG)
+=================================================================== */
+function statusOf(step, id){
+  if(step.current===id && (step.type==='select' || step.type==='examine-edge')) return 'current';
+  if(step.visited.includes(id)) return 'final';
+  return 'unvisited';
+}
+
+function renderGraphSVG(svg, ids, edges, step, source, dest){
+  const pos = circlePositions(ids, 300, 200, 145);
+  const pathSet = new Set();
+  if(step.type==='done' && step.path){
+    for(let i=0;i<step.path.length-1;i++) pathSet.add(step.path[i]+'-'+step.path[i+1]);
+    for(let i=0;i<step.path.length-1;i++) pathSet.add(step.path[i+1]+'-'+step.path[i]);
+  }
+  let svgContent = '';
+
+  edges.forEach(e=>{
+    const p1 = pos[e.a], p2 = pos[e.b];
+    const isPath = pathSet.has(e.a+'-'+e.b);
+    const isExamined = step.edge && ((step.edge.from===e.a && step.edge.to===e.b) || (step.edge.from===e.b && step.edge.to===e.a));
+    let stroke = '#B7C2CB', width = 2;
+    if(isExamined){ stroke = 'var(--current)'; width = 4; }
+    if(isPath){ stroke = 'var(--path)'; width = 5; }
+    svgContent += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round"/>`;
+    const mx = (p1.x+p2.x)/2, my = (p1.y+p2.y)/2;
+    svgContent += `<circle cx="${mx}" cy="${my}" r="12" fill="#fff" stroke="${stroke}" stroke-width="1.4"/>`;
+    svgContent += `<text x="${mx}" y="${my+4}" text-anchor="middle" font-size="12" font-weight="700" fill="#33404A">${e.w}</text>`;
+  });
+
+  ids.forEach(id=>{
+    const p = pos[id];
+    const s = statusOf(step, id);
+    let fill = '#FFFFFF', stroke = 'var(--unvisited)', textColor = '#33404A';
+    if(id===source){ fill = 'var(--source-bg)'; stroke='var(--source)'; }
+    if(s==='current'){ fill = 'var(--current-bg)'; stroke='var(--current)'; }
+    if(s==='final'){ fill='var(--final-bg)'; stroke='var(--final)'; }
+    let extraRing = '';
+    if(id===dest){
+      extraRing = `<circle cx="${p.x}" cy="${p.y}" r="30" fill="none" stroke="#6B7A87" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+    }
+    const d = step.dist[id];
+    const dText = d===Infinity ? '∞' : d;
+    svgContent += extraRing;
+    svgContent += `<circle cx="${p.x}" cy="${p.y}" r="26" fill="${fill}" stroke="${stroke}" stroke-width="3"/>`;
+    svgContent += `<text x="${p.x}" y="${p.y-2}" text-anchor="middle" font-size="15" font-weight="700" fill="${textColor}">${id}</text>`;
+    svgContent += `<text x="${p.x}" y="${p.y+14}" text-anchor="middle" font-size="11" fill="${textColor}">(${dText})</text>`;
+  });
+
+  svg.innerHTML = svgContent;
+}
+
+/* ===================================================================
+   6. RENDERING — MAIN
+=================================================================== */
+function render(){
+  const step = state.steps[state.stepIndex];
+  if(!step) return;
+
+  el('progressLabel').textContent = `Step ${state.stepIndex+1} of ${state.steps.length}`;
+  el('progressFill').style.width = ((state.stepIndex+1)/state.steps.length*100) + '%';
+  el('prevBtn').disabled = state.stepIndex===0;
+  el('nextBtn').disabled = state.stepIndex>=state.steps.length-1;
+
+  const finalizedIds = step.visited;
+  el('finalizedLine').innerHTML = '<b>Vertices finalized:</b> ' + (finalizedIds.length ? finalizedIds.map(v=>v+' ✓').join('   ') : '–');
+
+  el('explanationTitle').textContent = step.title;
+  el('explanationText').innerHTML = step.text;
+
+  const whyCard = el('whyCard');
+  if(step.type==='select'){
+    whyCard.style.display='';
+    el('whyTitle').textContent = `Why was ${step.current} selected?`;
+    const list = el('whyList'); list.innerHTML='';
+    step.candidates.forEach(c=>{
+      const li = document.createElement('li');
+      const isMin = c.id===step.current;
+      li.className = isMin ? 'smallest' : '';
+      li.innerHTML = `<span>${c.id}</span><span>${c.d===Infinity?'∞':c.d}${isMin?' ← smallest':''}</span>`;
+      list.appendChild(li);
+    });
+    el('whyConclusion').textContent = `Therefore Dijkstra selects ${step.current}.`;
+  } else {
+    whyCard.style.display='none';
+  }
+
+  const relaxCard = el('relaxCard');
+  if(step.type==='examine-edge'){
+    relaxCard.style.display='';
+    el('relaxTitle').textContent = `${step.edge.from} → ${step.edge.to} (weight ${step.edge.w})`;
+    const distFrom = step.dist[step.edge.from];
+    el('relaxCurrentDist').textContent = `${step.edge.from} = ${distFrom===Infinity?'∞':distFrom}`;
+    el('relaxWeight').textContent = step.edge.w;
+    el('relaxEq').textContent = `${distFrom} + ${step.edge.w} = ${step.candidate}`;
+    el('relaxOld').textContent = `${step.edge.to} = ${step.old===Infinity?'∞':step.old}`;
+    const verdict = el('relaxVerdict');
+    if(step.updated){
+      verdict.className='relax-verdict updated';
+      verdict.textContent = `${step.candidate} < ${step.old===Infinity?'∞':step.old}  →  Update ${step.edge.to} = ${step.candidate}, Previous(${step.edge.to}) = ${step.edge.from}`;
+    } else {
+      verdict.className='relax-verdict same';
+      verdict.textContent = `${step.candidate} ≥ ${step.old===Infinity?'∞':step.old}  →  No update`;
+    }
+  } else {
+    relaxCard.style.display='none';
+  }
+
+  renderGraphSVG(graphSvg, state.ids, state.edges, step, state.source, state.dest);
+
+  const tbody = document.querySelector('#distTable tbody');
+  tbody.innerHTML='';
+  state.ids.forEach(id=>{
+    const tr = document.createElement('tr');
+    const d = step.dist[id];
+    const isFinal = step.visited.includes(id);
+    const isCurrent = step.current===id && !isFinal;
+    if(isFinal) tr.className='row-final';
+    if(isCurrent) tr.className='row-current';
+    const statusText = isFinal ? 'Final' : (isCurrent ? 'Selecting…' : '');
+    tr.innerHTML = `<td><b>${id}</b></td><td>${d===Infinity?'∞':d}</td><td>${step.prev[id] || '–'}</td>
+      <td class="${isFinal?'status-final':(isCurrent?'status-current':'')}">${statusText}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll('#pseudoList li').forEach((li,i)=>{
+    li.classList.toggle('active', step.pseudocodeLine.includes(i+1));
+  });
+
+  const isDone = step.type==='done';
+  el('compareCard').style.display = isDone ? '' : 'none';
+  el('summaryCard').style.display = isDone ? '' : 'none';
+  if(isDone) renderDoneExtras(step);
+
+  renderPredictPanel();
+}
+
+function renderDoneExtras(step){
+  const rowsWrap = el('compareRows');
+  const paths = allSimplePaths(state.ids, state.edges, state.source, state.dest).slice(0,6);
+  rowsWrap.innerHTML='';
+  paths.forEach(p=>{
+    const isBest = p.weight===step.total && p.path.join('>')===step.path.join('>');
+    const row = document.createElement('div');
+    row.className = 'compare-row' + (isBest ? ' best':'');
+    row.innerHTML = `<span>${p.path.join(' → ')}</span><span>${p.path.length>1 ? weightsBreak(p.path,state.edges)+' = ' : ''}${p.weight}${isBest?' ✓ shortest':''}</span>`;
+    rowsWrap.appendChild(row);
+  });
+
+  el('sumSource').textContent = state.source;
+  el('sumDest').textContent = state.dest;
+  el('sumPath').textContent = step.path.join(' → ');
+  el('sumDistance').textContent = step.total;
+  el('sumEdges').textContent = step.path.length-1;
+}
+
+function weightsBreak(path, edges){
+  const parts = [];
+  for(let i=0;i<path.length-1;i++){
+    const e = edges.find(e=> (e.a===path[i]&&e.b===path[i+1]) || (e.b===path[i]&&e.a===path[i+1]));
+    parts.push(e.w);
+  }
+  return parts.join(' + ');
+}
+
+/* ===================================================================
+   7. PREDICT MODE
+=================================================================== */
+function renderPredictPanel(){
+  const card = el('predictCard');
+  if(!state.predictMode || state.pendingIndex===null){
+    card.style.display='none';
+    return;
+  }
+  card.style.display='';
+  const step = state.steps[state.pendingIndex];
+  const choicesWrap = el('predictChoices');
+  choicesWrap.innerHTML='';
+  el('predictFeedback').textContent='';
+  el('predictFeedback').className='predict-feedback';
+  el('continueBtn').style.display='none';
+
+  step.candidates.forEach(c=>{
+    const btn = document.createElement('button');
+    btn.textContent = c.id;
+    btn.onclick = ()=> handlePredictChoice(c.id, step);
+    choicesWrap.appendChild(btn);
+  });
+}
+
+function handlePredictChoice(choiceId, step){
+  const correct = choiceId===step.current;
+  const fb = el('predictFeedback');
+  if(correct){
+    fb.className='predict-feedback correct';
+    fb.textContent = `✅ Correct! ${step.current} has the smallest tentative distance: ${step.dist[step.current]===Infinity?'∞':step.dist[step.current]}.`;
+    state.answered[state.pendingIndex] = {correct:true, chosen:choiceId};
+    el('continueBtn').style.display='inline-block';
+    Array.from(el('predictChoices').children).forEach(b=> b.disabled=true);
+  } else {
+    fb.className='predict-feedback incorrect';
+    fb.textContent = '❌ Not yet. Remember: Dijkstra chooses the unvisited vertex with the smallest tentative distance. Try again.';
+  }
+}
+
+el('revealBtn').addEventListener('click', ()=>{
+  const step = state.steps[state.pendingIndex];
+  state.answered[state.pendingIndex] = {correct:false, revealed:true};
+  const fb = el('predictFeedback');
+  fb.className='predict-feedback incorrect';
+  fb.textContent = `Answer revealed: ${step.current} has the smallest tentative distance.`;
+  el('continueBtn').style.display='inline-block';
+  Array.from(el('predictChoices').children).forEach(b=> b.disabled=true);
+});
+
+el('continueBtn').addEventListener('click', ()=>{
+  state.stepIndex = state.pendingIndex;
+  state.pendingIndex = null;
+  render();
+});
+
+/* ===================================================================
+   8. STEP NAVIGATION
+=================================================================== */
+function goNext(){
+  if(state.pendingIndex!==null) return;
+  if(state.stepIndex>=state.steps.length-1) return;
+  const nextIndex = state.stepIndex+1;
+  const nextStep = state.steps[nextIndex];
+  if(state.predictMode && nextStep.type==='select' && !state.answered[nextIndex]){
+    state.pendingIndex = nextIndex;
+    stopAuto();
+    render();
+    return;
+  }
+  state.stepIndex = nextIndex;
+  render();
+}
+function goPrev(){
+  if(state.pendingIndex!==null) return;
+  if(state.stepIndex<=0) return;
+  state.stepIndex--;
+  render();
+}
+function stopAuto(){
+  if(state.autoTimer){ clearInterval(state.autoTimer); state.autoTimer=null; }
+  el('autoBtn').textContent='▶ Auto Play';
+}
+function toggleAuto(){
+  if(state.autoTimer){ stopAuto(); return; }
+  el('autoBtn').textContent='⏸ Pause';
+  state.autoTimer = setInterval(()=>{
+    if(state.stepIndex>=state.steps.length-1 || state.pendingIndex!==null){
+      stopAuto();
+      return;
+    }
+    goNext();
+  }, 1600);
+}
+
+el('nextBtn').addEventListener('click', goNext);
+el('prevBtn').addEventListener('click', goPrev);
+el('autoBtn').addEventListener('click', toggleAuto);
+el('resetBtn').addEventListener('click', ()=> rebuildSteps());
+el('tryAgainBtn').addEventListener('click', ()=> rebuildSteps());
+el('newGraphBtn').addEventListener('click', ()=> generateRandom());
+el('practiceChallengeBtn').addEventListener('click', ()=> switchMode('challenge'));
+
+/* ===================================================================
+   9. CONTROLS — graph size / source / dest / random
+=================================================================== */
+function populateSelects(){
+  sourceSelect.innerHTML = state.ids.map(id=>`<option value="${id}">${id}</option>`).join('');
+  destSelect.innerHTML = state.ids.map(id=>`<option value="${id}">${id}</option>`).join('');
+  sourceSelect.value = state.source;
+  destSelect.value = state.dest;
+}
+
+graphSizeSeg.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  Array.from(graphSizeSeg.children).forEach(b=> b.classList.remove('active'));
+  btn.classList.add('active');
+  const n = parseInt(btn.dataset.n,10);
+  state.n = n;
+  const g = FIXED_GRAPHS[n];
+  state.ids = g.ids; state.edges = g.edges;
+  state.source = g.defaultSource; state.dest = g.defaultDest;
+  populateSelects();
+  rebuildSteps();
+});
+
+sourceSelect.addEventListener('change', ()=>{
+  state.source = sourceSelect.value;
+  if(state.source===state.dest){
+    const alt = state.ids.find(id=> id!==state.source);
+    state.dest = alt; destSelect.value = alt;
+  }
+  rebuildSteps();
+});
+destSelect.addEventListener('change', ()=>{
+  state.dest = destSelect.value;
+  if(state.dest===state.source){
+    const alt = state.ids.find(id=> id!==state.dest);
+    state.source = alt; sourceSelect.value = alt;
+  }
+  rebuildSteps();
+});
+
+function generateRandom(){
+  state.edges = randomGraph(state.ids);
+  rebuildSteps();
+}
+el('randomGraphBtn').addEventListener('click', generateRandom);
+
+el('predictToggle').addEventListener('change', (e)=>{
+  state.predictMode = e.target.checked;
+  state.pendingIndex = null;
+  render();
+});
+
+/* ===================================================================
+   10. MODE SWITCH
+=================================================================== */
+function switchMode(mode){
+  const learnBtn = el('btnLearnMode'), challBtn = el('btnChallengeMode');
+  if(mode==='learn'){
+    el('learnMode').style.display=''; el('challengeMode').style.display='none';
+    learnBtn.classList.add('active'); challBtn.classList.remove('active');
+  } else {
+    el('learnMode').style.display='none'; el('challengeMode').style.display='';
+    challBtn.classList.add('active'); learnBtn.classList.remove('active');
+    stopAuto();
+    if(!challenge.ids.length) newChallengeRound();
+  }
+}
+el('btnLearnMode').addEventListener('click', ()=> switchMode('learn'));
+el('btnChallengeMode').addEventListener('click', ()=> switchMode('challenge'));
+
+/* ===================================================================
+   11. CHALLENGE MODE
+=================================================================== */
+const challenge = {
+  ids: [], edges: [], source:null, dest:null,
+  correctSteps: null,
+  yourPath: [], yourOrder: [],
+  score: {correct:0, total:0}
+};
+
+function newChallengeRound(){
+  const n = 5 + Math.round(Math.random());
+  challenge.ids = FIXED_GRAPHS[n].ids.slice();
+  challenge.edges = randomGraph(challenge.ids);
+  let s, d;
+  do{
+    s = challenge.ids[Math.floor(Math.random()*challenge.ids.length)];
+    d = challenge.ids[Math.floor(Math.random()*challenge.ids.length)];
+  } while(s===d);
+  challenge.source = s; challenge.dest = d;
+  challenge.correctSteps = computeSteps(challenge.ids, challenge.edges, s, d);
+  challenge.yourPath = []; challenge.yourOrder = [];
+  el('chSource').textContent = s;
+  el('chDest').textContent = d;
+  el('chDistanceInput').value='';
+  el('chFeedback').innerHTML='';
+  renderChallengeGraph();
+  renderChallengeChips();
+}
+
+function renderChallengeGraph(){
+  const svg = el('challengeSvg');
+  const pos = circlePositions(challenge.ids, 300, 200, 145);
+  let content='';
+  challenge.edges.forEach(e=>{
+    const p1=pos[e.a], p2=pos[e.b];
+    content += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#B7C2CB" stroke-width="2"/>`;
+    const mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2;
+    content += `<circle cx="${mx}" cy="${my}" r="12" fill="#fff" stroke="#B7C2CB"/>`;
+    content += `<text x="${mx}" y="${my+4}" text-anchor="middle" font-size="12" font-weight="700" fill="#33404A">${e.w}</text>`;
+  });
+  challenge.ids.forEach(id=>{
+    const p = pos[id];
+    let fill='#fff', stroke='var(--unvisited)';
+    if(id===challenge.source){ fill='var(--source-bg)'; stroke='var(--source)'; }
+    if(id===challenge.dest){ fill='var(--current-bg)'; stroke='var(--current)'; }
+    content += `<circle cx="${p.x}" cy="${p.y}" r="26" fill="${fill}" stroke="${stroke}" stroke-width="3"/>`;
+    content += `<text x="${p.x}" y="${p.y+5}" text-anchor="middle" font-size="15" font-weight="700" fill="#33404A">${id}</text>`;
+  });
+  svg.innerHTML = content;
+}
+
+function renderChallengeChips(){
+  const pathWrap = el('chPathChips'), orderWrap = el('chOrderChips');
+  pathWrap.innerHTML=''; orderWrap.innerHTML='';
+  challenge.ids.forEach(id=>{
+    const b1 = document.createElement('button');
+    b1.className='chip'; b1.textContent=id;
+    b1.onclick=()=>{ challenge.yourPath.push(id); updateSeqDisplays(); };
+    pathWrap.appendChild(b1);
+
+    const b2 = document.createElement('button');
+    b2.className='chip'; b2.textContent=id;
+    b2.onclick=()=>{ challenge.yourOrder.push(id); updateSeqDisplays(); };
+    orderWrap.appendChild(b2);
+  });
+  updateSeqDisplays();
+}
+function updateSeqDisplays(){
+  el('chPathDisplay').textContent = challenge.yourPath.length ? challenge.yourPath.join(' → ') : '–';
+  el('chOrderDisplay').textContent = challenge.yourOrder.length ? challenge.yourOrder.join(' → ') : '–';
+}
+el('chPathClear').addEventListener('click', ()=>{ challenge.yourPath=[]; updateSeqDisplays(); });
+el('chOrderClear').addEventListener('click', ()=>{ challenge.yourOrder=[]; updateSeqDisplays(); });
+el('newRoundBtn').addEventListener('click', newChallengeRound);
+
+el('checkAnswerBtn').addEventListener('click', ()=>{
+  const doneStep = challenge.correctSteps.find(s=> s.type==='done');
+  const correctDistance = doneStep ? doneStep.total : null;
+  const correctPath = doneStep ? doneStep.path : null;
+  const correctOrder = challenge.correctSteps.filter(s=> s.type==='finalize').map(s=> s.current);
+
+  const yourDistance = parseFloat(el('chDistanceInput').value);
+  const distOk = correctDistance!==null && yourDistance===correctDistance;
+  const pathOk = correctPath!==null && JSON.stringify(challenge.yourPath)===JSON.stringify(correctPath);
+  const orderOk = JSON.stringify(challenge.yourOrder)===JSON.stringify(correctOrder);
+
+  let correctCount = [distOk, pathOk, orderOk].filter(Boolean).length;
+  challenge.score.correct += correctCount;
+  challenge.score.total += 3;
+  el('scorePill').textContent = `Score: ${challenge.score.correct} / ${challenge.score.total}`;
+
+  const fb = el('chFeedback');
+  fb.innerHTML = `
+    <div class="verdict-line ${distOk?'ok':'bad'}">${distOk?'✅':'❌'} Distance: your answer ${isNaN(yourDistance)?'(blank)':yourDistance} — correct is ${correctDistance===null?'unreachable':correctDistance}</div>
+    <div class="verdict-line ${pathOk?'ok':'bad'}">${pathOk?'✅':'❌'} Path: your answer ${challenge.yourPath.join(' → ')||'(blank)'} — correct is ${correctPath?correctPath.join(' → '):'unreachable'}</div>
+    <div class="verdict-line ${orderOk?'ok':'bad'}">${orderOk?'✅':'❌'} Finalization order: your answer ${challenge.yourOrder.join(' → ')||'(blank)'} — correct is ${correctOrder.join(' → ')}</div>
+    <p style="margin-top:8px; font-weight:700;">${correctCount===3?'🎉 Excellent! All three correct.':(correctCount>0?'Good effort — some parts correct, review the ones marked ❌.':'Not quite — review the pseudocode and try another round.')}</p>
+  `;
+});
+
+/* ===================================================================
+   12. INIT
+=================================================================== */
+populateSelects();
+rebuildSteps();
+
+})();
+</script>
+</body>
+</html>
