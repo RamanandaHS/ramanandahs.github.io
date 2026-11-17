@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LR and LCR Circuit Simulator</title>
+<style>
+:root{--bg:#eef2f7;--ink:#1b2a41;--acc:#1f5fbf;--line:#d5dce7}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:16px}
+header{background:linear-gradient(90deg,#0f2a52,#1f5fbf);color:#fff;padding:12px 22px}
+header h1{margin:0;font-size:23px}header p{margin:2px 0 0;font-size:14px;opacity:.85}
+.tabs{display:flex;gap:6px;padding:10px 20px 0}
+.tab{border:0;padding:10px 22px;font-size:17px;font-weight:600;border-radius:8px 8px 0 0;background:#cdd7e6;color:var(--ink);cursor:pointer}
+.tab.on{background:#fff;color:var(--acc)}
+.exp{display:none;grid-template-columns:minmax(340px,1fr) minmax(380px,1.25fr);gap:14px;padding:14px;background:#fff;margin:0 20px 14px;border-radius:0 10px 10px 10px;box-shadow:0 2px 8px #0002}
+.exp.on{display:grid}
+@media(max-width:900px){.exp{grid-template-columns:1fr}}
+h2{font-size:17px;margin:0 0 8px;color:var(--acc)}
+.box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;background:#fff}
+svg.ckt{width:100%;height:auto;display:block}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+button{font:inherit;font-weight:600;padding:8px 14px;border:1px solid #9fb0c9;background:#f3f6fb;border-radius:8px;cursor:pointer}
+button:hover{background:#e2eaf6}button.sw{background:#fde2e2;border-color:#d46}button.sw.on{background:#d9f5df;border-color:#2a8}
+.row{display:grid;grid-template-columns:130px 1fr 90px;gap:8px;align-items:center;margin:7px 0}
+.row b{text-align:right;color:var(--acc)}input[type=range]{width:100%;height:24px}
+canvas{width:100%;height:340px;display:block}
+.eq{font-family:"Cambria Math",Cambria,"Times New Roman",serif;font-size:19px;margin:4px 0;padding:5px 10px;background:#f4f7fc;border-left:4px solid var(--acc);border-radius:4px}
+.eq.sub{font-size:17px;color:#2c4670}.math p{margin:5px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:6px}
+.grid div{background:#f4f7fc;border-radius:6px;padding:6px 10px;display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.grid b{color:#0f2a52;white-space:nowrap}
+.badge{display:inline-block;color:#fff;border-radius:12px;padding:2px 12px;font-weight:700}
+.foot{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 20px 20px}
+@media(max-width:900px){.foot{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--line);padding:6px 9px;text-align:left}th{background:#e8eef8}
+li{margin:5px 0}details{margin:5px 0}summary{cursor:pointer;font-weight:600}
+@media(min-width:1500px){body{font-size:18px}}
+</style></head><body>
+<header><h1>Circuits and Differential Equations: LR and LCR Laboratory</h1><p>Engineering Mathematics &ndash; see how the circuit, its equation and the current&ndash;time graph are one idea</p></header>
+<div class="tabs"><button class="tab on" data-t="lr">Experiment 1: LR Series Circuit</button><button class="tab" data-t="lcr">Experiment 2: LCR Series Circuit</button></div>
+<div id="exps"></div>
+<div class="foot">
+<div class="box"><h2>Comparison</h2><table><tr><th>Feature</th><th>LR Circuit</th><th>LCR Circuit</th></tr>
+<tr><td>Differential equation</td><td>First order</td><td>Second order</td></tr>
+<tr><td>Energy storage</td><td>Inductor</td><td>Inductor and capacitor</td></tr>
+<tr><td>Current response</td><td>Exponential growth</td><td>Damped transient</td></tr>
+<tr><td>Important parameters</td><td>L, R</td><td>L, R, C</td></tr></table></div>
+<div class="box"><h2>Observe and Learn</h2><ul id="obs"></ul>
+<details><summary>Why does current not increase instantaneously in an LR circuit?</summary>A growing current changes the magnetic flux, which induces an emf (L di/dt) opposing the change. The inductor therefore resists sudden change, and i(0) = 0 must continue smoothly.</details>
+<details><summary>What is the physical meaning of the time constant?</summary>&tau; = L/R is the time in which the current covers 63.2% of the gap to its final value. After about 5&tau; the circuit is practically at steady state.</details>
+<details><summary>Why does resistance control damping in an LCR circuit?</summary>Resistance turns electrical energy into heat (i&sup2;R). Energy exchanged between L and C is lost on every swing; larger R removes it faster and the oscillations die out sooner.</details>
+<details><summary>Underdamped versus overdamped?</summary>Underdamped (R&sup2; &lt; 4L/C): complex roots, current oscillates while decaying. Overdamped (R&sup2; &gt; 4L/C): real roots, current rises and decays slowly with no oscillation. Critical damping is the borderline.</details>
+<details><summary>What happens when inductance increases?</summary>In LR the growth slows (larger &tau;) but the final current E/R is unchanged. In LCR the natural frequency 1/&radic;(LC) falls, so oscillations become slower.</details></div></div>
+<script>
+const N=20000,DUR=8,$=i=>document.getElementById(i),g=v=>String(+(+v).toPrecision(4));
+//MATH-START
+function ana(p,t,R){R=R||p.R;
+ if(!p.lcr)return p.E/R*(1-Math.exp(-R*t/p.L));
+ const E=p.E,L=p.L,a=R/(2*L),d=R*R-4*L/p.C;
+ if(Math.abs(d)<1e-9*R*R)return E/L*t*Math.exp(-a*t);
+ if(d>0){const s=Math.sqrt(d),m1=(-R+s)/(2*L),m2=(-R-s)/(2*L);return E/(L*(m1-m2))*(Math.exp(m1*t)-Math.exp(m2*t))}
+ const w=Math.sqrt(-d)/(2*L);return E/(L*w)*Math.exp(-a*t)*Math.sin(w*t)}
+function tmax(p,R){R=R||p.R;if(!p.lcr)return 5*p.L/R;
+ const a=R/(2*p.L),d=R*R-4*p.L/p.C;
+ if(Math.abs(d)<1e-9*R*R)return 8/a;
+ if(d>0)return 5/((R-Math.sqrt(d))/(2*p.L));
+ const w=Math.sqrt(-d)/(2*p.L);return Math.min(5/a,60*Math.PI/w)}
+function advance(e,n,p){const h=e.h,E=p.E,R=p.R,L=p.L,ic=p.lcr?1/p.C:0;
+ const f=(q,i)=>[i,(E-R*i-q*ic)/L];
+ for(;n>0&&e.k<N;n--){const q=e.q,i=e.i,a=f(q,i),b=f(q+h/2*a[0],i+h/2*a[1]),c=f(q+h/2*b[0],i+h/2*b[1]),d=f(q+h*c[0],i+h*c[1]);
+  e.q=q+h/6*(a[0]+2*b[0]+2*c[0]+d[0]);e.i=i+h/6*(a[1]+2*b[1]+2*c[1]+d[1]);
+  e.k++;e.T[e.k]=e.k*h;e.I[e.k]=e.i}}
+//MATH-END
+const CFG={lr:{lcr:false,sl:[['E','EMF E','V',1,24,.5,12],['R','Resistance R','Ω',1,100,1,20],['L','Inductance L','H',.1,10,.1,2]]},
+ lcr:{lcr:true,sl:[['E','EMF E','V',1,24,.5,12],['R','Resistance R','Ω',1,100,1,20],['L','Inductance L','H',.1,10,.1,1],['C','Capacitance C','μF',10,1000,10,100]]}};
+const PRE={under:{R:20,L:1,C:100},crit:{R:100,L:2.5,C:1000},over:{R:100,L:.5,C:1000}};
+const X={};let active='lr';
+function P(e){return{E:e.v.E,R:e.v.R,L:e.v.L,C:(e.v.C||1)/1e6,lcr:e.lcr}}
+function ckt(id,lcr){const t=(x,y,s,x2)=>`<text x="${x}" y="${y}" font-size="14" fill="#33415c" text-anchor="middle" ${s||''}>`;
+return `<svg class="ckt" viewBox="0 0 460 340"><defs><radialGradient id="${id}g"><stop offset="0" stop-color="#fff3a0"/><stop offset="1" stop-color="#ffd84d" stop-opacity="0"/></radialGradient></defs>
+<rect width="460" height="340" fill="#fff"/>
+<path id="${id}path" d="M50,180 L50,60 L410,60 L410,300 L50,300 Z" fill="none" stroke="#33415c" stroke-width="3"/>
+<rect x="35" y="150" width="30" height="60" fill="#fff"/><line x1="30" y1="168" x2="70" y2="168" stroke="#111" stroke-width="4"/><line x1="40" y1="190" x2="60" y2="190" stroke="#111" stroke-width="8"/>
+<text x="76" y="166" font-size="16" font-weight="700" fill="#c00">+</text><text x="76" y="198" font-size="18" font-weight="700">−</text>${t(50,230,'font-weight="700"')}<tspan id="${id}tE"></tspan></text>
+<rect x="92" y="55" width="51" height="10" fill="#fff"/><circle cx="90" cy="60" r="4" fill="#111"/><circle cx="145" cy="60" r="4" fill="#111"/><line id="${id}lev" x1="90" y1="60" x2="138" y2="32" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+${t(118,92)}Switch</text>
+<rect x="180" y="55" width="70" height="10" fill="#fff"/><polyline points="180,60 190,60 196,46 206,74 216,46 226,74 236,46 242,60 250,60" fill="none" stroke="#8a2be2" stroke-width="4"/>${t(215,92)}<tspan id="${id}tR"></tspan></text>
+<rect x="280" y="52" width="100" height="14" fill="#fff"/><path d="M280,60 h4 a12,12 0 0 1 24,0 a12,12 0 0 1 24,0 a12,12 0 0 1 24,0 a12,12 0 0 1 24,0 h0" fill="none" stroke="#b45309" stroke-width="4"/>${t(330,92)}<tspan id="${id}tL"></tspan></text>
+${lcr?`<rect x="215" y="294" width="30" height="12" fill="#fff"/><line x1="222" y1="280" x2="222" y2="320" stroke="#0a6" stroke-width="5"/><line x1="238" y1="280" x2="238" y2="320" stroke="#0a6" stroke-width="5"/>${t(230,270)}<tspan id="${id}tC"></tspan></text>`:''}
+<rect x="35" y="228" width="30" height="44" fill="#fff"/><circle cx="50" cy="250" r="17" fill="#fff" stroke="#0a7" stroke-width="3"/>${t(50,256,'font-weight="700" font-size="17"')}A</text>${t(88,254,'text-anchor="start"')}</text>
+<rect x="398" y="145" width="24" height="70" fill="#fff"/><circle id="${id}halo" cx="410" cy="180" r="48" fill="url(#${id}g)" opacity="0"/><circle id="${id}glass" cx="410" cy="180" r="22" fill="#eee" stroke="#333" stroke-width="3"/>
+<polyline points="400,196 400,186 404,172 408,186 412,172 416,186 420,172 420,196" fill="none" stroke="#555" stroke-width="2"/>${t(378,230)}Bulb</text>
+<rect x="150" y="140" width="160" height="76" rx="8" fill="#0b1f14" stroke="#555" stroke-width="3"/>${t(230,160,'fill="#7f9" font-size="12"')}AMMETER</text>
+<text id="${id}rd" x="230" y="190" font-size="25" font-weight="700" fill="#5f8" text-anchor="middle" font-family="Consolas,monospace">0.000 A</text>
+<text id="${id}rt" x="230" y="209" font-size="13" fill="#7f9" text-anchor="middle" font-family="Consolas,monospace">t = 0.000 s</text>
+<g id="${id}dots"></g></svg>`}
+function build(id,c){const el=document.createElement('section');el.className='exp'+(id=='lr'?' on':'');el.id=id;
+ const sl=c.sl.map(s=>`<div class="row"><label>${s[1]}</label><input type="range" min="${s[3]}" max="${s[4]}" step="${s[5]}" value="${s[6]}" data-k="${s[0]}"><b id="${id}o${s[0]}"></b></div>`).join('');
+ el.innerHTML=`<div><div class="box"><h2>${c.lcr?'Series LCR circuit':'Series LR circuit'}</h2>${ckt(id,c.lcr)}
+<div class="btns"><button data-a="start">▶ Start</button><button data-a="pause">⏸ Pause</button><button data-a="reset">⟲ Reset</button><button data-a="sw" class="sw" id="${id}sw">Switch OFF</button></div></div>
+<div class="box"><h2>Adjust the circuit</h2>${sl}${c.lcr?`<div class="btns"><span>Try:</span><button data-p="under">Underdamped</button><button data-p="crit">Critically damped</button><button data-p="over">Overdamped</button></div>
+<label style="display:block;margin-top:8px"><input type="checkbox" id="${id}ov"> Show all three response types together (same L and C)</label>`:''}</div></div>
+<div><div class="box"><h2>Current versus time</h2><canvas id="${id}cv"></canvas></div>
+<div class="box"><h2>Governing equation and solution</h2><div class="math" id="${id}eq"></div></div>
+<div class="box"><h2>Calculated values</h2><div class="grid" id="${id}par"></div><h2 style="margin-top:10px">Live values</h2><div class="grid" id="${id}live"></div></div></div>`;
+ $('exps').appendChild(el);
+ const e=X[id]={id,lcr:c.lcr,el,v:{},sw:false,running:false,ph:0,T:new Float64Array(N+1),I:new Float64Array(N+1)};
+ c.sl.forEach(s=>e.v[s[0]]=s[6]);e.ov=c.lcr?$(id+'ov'):{checked:false};
+ const dots=$(id+'dots');for(let j=0;j<32;j++){const d=document.createElementNS('http://www.w3.org/2000/svg','circle');d.setAttribute('r',4);d.setAttribute('fill','#2563eb');dots.appendChild(d)}
+ e.len=$(id+'path').getTotalLength();
+ el.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
+  if(b.dataset.a=='start'){if(e.k>=N)resetSim(e);e.running=true;if(!e.sw)setSw(e,true)}
+  else if(b.dataset.a=='pause')e.running=false;
+  else if(b.dataset.a=='reset'){e.running=false;e.sw=false;resetSim(e)}
+  else if(b.dataset.a=='sw')setSw(e,!e.sw);
+  else if(b.dataset.p){Object.assign(e.v,PRE[b.dataset.p]);e.v.E=12;sync(e);changed(e)}
+  uiSw(e)});
+ el.addEventListener('input',ev=>{if(ev.target.dataset.k){e.v[ev.target.dataset.k]=+ev.target.value;sync(e);changed(e)}else if(ev.target.id==id+'ov')changed(e)});
+ sync(e);resetSim(e);uiSw(e);refresh(e)}
+function sync(e){CFG[e.id].sl.forEach(s=>{const i=e.el.querySelector(`[data-k=${s[0]}]`);i.value=e.v[s[0]];$(e.id+'o'+s[0]).textContent=g(e.v[s[0]])+' '+s[2]});
+ $(e.id+'tR').textContent='R = '+g(e.v.R)+' Ω';$(e.id+'tL').textContent='L = '+g(e.v.L)+' H';$(e.id+'tE').textContent='E = '+g(e.v.E)+' V';
+ if(e.lcr)$(e.id+'tC').textContent='C = '+g(e.v.C)+' μF'}
+function changed(e){resetSim(e);refresh(e)}
+function setSw(e,on){e.sw=on;if(on)e.running=true;resetSim(e);uiSw(e)}
+function uiSw(e){const b=$(e.id+'sw');b.textContent='Switch '+(e.sw?'ON':'OFF');b.classList.toggle('on',e.sw);
+ $(e.id+'lev').setAttribute('y2',e.sw?60:32);$(e.id+'lev').setAttribute('x2',e.sw?145:138)}
+function windowT(e){const p=P(e);let T=tmax(p);
+ if(e.lcr&&e.ov.checked){const Rc=2*Math.sqrt(p.L/p.C);[.25,1,3].forEach(f=>T=Math.max(T,tmax(p,Rc*f)))}return T}
+function resetSim(e){e.k=0;e.q=0;e.i=0;e.T[0]=0;e.I[0]=0;e.Tw=windowT(e);e.h=e.Tw/N}
+function refresh(e){const p=P(e),I=p.E/p.R;let h='',r=[];
+ if(!e.lcr){const tau=p.L/p.R;
+  h=`<p><b>Switch closed at t = 0</b> (Kirchhoff’s voltage law):</p><p class="eq">L (di/dt) + R i = E &nbsp;⇒&nbsp; ${g(p.L)} (di/dt) + ${g(p.R)} i = ${g(p.E)}</p><p>Initial condition: i(0) = 0</p><p>Solution:</p><p class="eq">i(t) = (E/R)(1 − e<sup>−Rt/L</sup>)</p><p class="eq sub">i(t) = ${g(I)} (1 − e<sup>−${g(1/tau)} t</sup>) amperes</p>`;
+  r=[['Time constant τ = L/R',g(tau)+' s'],['Final current I∞ = E/R',g(I)+' A'],['Initial current i(0)','0 A'],['Time to reach 99% ≈ 4.6τ',g(4.605*tau)+' s'],['Current at t = τ (63.2%)',g(.632*I)+' A']]}
+ else{const L=p.L,C=p.C,R=p.R,d=R*R-4*L/C,a=R/(2*L),eps=Math.abs(d)<1e-9*R*R,type=eps?'crit':d>0?'over':'under';
+  const nm={over:'Overdamped',crit:'Critically damped',under:'Underdamped'}[type],col={over:'#b45309',crit:'#7c3aed',under:'#15803d'}[type];
+  let roots,sol,num;
+  if(type=='under'){const w=Math.sqrt(-d)/(2*L);roots=`m₁, m₂ = ${g(-a)} ± ${g(w)} j  (j = √−1)`;
+   sol='i(t) = (E/(L ω<sub>d</sub>)) e<sup>−αt</sup> sin(ω<sub>d</sub> t), α = R/2L, ω<sub>d</sub> = √(1/LC − R²/4L²)';num=`i(t) = ${g(p.E/(L*w))} e<sup>−${g(a)} t</sup> sin(${g(w)} t) A`}
+  else if(type=='crit'){roots=`m₁ = m₂ = ${g(-a)}`;sol='i(t) = (E/L) t e<sup>−Rt/2L</sup>';num=`i(t) = ${g(p.E/L)} t e<sup>−${g(a)} t</sup> A`}
+  else{const s=Math.sqrt(d),m1=(-R+s)/(2*L),m2=(-R-s)/(2*L);roots=`m₁ = ${g(m1)},  m₂ = ${g(m2)}`;
+   sol='i(t) = E/(L(m₁ − m₂)) · (e<sup>m₁t</sup> − e<sup>m₂t</sup>)';num=`i(t) = ${g(p.E/(L*(m1-m2)))} (e<sup>${g(m1)} t</sup> − e<sup>${g(m2)} t</sup>) A`}
+  h=`<p class="eq">L (d²q/dt²) + R (dq/dt) + q/C = E, &nbsp; i = dq/dt</p><p>Initial conditions: q(0) = 0, i(0) = 0 &nbsp;⇒&nbsp; equivalent current equation:</p><p class="eq">L (d²i/dt²) + R (di/dt) + i/C = 0</p>
+<p>Characteristic equation: <span class="eq">L m² + R m + 1/C = 0</span></p><p class="eq sub">m = [−R ± √(R² − 4L/C)] / 2L &nbsp;⇒&nbsp; ${roots}</p>
+<p>R² = ${g(R*R)} &nbsp; and &nbsp; 4L/C = ${g(4*L/C)} &nbsp;⇒&nbsp; <span class="badge" style="background:${col}">${nm}</span></p><p class="eq">${sol}</p><p class="eq sub">${num}</p>`;
+  const w0=1/Math.sqrt(L*C);r=[['Response type',nm],['R² − 4L/C',g(d)+' Ω²'],['Damping α = R/2L',g(a)+' s⁻¹'],['Natural frequency ω₀ = 1/√(LC)',g(w0)+' rad/s'],['Damping ratio ζ',g(R/2*Math.sqrt(C/L))],
+   ['Critical resistance 2√(L/C)',g(2*Math.sqrt(L/C))+' Ω']];if(type=='under'){const w=Math.sqrt(-d)/(2*L);r.push(['Damped frequency ω_d',g(w)+' rad/s'],['Period 2π/ω_d',g(2*Math.PI/w)+' s'])}
+  r.push(['Final current','0 A (capacitor blocks DC)'])}
+ $(e.id+'eq').innerHTML=h;$(e.id+'par').innerHTML=r.map(x=>`<div><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');obs()}
+function obs(){const e=X[active],p=P(e);let o=[];
+ if(!e.lcr){const tau=p.L/p.R;o=[`τ = L/R = ${g(tau)} s: after one τ the current is 63.2% of its final value ${g(p.E/p.R)} A.`,`Increase L (now ${g(p.L)} H): τ grows and the current rises more slowly; the final current E/R does not change.`,`Increase R (now ${g(p.R)} Ω): the final current E/R falls, yet the current settles sooner because τ = L/R becomes smaller.`,`Change E (now ${g(p.E)} V): the final current scales in proportion; τ stays the same.`]}
+ else{const d=p.R*p.R-4*p.L/p.C,eps=Math.abs(d)<1e-9*p.R*p.R,w0=1/Math.sqrt(p.L*p.C);
+  o.push(eps?'Critically damped: the quickest return to zero without any oscillation.':d>0?'Overdamped: the current rises to a single peak and then decays slowly with no oscillation.':`Underdamped: the current oscillates at ω_d = ${g(Math.sqrt(-d)/(2*p.L))} rad/s inside a decaying envelope e^(−${g(p.R/(2*p.L))}t).`);
+  o.push(`Natural frequency ω₀ = ${g(w0)} rad/s. Increasing L or C lowers it, so the oscillations slow down.`,`Increase R: R² grows towards 4L/C = ${g(4*p.L/p.C)}; oscillations shrink and vanish when R reaches ${g(2*Math.sqrt(p.L/p.C))} Ω.`,'Eventually the capacitor charges to E and the current falls to zero.')}
+ $('obs').innerHTML=o.map(s=>`<li>${s}</li>`).join('')}
+const fa=v=>Math.abs(v)<1e-3&&v!=0?v.toExponential(2):v.toFixed(3);
+function show(e,dt){const p=P(e),k=e.k,i=e.sw?e.i:0,t=e.sw?e.T[k]:0;
+ $(e.id+'rd').textContent=fa(i)+' A';$(e.id+'rt').textContent='t = '+fa(t)+' s';
+ const b=e.sw?Math.min(1,Math.sqrt(Math.abs(i)/1.5)):0,c1=[238,238,238],c2=[255,222,60];
+ $(e.id+'halo').setAttribute('opacity',b);$(e.id+'glass').setAttribute('fill',`rgb(${c1.map((v,j)=>Math.round(v+(c2[j]-v)*b))})`);
+ const ds=$(e.id+'dots').children,sp=Math.sign(i)*Math.min(1,Math.sqrt(Math.abs(i)/1.5))*.3;e.ph+=sp*dt;
+ for(let j=0;j<ds.length;j++){const f=(((e.ph+j/ds.length)%1)+1)%1,pt=$(e.id+'path').getPointAtLength(f*e.len);ds[j].setAttribute('cx',pt.x);ds[j].setAttribute('cy',pt.y);ds[j].setAttribute('opacity',e.sw&&Math.abs(i)>1e-6?1:0)}
+ const q=e.sw?e.q:0,L=[['Current i',fa(i)+' A']];
+ if(!e.lcr)L.push(['Voltage across R',fa(p.R*i)+' V'],['Voltage across L',fa(e.sw?p.E-p.R*i:0)+' V'],['Energy in L = ½Li²',fa(.5*p.L*i*i)+' J']);
+ else L.push(['Charge q',(q*1e3).toFixed(3)+' mC'],['Voltage across C',fa(q/p.C)+' V'],['Voltage across R',fa(p.R*i)+' V']);
+ L.push(['Numerical − formula',e.sw?(Math.abs(e.I[k]-ana(p,e.T[k]))).toExponential(1)+' A':'—']);
+ $(e.id+'live').innerHTML=L.map(x=>`<div><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}
+function ticks(a,b,n){const r=(b-a)/n,mg=Math.pow(10,Math.floor(Math.log10(r))),f=r/mg,s=(f<1.5?1:f<3?2:f<7?5:10)*mg,o=[];for(let v=Math.ceil(a/s-1e-9)*s;v<=b+1e-9*s;v+=s)o.push(+v.toPrecision(10));return o}
+function draw(e){const cv=$(e.id+'cv'),d=window.devicePixelRatio||1,r=cv.getBoundingClientRect();
+ if(cv.width!=Math.round(r.width*d)||cv.height!=Math.round(r.height*d)){cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d)}
+ const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);const W=r.width,H=r.height,m={l:66,r:16,t:14,b:46},pw=W-m.l-m.r,ph=H-m.t-m.b;c.clearRect(0,0,W,H);
+ const p=P(e),Tw=e.Tw;let ex=[];
+ if(e.lcr&&e.ov.checked){const Rc=2*Math.sqrt(p.L/p.C);ex=[[Rc*.25,'#15803d','Underdamped'],[Rc,'#7c3aed','Critically damped'],[Rc*3,'#b45309','Overdamped']]}
+ const samp=R=>{const a=[];for(let j=0;j<=500;j++)a.push(ana(p,Tw*j/500,R));return a},S=[samp(p.R),...ex.map(x=>samp(x[0]))];
+ let lo=0,hi=0;S.forEach(a=>a.forEach(v=>{lo=Math.min(lo,v);hi=Math.max(hi,v)}));if(!e.lcr)hi=p.E/p.R;
+ const pad=(hi-lo||1)*.12;hi+=pad;if(lo<0)lo-=pad;
+ const X_=t=>m.l+t/Tw*pw,Y=v=>m.t+ph-(v-lo)/(hi-lo)*ph;
+ c.font='13px Segoe UI,Arial';c.fillStyle='#1b2a41';c.strokeStyle='#e1e7f0';c.lineWidth=1;c.textAlign='center';
+ ticks(0,Tw,8).forEach(t=>{const x=X_(t);c.beginPath();c.moveTo(x,m.t);c.lineTo(x,m.t+ph);c.stroke();c.fillText(String(+t.toPrecision(4)),x,m.t+ph+16)});
+ c.textAlign='right';ticks(lo,hi,6).forEach(v=>{const y=Y(v);c.beginPath();c.moveTo(m.l,y);c.lineTo(m.l+pw,y);c.stroke();c.fillText(String(+v.toPrecision(4)),m.l-6,y+4)});
+ c.strokeStyle='#33415c';c.lineWidth=1.5;c.strokeRect(m.l,m.t,pw,ph);if(lo<0){c.beginPath();c.moveTo(m.l,Y(0));c.lineTo(m.l+pw,Y(0));c.stroke()}
+ c.textAlign='center';c.font='14px Segoe UI,Arial';c.fillText('Time t (seconds)',m.l+pw/2,H-8);c.save();c.translate(15,m.t+ph/2);c.rotate(-Math.PI/2);c.fillText('Current i (amperes)',0,0);c.restore();
+ const fin=e.lcr?0:p.E/p.R;c.setLineDash([3,4]);c.strokeStyle='#2a8';c.lineWidth=1.5;c.beginPath();c.moveTo(m.l,Y(fin));c.lineTo(m.l+pw,Y(fin));c.stroke();c.setLineDash([]);
+ c.fillStyle='#157';c.textAlign='left';c.fillText(e.lcr?'final current = 0':'I∞ = '+g(fin)+' A',m.l+6,Y(fin)-5);
+ const line=(a,col,w,dash)=>{c.beginPath();a.forEach((v,j)=>{const x=X_(Tw*j/500),y=Y(v);j?c.lineTo(x,y):c.moveTo(x,y)});c.strokeStyle=col;c.lineWidth=w;c.setLineDash(dash||[]);c.stroke();c.setLineDash([])};
+ ex.forEach((x,j)=>line(S[j+1],x[1],2));line(S[0],'#1f5fbf',2.5,[8,5]);
+ const k=e.sw?e.k:0,st=Math.max(1,Math.ceil(k/800));c.beginPath();for(let j=0;j<=k;j+=st){const x=X_(e.T[j]),y=Y(e.I[j]);j?c.lineTo(x,y):c.moveTo(x,y)}
+ if(k>0)c.lineTo(X_(e.T[k]),Y(e.I[k]));c.strokeStyle='#d62828';c.lineWidth=3.5;c.stroke();
+ const px=X_(e.sw?e.T[k]:0),py=Y(e.sw?e.I[k]:0);c.beginPath();c.arc(px,py,7,0,7);c.fillStyle='#d62828';c.fill();c.strokeStyle='#fff';c.lineWidth=2;c.stroke();
+ const lab=`t = ${fa(e.sw?e.T[k]:0)} s,  i = ${fa(e.sw?e.I[k]:0)} A`;c.font='bold 13px Segoe UI,Arial';const tw=c.measureText(lab).width;
+ let lx=px+12;if(lx+tw>m.l+pw-4)lx=px-tw-12;let ly=Math.min(Math.max(py-10,m.t+14),m.t+ph-6);c.fillStyle='#fffc';c.fillRect(lx-3,ly-13,tw+6,18);c.fillStyle='#b01010';c.textAlign='left';c.fillText(lab,lx,ly);
+ const lg=[['Theoretical i(t)','#1f5fbf',1],['Simulation (numerical)','#d62828',0],...ex.map(x=>[x[2]+' (R = '+g(x[0])+' Ω)',x[1],0])],lw=250,lh=lg.length*20+8,gx=m.l+pw-lw-8,gy=e.lcr?m.t+8:m.t+ph-lh-8;
+ c.font='13px Segoe UI,Arial';c.fillStyle='#fffe';c.fillRect(gx,gy,lw,lh);c.strokeStyle='#cbd5e3';c.lineWidth=1;c.strokeRect(gx,gy,lw,lh);
+ lg.forEach((s,j)=>{const y=gy+18+j*20;c.beginPath();c.moveTo(gx+8,y-4);c.lineTo(gx+38,y-4);c.strokeStyle=s[1];c.lineWidth=3;c.setLineDash(s[2]?[7,4]:[]);c.stroke();c.setLineDash([]);c.fillStyle='#1b2a41';c.fillText(s[0],gx+46,y)})}
+let last=performance.now();
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;const e=X[active];
+ if(e.sw&&e.running&&e.k<N)advance(e,Math.max(1,Math.ceil(dt*N/DUR)),P(e));
+ show(e,dt);draw(e);requestAnimationFrame(frame)}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{active=b.dataset.t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x==b));
+ Object.values(X).forEach(e=>e.el.classList.toggle('on',e.id==active));obs()});
+Object.keys(CFG).forEach(k=>build(k,CFG[k]));obs();requestAnimationFrame(frame);
+</script></body></html>
